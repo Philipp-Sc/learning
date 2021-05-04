@@ -366,7 +366,7 @@ const Tab1: React.FC = () => {
           
      <MediaCapturer
           constraints={{ audio: true }}
-          mimeType="audio/webm"
+          mimeType="audio/aac"
           timeSlice={10}
           onGranted={handleGranted}
           onDenied={handleDenied}
