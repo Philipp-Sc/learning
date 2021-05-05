@@ -131,10 +131,10 @@ const Tab1: React.FC = () => {
     setGranted(false);
   };
   const handleError = (err) => {
-    console.log(err);
+    alert(err);
   };
 
-  const downloadAudio = (blob) => {
+  const downloadAudio = (blob) => { 
     let url = URL.createObjectURL(blob);
     var id = 0;
     if(dropdown=="New"){
@@ -348,10 +348,15 @@ const Tab1: React.FC = () => {
       <Dropdown.Item onClick={() => {setDropdown("Edit");}} >Edit</Dropdown.Item> 
       <Dropdown.Item onClick={() => {setDropdown("Delete");}} >Delete</Dropdown.Item> 
       <Dropdown.Divider />
-      <Dropdown.Item onClick={() => {setDropdown("Menu");}} >Menu</Dropdown.Item> 
+      <Dropdown.Item onClick={() => {setDropdown("Augment");}} >Augment</Dropdown.Item> 
+      <Dropdown.Item onClick={() => {setDropdown("Special");}} >Special</Dropdown.Item> 
+      <Dropdown.Divider />
+      <Dropdown.Item onClick={() => {setDropdown("Iterate");}} >Iterate</Dropdown.Item> 
+      <Dropdown.Item onClick={() => {setDropdown("Training");}} >Training</Dropdown.Item> 
+      <Dropdown.Divider />
       <Dropdown.Item onClick={() => {}} >Options</Dropdown.Item> 
     </DropdownButton>
-    {dropdown!="Delete" && <FormControl
+    {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && <FormControl
       placeholder="Type: Content"
       ref={inputRef}
       aria-label="Type: Content"
@@ -362,11 +367,31 @@ const Tab1: React.FC = () => {
     Remove selection
   </Button>}
      <InputGroup.Append>  
-     {dropdown!="Delete" && !recording && <Button variant="outline-secondary" onClick={() => {takePicture()}}><IonIcon icon={cameraOutline}/></Button>}
+      <div>
+            {(dropdown=="Special") && <Button variant="outline-secondary" onClick={() => {}}>{'Correct'}</Button>}
+            {(dropdown=="Special") && <Button variant="outline-secondary" onClick={() => {}}>{'Similar'}</Button>}
+            {(dropdown=="Special") && <Button variant="outline-secondary" onClick={() => {}}>{'Translate'}</Button>}
+            {(dropdown=="Special") && <Button variant="outline-secondary" onClick={() => {}}>{'Explain'}</Button>}
+
+            {(dropdown=="Augment") && <Button variant="outline-secondary" onClick={() => {}}>{'Q'}</Button>}
+            {(dropdown=="Augment") && <Button variant="outline-secondary" onClick={() => {}}>{'A'}</Button>}
+            {(dropdown=="Augment") && <Button variant="outline-secondary" onClick={() => {}}>{'Info'}</Button>}
+            {(dropdown=="Augment") && <Button variant="outline-secondary" onClick={() => {}}>{'Detail'}</Button>}
+            {(dropdown=="Augment") && <Button variant="outline-secondary" onClick={() => {}}>{'Tip'}</Button>}
+            {(dropdown=="Augment") && <Button variant="outline-secondary" onClick={() => {}}>{'ID'}</Button>}
+
+            {(dropdown=="Iterate") && <Button variant="outline-secondary" onClick={() => {}}>{'w/A'}</Button>}
+            {(dropdown=="Iterate") && <Button variant="outline-secondary" onClick={() => {}}>{'w/Info'}</Button>}
+            {(dropdown=="Iterate") && <Button variant="outline-secondary" onClick={() => {}}>{'w/Detail'}</Button>}
+            {(dropdown=="Iterate") && <Button variant="outline-secondary" onClick={() => {}}>{'w/Tip'}</Button>}
+            {(dropdown=="Iterate") && <Button variant="outline-secondary" onClick={() => {}}>{'w/ID'}</Button>} 
+      </div>
+
+     {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && !recording && <Button variant="outline-secondary" onClick={() => {takePicture()}}><IonIcon icon={cameraOutline}/></Button>}
           
      <MediaCapturer
           constraints={{ audio: true }}
-          mimeType="audio/aac"
+          mimeType="audio/webm"
           timeSlice={10}
           onGranted={handleGranted}
           onDenied={handleDenied}
@@ -378,13 +403,13 @@ const Tab1: React.FC = () => {
           onStreamClosed={handleStreamClose}
           render={({ request, start, stop, pause, resume }) => 
           <div>
-            {dropdown!="Delete" && recording && !paused && <Button variant="outline-secondary" onClick={() => {stop()}}>Stop</Button>}
-            {dropdown!="Delete" && recording && !paused && <Button variant="outline-secondary" onClick={() => {pause()}}>Pause</Button>}
-            {dropdown!="Delete" && recording && paused && <Button variant="outline-secondary" onClick={() => {resume()}}>Resume</Button>} 
-            {dropdown!="Delete" && granted && !recording && <Button variant="outline-secondary" onClick={() => {start()}}><IonIcon icon={micCircleOutline}/></Button>}
-            {dropdown!="Delete" && !granted && <Button variant="outline-secondary" onClick={() => {request()}}>Get Permission</Button>}
-            {dropdown!="Delete" && recording && !paused && <Button variant="outline-secondary" disabled><IonSpinner className="hw1" name="bubbles"/></Button>}
-            {dropdown!="Delete" && recording && paused && <Button variant="outline-secondary" disabled><IonSpinner className="hw1" name="dots"/></Button>}
+            {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && recording && !paused && <Button variant="outline-secondary" onClick={() => {stop()}}>Stop</Button>}
+            {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && recording && !paused && <Button variant="outline-secondary" onClick={() => {pause()}}>Pause</Button>}
+            {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && recording && paused && <Button variant="outline-secondary" onClick={() => {resume()}}>Resume</Button>} 
+            {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && granted && !recording && <Button variant="outline-secondary" onClick={() => {start()}}><IonIcon icon={micCircleOutline}/></Button>}
+            {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && !granted && <Button variant="outline-secondary" onClick={() => {request()}}>Get Permission</Button>}
+            {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && recording && !paused && <Button variant="outline-secondary" disabled><IonSpinner className="hw1" name="bubbles"/></Button>}
+            {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && recording && paused && <Button variant="outline-secondary" disabled><IonSpinner className="hw1" name="dots"/></Button>}
           </div>
         } />
     </InputGroup.Append>
