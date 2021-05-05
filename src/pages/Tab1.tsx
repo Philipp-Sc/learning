@@ -16,7 +16,9 @@ import {IonInfiniteScroll, IonInfiniteScrollContent, IonCard} from '@ionic/react
 
 import { Plugins, CameraResultType } from '@capacitor/core';
 
-import ReactAudioPlayer from 'react-audio-player';
+//import ReactAudioPlayer from 'react-audio-player';
+import AudioPlayer from 'react-h5-audio-player';
+import 'react-h5-audio-player/lib/styles.css';
 
 var hash = require('object-hash');
 
@@ -295,11 +297,14 @@ const Tab1: React.FC = () => {
             return <div key={`${i}`}>
       
     <IonCard>
-  <InputGroup><InputGroup.Prepend><InputGroup.Radio name="groupOptions" checked={item.hash==(selectedItemHash || items[items.length-1].hash)} value={item.hash} onChange={(e) => {setSelectedItemHash(e.currentTarget.value)}}/> </InputGroup.Prepend><InputGroup.Append><ReactAudioPlayer
-                                                                                    src={item.value}
-                                                                                    autoPlay
-                                                                                    controls
-                                                                                  /> </InputGroup.Append><InputGroup.Append className="ml-auto">
+  <InputGroup><InputGroup.Prepend><InputGroup.Radio name="groupOptions" checked={item.hash==(selectedItemHash || items[items.length-1].hash)} value={item.hash} onChange={(e) => {setSelectedItemHash(e.currentTarget.value)}}/> </InputGroup.Prepend>
+  <InputGroup>
+   <AudioPlayer 
+    src={item.value}
+    onPlay={e => console.log("onPlay")}
+    // other props here
+  />
+  </InputGroup><InputGroup.Append className="ml-auto">
       <InputGroup.Text>{item.id}</InputGroup.Text>
     </InputGroup.Append></InputGroup></IonCard></div>
             }

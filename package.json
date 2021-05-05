@@ -29,6 +29,7 @@
     "react-audio-player": "^0.17.0",
     "react-bootstrap": "^1.5.2",
     "react-dom": "^17.0.1",
+    "react-h5-audio-player": "^3.7.0",
     "react-multimedia-capture": "^1.2.4",
     "react-router": "^5.2.0",
     "react-router-dom": "^5.2.0",
