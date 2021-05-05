@@ -9,10 +9,7 @@ import { micCircleOutline, cameraOutline } from 'ionicons/icons';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {InputGroup, DropdownButton, Dropdown, FormControl, Button, Modal} from 'react-bootstrap'
-
-//import MediaCapturer from 'react-multimedia-capture';
-
-// alternative
+ 
 import { ReactMediaRecorder,useReactMediaRecorder } from "react-media-recorder";
 
 
