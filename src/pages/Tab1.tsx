@@ -75,10 +75,6 @@ const Tab1: React.FC = () => {
 
   const [show, setShow] = useState<boolean>(false);
  
-
-  const [granted, setGranted] = useState<boolean>(false);
-  const [rejectedReason, setRejectedReason] = useState<string>('');
-  const [recording, setRecording] = useState<boolean>(false);
   const [paused, setPaused] = useState<boolean>(false);
  
   interface Item {
@@ -115,41 +111,10 @@ const Tab1: React.FC = () => {
     stopRecording,
     pauseRecording,
     resumeRecording,
-    mediaBlobUrl,
   } = useReactMediaRecorder({ audio: true });
 
-  const handleGranted = () => { 
-    setGranted(true);
-    console.log('Permission Granted!');
-  };
-  const handleDenied = (err) => {
-    setRejectedReason(err.name) 
-    console.log('Permission Denied!', err);
-  };
-  const handleStart = (stream) => {
-    setRecording(true);
-    console.log('Recording Started.');
-  };
-  const handleStop = (blob) => {
-    setRecording(false);
-    console.log('Recording Stopped.');
-    downloadAudio(blob);
-  };
-  const handlePause = () => {
-    setPaused(true);
-  };
-  const handleResume = (stream) => {
-    setPaused(false);
-  };
-  const handleStreamClose = () => {
-    setGranted(false);
-  };
-  const handleError = (err) => {
-    alert(err);
-  };
-
   const downloadAudio = (blob) => { 
-    let url = URL.createObjectURL(blob);
+    let url = blob; //URL.createObjectURL(blob);
     var id = 0;
     if(dropdown=="New"){
       id = items.length;
@@ -195,6 +160,7 @@ const Tab1: React.FC = () => {
     } 
   },[selectedItemHash,dropdown]);
 
+/*
   const getSupportetAudioType = () => {
     var audio = document.createElement('audio'); 
     var types = ["audio/webm",
@@ -212,7 +178,7 @@ const Tab1: React.FC = () => {
       }
     }
     return "audio/wav";
-  }
+  }*/
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(false);
@@ -331,8 +297,6 @@ const Tab1: React.FC = () => {
   <InputGroup>
    <AudioPlayer 
     src={item.value}
-    onPlay={e => console.log("onPlay")}
-    // other props here
   />
   </InputGroup><InputGroup.Append className="ml-auto">
       <InputGroup.Text>{item.id}</InputGroup.Text>
@@ -422,20 +386,20 @@ const Tab1: React.FC = () => {
             {(dropdown=="Iterate") && <Button variant="outline-secondary" onClick={() => {}}>{'w/ID'}</Button>} 
       </div>
 
-     {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && !recording && <Button variant="outline-secondary" onClick={() => {takePicture()}}><IonIcon icon={cameraOutline}/></Button>}
+     {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && status!="recording" && <Button variant="outline-secondary" onClick={() => {takePicture()}}><IonIcon icon={cameraOutline}/></Button>}
     <ReactMediaRecorder
       audio
-      render={({ status, startRecording, stopRecording, pauseRecording, resumeRecording, mediaBlobUrl }) => (
-        <div>
-          <p>{status}</p>
-          <button onClick={startRecording}>Start Recording</button>
-          <button onClick={stopRecording}>Stop Recording</button>
-           <AudioPlayer 
-    src={mediaBlobUrl || ""} 
-    onPlay={e => console.log("onPlay")}
-    // other props here
-  /> 
-        </div>
+      onStop={downloadAudio}
+      render={({ status, startRecording, stopRecording, pauseRecording, resumeRecording }) => (
+         <div> 
+            {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && status=="recording" && <Button variant="outline-secondary" onClick={() => {stopRecording()}}>Stop</Button>}
+            {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && status=="recording" && !paused && <Button variant="outline-secondary" onClick={() => {pauseRecording();setPaused(true)}}>Pause</Button>}
+            {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && status=="recording" && paused && <Button variant="outline-secondary" onClick={() => {resumeRecording();setPaused(false)}}>Resume</Button>} 
+            {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && status!="permission_denied" && status!="recording" && <Button variant="outline-secondary" onClick={() => {startRecording()}}><IonIcon icon={micCircleOutline}/></Button>}
+            {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && status=="permission_denied" && <Button variant="outline-secondary" onClick={() => {console.log("ohoh")}}>Get Permission</Button>}
+            {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && status=="recording" && !paused && <Button variant="outline-secondary" disabled><IonSpinner className="hw1" name="bubbles"/></Button>}
+            {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && status!="stopped" && status!="recording" && status!="idle" && paused && <Button variant="outline-secondary" disabled><IonSpinner className="hw1" name="dots"/></Button>}
+          </div>
       )}
     />
     
