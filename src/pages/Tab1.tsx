@@ -184,10 +184,7 @@ const Tab1: React.FC = () => {
   },[selectedItemHash,dropdown]);
 
   const getSupportetAudioType = () => {
-    var audio = document.createElement('audio');
-    const supportsAudioType = (mime) => { 
-      return audio.canPlayType(mime);
-    }
+    var audio = document.createElement('audio'); 
     var types = ["audio/webm",
                "audio/webm\;codecs=opus",
                "audio/mpeg",
@@ -198,7 +195,8 @@ const Tab1: React.FC = () => {
                "audio/ac3",
                "audio/wav"];
     for (var i in types) {
-      if(supportsAudioType(types[i])=="maybe"){  
+      if(audio.canPlayType(types[i])=="maybe"){  
+        alert(types[i])
         return types[i];
       }
     }
