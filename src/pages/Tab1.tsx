@@ -10,7 +10,11 @@ import { micCircleOutline, cameraOutline } from 'ionicons/icons';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {InputGroup, DropdownButton, Dropdown, FormControl, Button, Modal} from 'react-bootstrap'
 
-import MediaCapturer from 'react-multimedia-capture';
+//import MediaCapturer from 'react-multimedia-capture';
+
+// alternative
+import { ReactMediaRecorder,useReactMediaRecorder } from "react-media-recorder";
+
 
 import {IonInfiniteScroll, IonInfiniteScrollContent, IonCard} from '@ionic/react';
 
@@ -105,6 +109,14 @@ const Tab1: React.FC = () => {
   const [disableInfiniteScroll, setDisableInfiniteScroll] = 
         useState<boolean>(false);
 
+  const {
+    status,
+    startRecording,
+    stopRecording,
+    pauseRecording,
+    resumeRecording,
+    mediaBlobUrl,
+  } = useReactMediaRecorder({ audio: true });
 
   const handleGranted = () => { 
     setGranted(true);
@@ -195,8 +207,7 @@ const Tab1: React.FC = () => {
                "audio/ac3",
                "audio/wav"];
     for (var i in types) {
-      if(audio.canPlayType(types[i])=="maybe"){  
-        alert(types[i])
+      if(audio.canPlayType(types[i])=="maybe"){   
         return types[i];
       }
     }
@@ -412,30 +423,22 @@ const Tab1: React.FC = () => {
       </div>
 
      {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && !recording && <Button variant="outline-secondary" onClick={() => {takePicture()}}><IonIcon icon={cameraOutline}/></Button>}
-          
-     <MediaCapturer
-          constraints={{ audio: true }}
-          mimeType={getSupportetAudioType()}
-          timeSlice={10}
-          onGranted={handleGranted}
-          onDenied={handleDenied}
-          onStart={handleStart}
-          onStop={handleStop}
-          onPause={handlePause}
-          onResume={handleResume}
-          onError={handleError} 
-          onStreamClosed={handleStreamClose}
-          render={({ request, start, stop, pause, resume }) => 
-          <div>
-            {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && recording && !paused && <Button variant="outline-secondary" onClick={() => {stop()}}>Stop</Button>}
-            {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && recording && !paused && <Button variant="outline-secondary" onClick={() => {pause()}}>Pause</Button>}
-            {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && recording && paused && <Button variant="outline-secondary" onClick={() => {resume()}}>Resume</Button>} 
-            {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && granted && !recording && <Button variant="outline-secondary" onClick={() => {start()}}><IonIcon icon={micCircleOutline}/></Button>}
-            {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && !granted && <Button variant="outline-secondary" onClick={() => {request()}}>Get Permission</Button>}
-            {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && recording && !paused && <Button variant="outline-secondary" disabled><IonSpinner className="hw1" name="bubbles"/></Button>}
-            {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && recording && paused && <Button variant="outline-secondary" disabled><IonSpinner className="hw1" name="dots"/></Button>}
-          </div>
-        } />
+    <ReactMediaRecorder
+      audio
+      render={({ status, startRecording, stopRecording, pauseRecording, resumeRecording, mediaBlobUrl }) => (
+        <div>
+          <p>{status}</p>
+          <button onClick={startRecording}>Start Recording</button>
+          <button onClick={stopRecording}>Stop Recording</button>
+           <AudioPlayer 
+    src={mediaBlobUrl || ""} 
+    onPlay={e => console.log("onPlay")}
+    // other props here
+  /> 
+        </div>
+      )}
+    />
+    
     </InputGroup.Append>
   </InputGroup> 
       </div>  
