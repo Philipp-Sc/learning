@@ -25,9 +25,6 @@ var hash = require('object-hash');
 
 const Tab1: React.FC = () => {
 
-  
-  const [mimeType, setMimeType] = useState<string>("audio/webm");
-
   const inputRef = React.createRef<HTMLInputElement>();
 
   const { Camera } = Plugins;
@@ -186,12 +183,11 @@ const Tab1: React.FC = () => {
     } 
   },[selectedItemHash,dropdown]);
 
-  useEffect(() => {
+  const getSupportetAudioType = () => {
     var audio = document.createElement('audio');
     const supportsAudioType = (mime) => { 
       return audio.canPlayType(mime);
     }
-
     var types = ["audio/webm",
                "audio/webm\;codecs=opus",
                "audio/mpeg",
@@ -201,16 +197,13 @@ const Tab1: React.FC = () => {
                "audio/opus",
                "audio/ac3",
                "audio/wav"];
-   
     for (var i in types) {
-      if(supportsAudioType(types[i])=="maybe"){
-        setMimeType(types[i]);
-        break;
+      if(supportsAudioType(types[i])=="maybe"){  
+        return types[i];
       }
     }
-    alert(mimeType)
-  },[])
-    
+    return "audio/wav";
+  }
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(false);
@@ -424,7 +417,7 @@ const Tab1: React.FC = () => {
           
      <MediaCapturer
           constraints={{ audio: true }}
-          mimeType={mimeType}
+          mimeType={getSupportetAudioType()}
           timeSlice={10}
           onGranted={handleGranted}
           onDenied={handleDenied}
