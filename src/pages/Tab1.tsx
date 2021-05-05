@@ -199,7 +199,8 @@ const Tab1: React.FC = () => {
                "audio/aac",
                "audio/ogg",
                "audio/opus",
-               "audio/ac3"];
+               "audio/ac3",
+               "audio/wav"];
    
     for (var i in types) {
       if(supportsAudioType(types[i])){
@@ -207,7 +208,7 @@ const Tab1: React.FC = () => {
         break;
       }
     }
-    console.log(mimeType)
+    alert(mimeType)
   },[])
     
 
