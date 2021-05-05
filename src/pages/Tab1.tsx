@@ -203,7 +203,7 @@ const Tab1: React.FC = () => {
                "audio/wav"];
    
     for (var i in types) {
-      if(supportsAudioType(types[i])){
+      if(supportsAudioType(types[i])=="maybe"){
         setMimeType(types[i]);
         break;
       }
