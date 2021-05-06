@@ -1,4 +1,5 @@
 import React from 'react';
+import CardContent from '../components/CardContent';
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react'; 
 import './Tab1.css';
 import { IonGrid, IonRow, IonCol, IonToggle, IonSpinner, IonBadge} from '@ionic/react'; 
@@ -13,7 +14,7 @@ import {InputGroup, DropdownButton, Dropdown, FormControl, Button, Modal} from '
 import { ReactMediaRecorder,useReactMediaRecorder } from "react-media-recorder";
 
 
-import {IonInfiniteScroll, IonInfiniteScrollContent, IonCard} from '@ionic/react';
+import {IonSlides, IonSlide, IonInfiniteScroll, IonInfiniteScrollContent, IonCard} from '@ionic/react';
 
 import { Plugins, CameraResultType } from '@capacitor/core';
 
@@ -25,6 +26,14 @@ var hash = require('object-hash');
 
 
 const Tab1: React.FC = () => {
+
+   const slideOpts = { 
+    slidesPerView: 1,
+    slidesPerColumn: 1,
+    slidesPerGroup: 1,
+    speed: 400
+  }; 
+
 
   const inputRef = React.createRef<HTMLInputElement>();
 
@@ -265,50 +274,18 @@ const Tab1: React.FC = () => {
 
   return (
     <IonPage>  
-     <IonContent>  
-
-      {items.sort((a, b) => {
-    return b.id - a.id || b.timestamp - a.timestamp;
-}).map((item: Item, i: number) => {
-            if(item.type=="text"){
-            return <div key={`${i}`}> 
-    <IonCard>
-  <InputGroup><InputGroup.Prepend><InputGroup.Radio name="groupOptions" checked={item.hash==(selectedItemHash || items[items.length-1].hash)} value={item.hash} onChange={(e) => {setSelectedItemHash(e.currentTarget.value)}}/> </InputGroup.Prepend><InputGroup.Append>
- <IonItem>
-          <IonLabel>
-            {item.value}
-          </IonLabel>     
-        </IonItem>
-   </InputGroup.Append><InputGroup.Append className="ml-auto">
-      <InputGroup.Text>{item.id}</InputGroup.Text>
-    </InputGroup.Append></InputGroup></IonCard></div>
-            }else if(item.type=="imageUrl"){
-            return <div key={`${i}`}> 
-    <IonCard className={item.hash==(selectedItemHash || items[items.length-1].hash) ? "shadow-lg mb-5 rounded" : ""}> 
-  <img src={item.value} onClick={() => {setSelectedItemHash(item.hash)}}/></IonCard></div>
-            }else if(item.type=="audioUrl"){
-            return <div key={`${i}`}>
-      
-    <IonCard>
-  <InputGroup><InputGroup.Prepend><InputGroup.Radio name="groupOptions" checked={item.hash==(selectedItemHash || items[items.length-1].hash)} value={item.hash} onChange={(e) => {setSelectedItemHash(e.currentTarget.value)}}/> </InputGroup.Prepend>
-  <InputGroup>
-   <AudioPlayer 
-    src={item.value}
-  />
-  </InputGroup><InputGroup.Append className="ml-auto">
-      <InputGroup.Text>{item.id}</InputGroup.Text>
-    </InputGroup.Append></InputGroup></IonCard></div>
-            }
-          })
+     <IonContent>   
+       <IonSlides pager={true} options={slideOpts}  className="h-100">
+        {Array.from(new Set(items.map((item: Item) => item.id))).map((id: number) => {
+          return (
+                  <IonSlide key={`${id}`}>
+                      <CardContent items={items.filter((e: Item)=> e.id==id)} selectedItemHash={selectedItemHash} setSelectedItemHash={setSelectedItemHash} />
+                  </IonSlide>
+                 )
+          }
+          )
         } 
-    {items.length>=13 &&
-     <IonInfiniteScroll threshold="10px" position="bottom"
-          disabled={disableInfiniteScroll}
-          onIonInfinite={(e) => searchNext(e)}>
-          <IonInfiniteScrollContent
-              loadingText="Loading more ...">
-          </IonInfiniteScrollContent>
-      </IonInfiniteScroll>}
+        </IonSlides>
 
     <Modal
         show={show}
@@ -347,7 +324,7 @@ const Tab1: React.FC = () => {
       <Dropdown.Item onClick={() => {setDropdown("Augment");}} >Augment</Dropdown.Item> 
       <Dropdown.Item onClick={() => {setDropdown("Special");}} >Special</Dropdown.Item> 
       <Dropdown.Divider />
-      <Dropdown.Item onClick={() => {setDropdown("Iterate");}} >Iterate</Dropdown.Item> 
+      <Dropdown.Item onClick={() => {setDropdown("Hide/Show");}} >Hide/Show</Dropdown.Item> 
       <Dropdown.Item onClick={() => {setDropdown("Training");}} >Training</Dropdown.Item> 
       <Dropdown.Divider />
       <Dropdown.Item onClick={() => {}} >Options</Dropdown.Item> 
@@ -376,11 +353,11 @@ const Tab1: React.FC = () => {
             {(dropdown=="Augment") && <Button variant="outline-secondary" onClick={() => {}}>{'Tip'}</Button>}
             {(dropdown=="Augment") && <Button variant="outline-secondary" onClick={() => {}}>{'ID'}</Button>}
 
-            {(dropdown=="Iterate") && <Button variant="outline-secondary" onClick={() => {}}>{'w/A'}</Button>}
-            {(dropdown=="Iterate") && <Button variant="outline-secondary" onClick={() => {}}>{'w/Info'}</Button>}
-            {(dropdown=="Iterate") && <Button variant="outline-secondary" onClick={() => {}}>{'w/Detail'}</Button>}
-            {(dropdown=="Iterate") && <Button variant="outline-secondary" onClick={() => {}}>{'w/Tip'}</Button>}
-            {(dropdown=="Iterate") && <Button variant="outline-secondary" onClick={() => {}}>{'w/ID'}</Button>} 
+            {(dropdown=="Hide/Show") && <Button variant="outline-secondary" onClick={() => {}}>{'A'}</Button>}
+            {(dropdown=="Hide/Show") && <Button variant="outline-secondary" onClick={() => {}}>{'Info'}</Button>}
+            {(dropdown=="Hide/Show") && <Button variant="outline-secondary" onClick={() => {}}>{'Detail'}</Button>}
+            {(dropdown=="Hide/Show") && <Button variant="outline-secondary" onClick={() => {}}>{'Tip'}</Button>}
+            {(dropdown=="Hide/Show") && <Button variant="outline-secondary" onClick={() => {}}>{'ID'}</Button>} 
       </div>
 
      {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && status!="recording" && <Button variant="outline-secondary" onClick={() => {takePicture()}}><IonIcon icon={cameraOutline}/></Button>}
