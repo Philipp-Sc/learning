@@ -6,7 +6,7 @@ import { IonGrid, IonRow, IonCol, IonToggle, IonSpinner, IonBadge} from '@ionic/
 import { IonItem, IonLabel, IonInput, IonButton, IonIcon, IonAlert } from '@ionic/react';
 import { IonTextarea, IonItemDivider, IonList } from '@ionic/react';
 import { useState, useRef, useEffect } from 'react';
-import { micCircleOutline, cameraOutline } from 'ionicons/icons';
+import { micCircleOutline, cameraOutline, trashOutline, returnUpForwardOutline, returnDownBackOutline } from 'ionicons/icons';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {InputGroup, DropdownButton, Dropdown, FormControl, Button, Modal} from 'react-bootstrap'
@@ -44,13 +44,13 @@ const Tab1: React.FC = () => {
     const image = await Camera.getPhoto({
       quality: 90,
       allowEditing: true,
-      resultType: CameraResultType.Uri
-    });
+      resultType: CameraResultType.Base64
+    }); 
     // image.webPath will contain a path that can be set as an image src.
     // You can access the original file using image.path, which can be
     // passed to the Filesystem API to read the raw data of the image,
     // if desired (or pass resultType: CameraResultType.Base64 to getPhoto)
-    var imageUrl = image.webPath;
+    var imageUrl = "data:image/png;base64,"+image.base64String; 
     var id = 0;
     if(dropdown=="New"){
       id = items.length;
@@ -71,7 +71,7 @@ const Tab1: React.FC = () => {
       }
     }
     var timestamp = Date.now();
-    var new_item = {"type":"imageUrl","value":imageUrl,"id":id,"timestamp":timestamp,"hash":hash([timestamp,id])};
+    var new_item = {"type":"imageUrl","value":imageUrl,"id":id,"timestamp":timestamp,"hash":hash([timestamp,id]),"deleted":undefined,"synced":undefined};
     setItems([...items, new_item]);
     setSelectedItemHash(new_item.hash)
     // Can be set to the src of an image now
@@ -90,11 +90,13 @@ const Tab1: React.FC = () => {
     id: number;
     timestamp: number;
     hash: string;
+    deleted: number | undefined;
+    synced: number | undefined;
   }
 
-  const [items, setItems] = useState< Item []>([]);
+  const [items, setItems] = useState< Item []>(JSON.parse(window.localStorage.getItem("items") || "[]")); // on load remove all deleted entries
 
-  const [selectedItemHash, setSelectedItemHash] = useState<string>();
+  const [selectedItemHash, setSelectedItemHash] = useState<string>(items.length>0 ? items[0].hash : "");
 
 
   const [showSelect, setShowSelect] = useState<boolean>(false); 
@@ -122,33 +124,46 @@ const Tab1: React.FC = () => {
     resumeRecording,
   } = useReactMediaRecorder({ audio: true });
 */
-  const downloadAudio = (blob) => { 
-    console.log(blob)
-    let url = URL.createObjectURL(blob);
-    var id = 0;
-    if(dropdown=="New"){
-      id = items.length;
-    }else if(dropdown=="Add" && selectedItemHash!=undefined){
-      var selectedItem = getItemByHash(selectedItemHash);
-      if(selectedItem!=undefined){
-        id = selectedItem.id;
-      }
-    }else if(dropdown=="Edit" && selectedItemHash!=undefined){
-      var selectedItem = getItemByHash(selectedItemHash);
-      if(selectedItem!=undefined){
-        selectedItem.type="audioUrl"
-        selectedItem.value=url;
-        setItems([...items.filter(e => e.hash!=selectedItemHash), selectedItem]); 
-        return;
-      }else{
-        return;
+  const getData = async(blob, callback) => {
+    const reader = new FileReader();
+    reader.onload = (event) => { 
+      if(event!=null && event.target!=null && event.target.result!=null){
+        callback(event.target.result);
       }
     }
-    var timestamp = Date.now();
-    var new_item = {"type":"audioUrl","value":url,"timestamp":timestamp,"id":id,"hash":hash([timestamp,id])};
-    setItems([...items, new_item]);
-    setSelectedItemHash(new_item.hash); 
-    
+    reader.readAsDataURL(blob);
+  }
+
+  const downloadAudio = (blob) => { 
+
+    const setAudio = (blob) => {
+      let url = blob;//URL.createObjectURL(blob);
+      var id = 0;
+      if(dropdown=="New"){
+        id = items.length;
+      }else if(dropdown=="Add" && selectedItemHash!=undefined){
+        var selectedItem = getItemByHash(selectedItemHash);
+        if(selectedItem!=undefined){
+          id = selectedItem.id;
+        }
+      }else if(dropdown=="Edit" && selectedItemHash!=undefined){
+        var selectedItem = getItemByHash(selectedItemHash);
+        if(selectedItem!=undefined){
+          selectedItem.type="audioUrl"
+          selectedItem.value=url;
+          setItems([...items.filter(e => e.hash!=selectedItemHash), selectedItem]); 
+          return;
+        }else{
+          return;
+        }
+      }
+      var timestamp = Date.now();
+      var new_item = {"type":"audioUrl","value":url,"timestamp":timestamp,"id":id,"hash":hash([timestamp,id]),"deleted":undefined,"synced":undefined};
+      setItems([...items, new_item]);
+      setSelectedItemHash(new_item.hash); 
+    }
+     
+    getData(blob,setAudio);
     /*
     let a = document.createElement('a');
     a.style.display = 'none';
@@ -183,6 +198,13 @@ const Tab1: React.FC = () => {
       }
     } 
   },[selectedItemHash,dropdown]);
+
+  useEffect(() => {
+    // monitor the free space and move data that can be retrieved from firestore
+    // move that data to sessionstorage
+    // have a function hydrate sessionstorage, after the page was refreshed
+    window.localStorage.setItem("items",JSON.stringify(items.filter(e => e.deleted==undefined || (e.deleted!=undefined && e.deleted<0))));
+  },[items])
 
 /*
   const getSupportetAudioType = () => {
@@ -230,7 +252,7 @@ const Tab1: React.FC = () => {
         }
       }
       var timestamp = Date.now();
-      var new_item = {"type":"text","value":content,"timestamp":timestamp,"id":id,"hash":hash([timestamp,id])}
+      var new_item = {"type":"text","value":content,"timestamp":timestamp,"id":id,"hash":hash([timestamp,id]),"deleted":undefined,"synced":undefined}
       setItems([...items, new_item]);
       setSelectedItemHash(new_item.hash);
       event.target.value = '';
@@ -246,10 +268,33 @@ const Tab1: React.FC = () => {
   return undefined
 
  }
+
+ const undoLastDelete = () => {
+  var deleted_items = items.filter(e => e.deleted!=undefined && e.deleted>=0).sort((a, b) => {if(b.deleted && a.deleted){return b.deleted - a.deleted};return 0;});
+  var undoHash = deleted_items[deleted_items.length-1].hash;
+  setItems(items.map(e => {if(e.hash==undoHash && e.deleted!=undefined){e.deleted=e.deleted*(-1);}return e;}))
+ }
+
+  const redoLastDelete = () => {
+  var undo_deleted_items = items.filter(e => e.deleted!=undefined && e.deleted<0).sort((a, b) => {if(b.deleted && a.deleted){return b.deleted - a.deleted};return 0;});
+  if(undo_deleted_items.length==0){
+    return;
+  }
+  var undoHash = undo_deleted_items[0].hash;
+  setItems(items.map(e => {if(e.hash==undoHash && e.deleted!=undefined){e.deleted=e.deleted*(-1);}return e;}))
+ }
  
  const deleteItem = async() => {
+  // if deleteItem => deletes ID 
+  // then remove 
   if(selectedItemHash){
-    setItems(items.filter(e => e.hash!=selectedItemHash))
+    var new_items = items.map(e => {
+      if(e.hash==selectedItemHash){
+        e.deleted=Date.now();
+      }
+      return e;
+    });
+    setItems(new_items)
     // add call to firebase to permanently remove it
     setSelectedItemHash(items[items.length-1].hash)
   } 
@@ -294,12 +339,12 @@ const Tab1: React.FC = () => {
     <IonPage>  
      <IonContent>   
        <IonSlides pager={true} options={slideOpts}  className="h-100">
-        {Array.from(new Set(items.map((item: Item) => item.id))).map((id: number) => {
+        {Array.from(new Set(items.map((item: Item) => item.id))).map((id: number) => { 
           return (
-                  <IonSlide key={`${id}`}>
-                      <CardContent items={items.filter((e: Item)=> e.id==id)} selectedItemHash={selectedItemHash} setSelectedItemHash={setSelectedItemHash} />
+                  <IonSlide key={`${id}`} hidden={items.filter((e: Item)=> e.id==id && (e.deleted==undefined || e.deleted<0)).length==0}> 
+                      <CardContent items={items.filter((e: Item)=> e.id==id && (e.deleted==undefined || e.deleted<0))} selectedItemHash={selectedItemHash} setSelectedItemHash={setSelectedItemHash} />
                   </IonSlide>
-                 )
+                 );
           }
           )
         } 
@@ -353,10 +398,20 @@ const Tab1: React.FC = () => {
       aria-label="Type: Content"
       aria-describedby="basic-addon2"
       onKeyDown={handleKeyDown}
-    />}
+    />} 
+    {dropdown=="Delete" && items.filter((e: Item)=> e.deleted!=undefined && e.deleted>=0).length>0 && <Button variant="outline-secondary" onClick={() => {undoLastDelete();}}>
+    <IonIcon icon={returnDownBackOutline}/>
+  </Button>}
+   {dropdown=="Delete" && items.filter((e: Item)=> e.deleted!=undefined && e.deleted<0).length>0 && <Button variant="outline-secondary" onClick={() => {redoLastDelete()}}>
+    <IonIcon icon={returnUpForwardOutline}/>
+    </Button>}
+    {dropdown=="Delete" && items.filter((e: Item)=> e.deleted!=undefined && e.deleted>=0).length>0 && <Button className="ml-auto" variant="outline-secondary" onClick={() => {window.location.reload();}}>
+    Clear cache <IonIcon icon={trashOutline}/>
+    </Button>}
     {dropdown=="Delete" && <Button variant="secondary" block onClick={() => {deleteItem()}}>
     Remove selection
   </Button>}
+   
      <InputGroup.Append>  
       <div>
             {(dropdown=="Special") && <Button variant="outline-secondary" onClick={() => {}}>{'Correct'}</Button>}
