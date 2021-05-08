@@ -11,7 +11,8 @@ import { micCircleOutline, cameraOutline } from 'ionicons/icons';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {InputGroup, DropdownButton, Dropdown, FormControl, Button, Modal} from 'react-bootstrap'
  
-import { ReactMediaRecorder,useReactMediaRecorder } from "react-media-recorder";
+//import { ReactMediaRecorder,useReactMediaRecorder } from "react-media-recorder";
+import useMediaRecorder from '@wmik/use-media-recorder';
 
 
 import {IonSlides, IonSlide, IonInfiniteScroll, IonInfiniteScrollContent, IonCard} from '@ionic/react';
@@ -111,6 +112,8 @@ const Tab1: React.FC = () => {
   const [disableInfiniteScroll, setDisableInfiniteScroll] = 
         useState<boolean>(false);
 
+/*
+
   const {
     status,
     startRecording,
@@ -118,9 +121,10 @@ const Tab1: React.FC = () => {
     pauseRecording,
     resumeRecording,
   } = useReactMediaRecorder({ audio: true });
-
+*/
   const downloadAudio = (blob) => { 
-    let url = blob; //URL.createObjectURL(blob);
+    console.log(blob)
+    let url = URL.createObjectURL(blob);
     var id = 0;
     if(dropdown=="New"){
       id = items.length;
@@ -155,6 +159,20 @@ const Tab1: React.FC = () => {
     a.click();*/
   };
 
+  let {
+    error,
+    status,
+    mediaBlob,
+    stopRecording,
+    getMediaStream,
+    pauseRecording,
+    resumeRecording,
+    startRecording
+  } = useMediaRecorder({
+    blobOptions: { type: 'audio/wav' },
+    mediaStreamConstraints: { audio: true },
+    onDataAvailable: downloadAudio,
+  });
   useEffect(() => {  
     if(dropdown=="Edit"){
       var current_item = getItemByHash(selectedItemHash) || {"type":"none","value":""};
@@ -361,21 +379,15 @@ const Tab1: React.FC = () => {
       </div>
 
      {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && status!="recording" && <Button variant="outline-secondary" onClick={() => {takePicture()}}><IonIcon icon={cameraOutline}/></Button>}
-    <ReactMediaRecorder
-      audio
-      onStop={downloadAudio}
-      render={({ status, startRecording, stopRecording, pauseRecording, resumeRecording }) => (
-         <div> 
-            {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && status=="recording" && <Button variant="outline-secondary" onClick={() => {stopRecording()}}>Stop</Button>}
-            {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && status=="recording" && !paused && <Button variant="outline-secondary" onClick={() => {pauseRecording();setPaused(true)}}>Pause</Button>}
-            {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && status=="recording" && paused && <Button variant="outline-secondary" onClick={() => {resumeRecording();setPaused(false)}}>Resume</Button>} 
-            {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && status!="permission_denied" && status!="recording" && <Button variant="outline-secondary" onClick={() => {startRecording()}}><IonIcon icon={micCircleOutline}/></Button>}
-            {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && status=="permission_denied" && <Button variant="outline-secondary" onClick={() => {console.log("ohoh")}}>Get Permission</Button>}
-            {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && status=="recording" && !paused && <Button variant="outline-secondary" disabled><IonSpinner className="hw1" name="bubbles"/></Button>}
-            {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && status!="stopped" && status!="recording" && status!="idle" && paused && <Button variant="outline-secondary" disabled><IonSpinner className="hw1" name="dots"/></Button>}
-          </div>
-      )}
-    />
+   <div> 
+            {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && {status}.status==="recording" && <Button variant="outline-secondary" onClick={() => {stopRecording()}}>Stop</Button>}
+            {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && {status}.status==="recording" && !paused && <Button variant="outline-secondary" onClick={() => {pauseRecording();setPaused(true)}}>Pause</Button>}
+            {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && {status}.status==="recording" && paused && <Button variant="outline-secondary" onClick={() => {resumeRecording();setPaused(false)}}>Resume</Button>} 
+            {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && {status}.status!=="ready" && {status}.status!=="recording" && <Button variant="outline-secondary" onClick={() => {getMediaStream();startRecording()}}><IonIcon icon={micCircleOutline}/></Button>}
+            {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && false && <Button variant="outline-secondary" onClick={() => {getMediaStream()}}>Get Permission</Button>}
+            {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && {status}.status==="recording" && !paused && <Button variant="outline-secondary" disabled><IonSpinner className="hw1" name="bubbles"/></Button>}
+            {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && {status}.status!=="stopped" && {status}.status!=="recording" && status!=="idle" && paused && <Button variant="outline-secondary" disabled><IonSpinner className="hw1" name="dots"/></Button>}
+    </div>
     
     </InputGroup.Append>
   </InputGroup> 
