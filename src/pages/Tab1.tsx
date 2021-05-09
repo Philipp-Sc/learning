@@ -28,6 +28,8 @@ var hash = require('object-hash');
 
 const Tab1: React.FC = () => {
 
+  window.localStorage.clear();
+
    const slideOpts = { 
     slidesPerView: 1,
     slidesPerColumn: 1,
@@ -460,7 +462,7 @@ const Tab1: React.FC = () => {
       <Dropdown.Item onClick={() => {setDropdown("Training");}} >Training</Dropdown.Item> 
       <Dropdown.Item onClick={() => {setDropdown("Tools");}} >Tools</Dropdown.Item> 
       <Dropdown.Divider />
-      <Dropdown.Item onClick={() => {setDropdown("Hide/Show");}} >Hide/Show</Dropdown.Item> 
+      <Dropdown.Item onClick={() => {setDropdown("Hide/Show");}} >Hide</Dropdown.Item> 
       <Dropdown.Item onClick={() => {setDropdown("Augment");}} >Augment</Dropdown.Item> 
       <Dropdown.Divider />
       <Dropdown.Item onClick={() => {setDropdown("Delete");}} >Delete</Dropdown.Item> 
