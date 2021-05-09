@@ -6,3 +6,11 @@
 .ml-auto {
 	margin-left: auto;
 }
+
+ion-slide {
+  overflow-x: scroll;  
+}
+
+.m-auto-auto {
+  margin: auto auto;   
+}

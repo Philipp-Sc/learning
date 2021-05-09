@@ -6,7 +6,7 @@ import { IonGrid, IonRow, IonCol, IonToggle, IonSpinner, IonBadge} from '@ionic/
 import { IonItem, IonLabel, IonInput, IonButton, IonIcon, IonAlert } from '@ionic/react';
 import { IonTextarea, IonItemDivider, IonList } from '@ionic/react';
 import { useState, useRef, useEffect } from 'react';
-import { micCircleOutline, cameraOutline, trashOutline, returnUpForwardOutline, returnDownBackOutline } from 'ionicons/icons';
+import { micCircleOutline, cameraOutline, trashOutline, returnUpForwardOutline, returnDownBackOutline, helpOutline, informationOutline, checkmarkDoneOutline, clipboardOutline, documentTextOutline, cogOutline } from 'ionicons/icons';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {InputGroup, DropdownButton, Dropdown, FormControl, Button, Modal} from 'react-bootstrap'
@@ -32,11 +32,12 @@ const Tab1: React.FC = () => {
     slidesPerView: 1,
     slidesPerColumn: 1,
     slidesPerGroup: 1,
-    speed: 400
+    speed: 400,
   }; 
 
+  const slidesRef = useRef<HTMLIonSlidesElement>(null); 
 
-  const inputRef = React.createRef<HTMLInputElement>();
+  const inputRef = React.createRef<HTMLInputElement>(); 
 
   const { Camera } = Plugins;
 
@@ -53,7 +54,7 @@ const Tab1: React.FC = () => {
     var imageUrl = "data:image/png;base64,"+image.base64String; 
     var id = 0;
     if(dropdown=="New"){
-      id = items.length;
+      id = getNewItemId();
     }else if(dropdown=="Add" && selectedItemHash!=undefined){
       var selectedItem = getItemByHash(selectedItemHash);
       if(selectedItem!=undefined){
@@ -71,9 +72,15 @@ const Tab1: React.FC = () => {
       }
     }
     var timestamp = Date.now();
-    var new_item = {"type":"imageUrl","value":imageUrl,"id":id,"timestamp":timestamp,"hash":hash([timestamp,id]),"deleted":undefined,"synced":undefined};
+    var new_item = {"type":"imageUrl","value":imageUrl,"augment":undefined,"id":id,"timestamp":timestamp,"hash":hash([timestamp,id]),"deleted":undefined,"synced":undefined};
     setItems([...items, new_item]);
     setSelectedItemHash(new_item.hash)
+    setTimeout(async()=> {
+        if(slidesRef.current && dropdown==="New"){
+          var swiper = await slidesRef.current.getSwiper()
+          slidesRef.current.slideTo(swiper.slides.length-1)
+        } 
+    },100); 
     // Can be set to the src of an image now
     //imageElement.src = imageUrl;
   }
@@ -87,6 +94,7 @@ const Tab1: React.FC = () => {
   interface Item {
     type: string;
     value: any;
+    augment: string | undefined;
     id: number;
     timestamp: number;
     hash: string;
@@ -94,23 +102,23 @@ const Tab1: React.FC = () => {
     synced: number | undefined;
   }
 
+  interface Estimate {
+    usage: number | undefined;
+    quota: number | undefined;
+    percent: string;
+  }
+
   const [items, setItems] = useState< Item []>(JSON.parse(window.localStorage.getItem("items") || "[]")); // on load remove all deleted entries
+  const [storageEstimate, setStorageEstimate] = useState<Estimate>()
 
   const [selectedItemHash, setSelectedItemHash] = useState<string>(items.length>0 ? items[0].hash : "");
 
+  interface Settings {
+    display_none: string [];
+  }
+  
+  const [userSettings, setUserSettings] = useState<Settings>(JSON.parse(window.localStorage.getItem("userSettings") || "{\"display_none\":[]}")); 
 
-  const [showSelect, setShowSelect] = useState<boolean>(false); 
-
-  var example = [
-  {
-    "text":"", 
-  },
-  { 
-    "imageUrl":""
-  },
-  { 
-    "audioUrl":""
-  }];
   const [disableInfiniteScroll, setDisableInfiniteScroll] = 
         useState<boolean>(false);
 
@@ -140,7 +148,7 @@ const Tab1: React.FC = () => {
       let url = blob;//URL.createObjectURL(blob);
       var id = 0;
       if(dropdown=="New"){
-        id = items.length;
+        id = getNewItemId();
       }else if(dropdown=="Add" && selectedItemHash!=undefined){
         var selectedItem = getItemByHash(selectedItemHash);
         if(selectedItem!=undefined){
@@ -158,9 +166,15 @@ const Tab1: React.FC = () => {
         }
       }
       var timestamp = Date.now();
-      var new_item = {"type":"audioUrl","value":url,"timestamp":timestamp,"id":id,"hash":hash([timestamp,id]),"deleted":undefined,"synced":undefined};
+      var new_item = {"type":"audioUrl","value":url,"augment":undefined,"timestamp":timestamp,"id":id,"hash":hash([timestamp,id]),"deleted":undefined,"synced":undefined};
       setItems([...items, new_item]);
       setSelectedItemHash(new_item.hash); 
+      setTimeout(async()=> {
+        if(slidesRef.current && dropdown==="New"){
+          var swiper = await slidesRef.current.getSwiper()
+          slidesRef.current.slideTo(swiper.slides.length-1)
+        } 
+      },100); 
     }
      
     getData(blob,setAudio);
@@ -204,7 +218,15 @@ const Tab1: React.FC = () => {
     // move that data to sessionstorage
     // have a function hydrate sessionstorage, after the page was refreshed
     window.localStorage.setItem("items",JSON.stringify(items.filter(e => e.deleted==undefined || (e.deleted!=undefined && e.deleted<0))));
+    navigator.storage.estimate().then(function(estimate) {
+      setStorageEstimate({usage: estimate.usage, quota: estimate.quota, percent:  ((estimate.usage || 0) / (estimate.quota || 0) * 100).toFixed(2)})
+    });
+    
   },[items])
+
+ useEffect(() => { 
+  window.localStorage.setItem("userSettings",JSON.stringify(userSettings));
+ },[userSettings])
 
 /*
   const getSupportetAudioType = () => {
@@ -229,12 +251,16 @@ const Tab1: React.FC = () => {
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(false);
 
- const handleKeyDown = (event) => {
+ const getNewItemId = () => {
+  return 1+Math.max(0,Math.max(...Array.from(new Set (items.map(e => e.id)))));
+ }
+
+ const handleKeyDown = async(event) => {
     if (event.key === 'Enter') {
       var content = event.target.value;
       var id = 0;
       if(dropdown=="New"){
-        id = items.length;
+        id = getNewItemId();
       }else if(dropdown=="Add" && selectedItemHash!=undefined){
         var selectedItem = getItemByHash(selectedItemHash);
         if(selectedItem!=undefined){
@@ -252,10 +278,16 @@ const Tab1: React.FC = () => {
         }
       }
       var timestamp = Date.now();
-      var new_item = {"type":"text","value":content,"timestamp":timestamp,"id":id,"hash":hash([timestamp,id]),"deleted":undefined,"synced":undefined}
+      var new_item = {"type":"text","value":content,"augment":undefined,"timestamp":timestamp,"id":id,"hash":hash([timestamp,id]),"deleted":undefined,"synced":undefined}
       setItems([...items, new_item]);
       setSelectedItemHash(new_item.hash);
       event.target.value = '';
+      setTimeout(async()=> {
+        if(slidesRef.current && dropdown==="New"){
+          var swiper = await slidesRef.current.getSwiper()
+          slidesRef.current.slideTo(swiper.slides.length-1)
+        } 
+    },100); 
     }
   }
 
@@ -298,6 +330,49 @@ const Tab1: React.FC = () => {
     // add call to firebase to permanently remove it
     setSelectedItemHash(items[items.length-1].hash)
   } 
+ };
+
+ const duplicateItem = () => { 
+  if(selectedItemHash){
+    var my_item = getItemByHash(selectedItemHash);
+    if(my_item!=undefined){
+      var item_id = my_item.id;
+      var new_item_id = getNewItemId();
+      var new_item_timestamp = Date.now()
+      var copy_items = items.filter(e => e.id==item_id).map((e,i) => {
+        var copy = Object.assign({}, e);
+        copy.timestamp = new_item_timestamp+i;
+        copy.id = new_item_id;
+        copy.hash = hash([copy.timestamp,copy.id]);
+        return copy;
+      }) 
+      setItems([...items,...copy_items]) 
+      setSelectedItemHash(items[items.length-1].hash)
+      setTimeout(async()=> {
+        if(slidesRef.current && dropdown==="Duplicate"){
+          var swiper = await slidesRef.current.getSwiper()
+          slidesRef.current.slideTo(swiper.slides.length-1)
+        } 
+      },100); 
+    }
+  } 
+ };
+
+ const setAugmention = (augment) => {
+  var augment_item = getItemByHash(selectedItemHash);
+  if(augment_item!=undefined){
+    augment_item.augment = augment;
+    setItems([...items]); 
+  }
+ };
+
+ const displayNone = (augment) => {
+   if(userSettings.display_none.includes(augment)){
+    userSettings.display_none = userSettings.display_none.filter(e => e!=augment);
+   }else{
+    userSettings.display_none = [...userSettings.display_none,augment];
+   }
+   setUserSettings(Object.assign({}, userSettings));
  }
 
  const fetchMoreData = async() => {
@@ -316,6 +391,7 @@ const Tab1: React.FC = () => {
     // finish loading current batch
     ($event.target as HTMLIonInfiniteScrollElement).complete();
   }
+
 
   /*
    const [theme,setTheme] = useState<boolean>(false)
@@ -338,11 +414,11 @@ const Tab1: React.FC = () => {
   return (
     <IonPage>  
      <IonContent>   
-       <IonSlides pager={true} options={slideOpts}  className="h-100">
+       <IonSlides ref={slidesRef} pager={true} options={slideOpts}  className="h-100">
         {Array.from(new Set(items.map((item: Item) => item.id))).map((id: number) => { 
           return (
-                  <IonSlide key={`${id}`} hidden={items.filter((e: Item)=> e.id==id && (e.deleted==undefined || e.deleted<0)).length==0}> 
-                      <CardContent items={items.filter((e: Item)=> e.id==id && (e.deleted==undefined || e.deleted<0))} selectedItemHash={selectedItemHash} setSelectedItemHash={setSelectedItemHash} />
+                  <IonSlide key={`${id}`} hidden={items.filter((e: Item)=> e.id==id && (e.deleted==undefined || e.deleted<0) && !userSettings.display_none.includes(e.augment || "")).length==0}> 
+                      <CardContent items={items.filter((e: Item)=> !userSettings.display_none.includes(e.augment || "") && e.id==id && (e.deleted==undefined || e.deleted<0))} selectedItemHash={selectedItemHash} setSelectedItemHash={setSelectedItemHash} />
                   </IonSlide>
                  );
           }
@@ -379,18 +455,20 @@ const Tab1: React.FC = () => {
       id="input-group-dropdown-1"
       className="dropup"
     >
+      <Dropdown.Item onClick={() => {}} >Options</Dropdown.Item> 
+      <Dropdown.Divider />
+      <Dropdown.Item onClick={() => {setDropdown("Training");}} >Training</Dropdown.Item> 
+      <Dropdown.Item onClick={() => {setDropdown("Tools");}} >Tools</Dropdown.Item> 
+      <Dropdown.Divider />
+      <Dropdown.Item onClick={() => {setDropdown("Hide/Show");}} >Hide/Show</Dropdown.Item> 
+      <Dropdown.Item onClick={() => {setDropdown("Augment");}} >Augment</Dropdown.Item> 
+      <Dropdown.Divider />
+      <Dropdown.Item onClick={() => {setDropdown("Delete");}} >Delete</Dropdown.Item> 
+      <Dropdown.Item onClick={() => {setDropdown("Duplicate");}} >Duplicate</Dropdown.Item> 
+      <Dropdown.Divider />
       <Dropdown.Item onClick={() => {setDropdown("New");}} >New</Dropdown.Item>
       <Dropdown.Item onClick={() => {setDropdown("Add");}} >Add</Dropdown.Item> 
       <Dropdown.Item onClick={() => {setDropdown("Edit");}} >Edit</Dropdown.Item> 
-      <Dropdown.Item onClick={() => {setDropdown("Delete");}} >Delete</Dropdown.Item> 
-      <Dropdown.Divider />
-      <Dropdown.Item onClick={() => {setDropdown("Augment");}} >Augment</Dropdown.Item> 
-      <Dropdown.Item onClick={() => {setDropdown("Special");}} >Special</Dropdown.Item> 
-      <Dropdown.Divider />
-      <Dropdown.Item onClick={() => {setDropdown("Hide/Show");}} >Hide/Show</Dropdown.Item> 
-      <Dropdown.Item onClick={() => {setDropdown("Training");}} >Training</Dropdown.Item> 
-      <Dropdown.Divider />
-      <Dropdown.Item onClick={() => {}} >Options</Dropdown.Item> 
     </DropdownButton>
     {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && <FormControl
       placeholder="Type: Content"
@@ -405,32 +483,41 @@ const Tab1: React.FC = () => {
    {dropdown=="Delete" && items.filter((e: Item)=> e.deleted!=undefined && e.deleted<0).length>0 && <Button variant="outline-secondary" onClick={() => {redoLastDelete()}}>
     <IonIcon icon={returnUpForwardOutline}/>
     </Button>}
-    {dropdown=="Delete" && items.filter((e: Item)=> e.deleted!=undefined && e.deleted>=0).length>0 && <Button className="ml-auto" variant="outline-secondary" onClick={() => {window.location.reload();}}>
-    Clear cache <IonIcon icon={trashOutline}/>
+    <div className="ml-auto">
+    {dropdown=="Delete" && items.filter((e: Item)=> e.deleted!=undefined && e.deleted>=0).length>0 && <Button style={{background: "linear-gradient(90deg, #0075ff "+((items.filter(e => e.deleted!=undefined && e.deleted>0).length/items.length)*100).toFixed(2)+"%, rgb(0 117 255 / 48%) 10%)", color: "white"}} variant="outline-secondary" onClick={() => {window.location.reload();}}>
+    Cache <IonIcon icon={trashOutline}/>
     </Button>}
+    {dropdown=="Delete" && items.length>0 && <Button style={{background: "linear-gradient(90deg, #0075ff "+((storageEstimate || {percent: "0"}).percent)+"%, rgb(0 117 255 / 48%) 10%)", color: "white"}} variant="outline-secondary" onClick={() => {window.localStorage.setItem("items","[]");window.location.reload();}}>
+    Storage <IonIcon icon={trashOutline}/>
+    </Button>}
+    </div>
     {dropdown=="Delete" && <Button variant="secondary" block onClick={() => {deleteItem()}}>
     Remove selection
+  </Button>}
+    {dropdown=="Duplicate" && <Button variant="secondary" block onClick={() => {duplicateItem()}}>
+    Create copy
   </Button>}
    
      <InputGroup.Append>  
       <div>
-            {(dropdown=="Special") && <Button variant="outline-secondary" onClick={() => {}}>{'Correct'}</Button>}
-            {(dropdown=="Special") && <Button variant="outline-secondary" onClick={() => {}}>{'Similar'}</Button>}
-            {(dropdown=="Special") && <Button variant="outline-secondary" onClick={() => {}}>{'Translate'}</Button>}
-            {(dropdown=="Special") && <Button variant="outline-secondary" onClick={() => {}}>{'Explain'}</Button>}
+            {(dropdown=="Tools") && <Button variant="outline-secondary" onClick={() => {}}>{'Correct'}</Button>}
+            {(dropdown=="Tools") && <Button variant="outline-secondary" onClick={() => {}}>{'Similar'}</Button>}
+            {(dropdown=="Tools") && <Button variant="outline-secondary" onClick={() => {}}>{'Translate'}</Button>}
+            {(dropdown=="Tools") && <Button variant="outline-secondary" onClick={() => {}}>{'Explain'}</Button>}
 
-            {(dropdown=="Augment") && <Button variant="outline-secondary" onClick={() => {}}>{'Q'}</Button>}
-            {(dropdown=="Augment") && <Button variant="outline-secondary" onClick={() => {}}>{'A'}</Button>}
-            {(dropdown=="Augment") && <Button variant="outline-secondary" onClick={() => {}}>{'Info'}</Button>}
-            {(dropdown=="Augment") && <Button variant="outline-secondary" onClick={() => {}}>{'Detail'}</Button>}
-            {(dropdown=="Augment") && <Button variant="outline-secondary" onClick={() => {}}>{'Tip'}</Button>}
-            {(dropdown=="Augment") && <Button variant="outline-secondary" onClick={() => {}}>{'ID'}</Button>}
+            {(dropdown=="Augment") && <Button variant="outline-secondary" onClick={() => {setAugmention('helpOutline')}}><IonIcon icon={helpOutline}/></Button>}
+            {(dropdown=="Augment") && <Button variant="outline-secondary" onClick={() => {setAugmention('checkmarkDoneOutline')}}><IonIcon icon={checkmarkDoneOutline}/></Button>}
+            {(dropdown=="Augment") && <Button variant="outline-secondary" onClick={() => {setAugmention('informationOutline')}}><IonIcon icon={informationOutline}/></Button>}
+            {(dropdown=="Augment") && <Button variant="outline-secondary" onClick={() => {setAugmention('clipboardOutline')}}><IonIcon icon={clipboardOutline}/></Button>}
+            {(dropdown=="Augment") && <Button variant="outline-secondary" onClick={() => {setAugmention('documentTextOutline')}}><IonIcon icon={documentTextOutline}/></Button>}
+            {(dropdown=="Augment") && <Button variant="outline-secondary" onClick={() => {setAugmention('cogOutline')}}><IonIcon icon={cogOutline}/></Button>}
 
-            {(dropdown=="Hide/Show") && <Button variant="outline-secondary" onClick={() => {}}>{'A'}</Button>}
-            {(dropdown=="Hide/Show") && <Button variant="outline-secondary" onClick={() => {}}>{'Info'}</Button>}
-            {(dropdown=="Hide/Show") && <Button variant="outline-secondary" onClick={() => {}}>{'Detail'}</Button>}
-            {(dropdown=="Hide/Show") && <Button variant="outline-secondary" onClick={() => {}}>{'Tip'}</Button>}
-            {(dropdown=="Hide/Show") && <Button variant="outline-secondary" onClick={() => {}}>{'ID'}</Button>} 
+            {(dropdown=="Hide/Show") && <Button style={{background: "linear-gradient(90deg, #0075ff "+(!userSettings.display_none.includes("helpOutline") ? 100 : 0)+"%, rgb(0 117 255 / 48%) 0%)", color: "white"}}  variant="outline-secondary" onClick={() => {displayNone("helpOutline")}}><IonIcon icon={helpOutline}/></Button>}
+            {(dropdown=="Hide/Show") && <Button style={{background: "linear-gradient(90deg, #0075ff "+(!userSettings.display_none.includes("checkmarkDoneOutline") ? 100 : 0)+"%, rgb(0 117 255 / 48%) 0%)", color: "white"}} variant="outline-secondary" onClick={() => {displayNone("checkmarkDoneOutline")}}><IonIcon icon={checkmarkDoneOutline}/></Button>}
+            {(dropdown=="Hide/Show") && <Button style={{background: "linear-gradient(90deg, #0075ff "+(!userSettings.display_none.includes("informationOutline") ? 100 : 0)+"%, rgb(0 117 255 / 48%) 0%)", color: "white"}} variant="outline-secondary" onClick={() => {displayNone("informationOutline")}}><IonIcon icon={informationOutline}/></Button>}
+            {(dropdown=="Hide/Show") && <Button style={{background: "linear-gradient(90deg, #0075ff "+(!userSettings.display_none.includes("clipboardOutline") ? 100 : 0)+"%, rgb(0 117 255 / 48%) 0%)", color: "white"}} variant="outline-secondary" onClick={() => {displayNone("clipboardOutline")}}><IonIcon icon={clipboardOutline}/></Button>}
+            {(dropdown=="Hide/Show") && <Button style={{background: "linear-gradient(90deg, #0075ff "+(!userSettings.display_none.includes("documentTextOutline") ? 100 : 0)+"%, rgb(0 117 255 / 48%) 0%)", color: "white"}} variant="outline-secondary" onClick={() => {displayNone("documentTextOutline")}}><IonIcon icon={documentTextOutline}/></Button>} 
+            {(dropdown=="Hide/Show") && <Button style={{background: "linear-gradient(90deg, #0075ff "+(!userSettings.display_none.includes("cogOutline") ? 100 : 0)+"%, rgb(0 117 255 / 48%) 0%)", color: "white"}} variant="outline-secondary" onClick={() => {displayNone("cogOutline")}}><IonIcon icon={cogOutline}/></Button>} 
       </div>
 
      {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && status!="recording" && <Button variant="outline-secondary" onClick={() => {takePicture()}}><IonIcon icon={cameraOutline}/></Button>}
