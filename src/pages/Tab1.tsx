@@ -27,9 +27,6 @@ var hash = require('object-hash');
 
 
 const Tab1: React.FC = () => {
-
-  window.localStorage.clear();
-
    const slideOpts = { 
     slidesPerView: 1,
     slidesPerColumn: 1,
