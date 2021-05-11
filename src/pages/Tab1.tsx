@@ -217,9 +217,14 @@ const Tab1: React.FC = () => {
     // move that data to sessionstorage
     // have a function hydrate sessionstorage, after the page was refreshed
     window.localStorage.setItem("items",JSON.stringify(items.filter(e => e.deleted==undefined || (e.deleted!=undefined && e.deleted<0))));
-    navigator.storage.estimate().then(function(estimate) {
-      setStorageEstimate({usage: estimate.usage, quota: estimate.quota, percent:  ((estimate.usage || 0) / (estimate.quota || 0) * 100).toFixed(2)})
-    });
+    if(navigator && navigator.storage){
+      navigator.storage.estimate().then(function(estimate) {
+        setStorageEstimate({usage: estimate.usage, quota: estimate.quota, percent:  ((estimate.usage || 0) / (estimate.quota || 0) * 100).toFixed(2)})
+      });
+    }else{
+      var myUsage = new Blob(Object.values(localStorage)).size;
+      setStorageEstimate({usage: myUsage, quota: 5e+6, percent:  ((myUsage || 0) / (5e+6 || 0) * 100).toFixed(2)})
+    }
     
   },[items])
 
