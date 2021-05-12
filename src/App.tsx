@@ -8,7 +8,8 @@ import {
   IonTabButton,
   IonTabs,
 } from '@ionic/react';
-import { IonReactRouter } from '@ionic/react-router';
+import { IonReactRouter, IonReactMemoryRouter } from '@ionic/react-router';
+import { createMemoryHistory} from 'history';
 //import { ellipse, square, triangle } from 'ionicons/icons';
 import Tab1 from './pages/Tab1';
 import Tab2 from './pages/Tab2';
@@ -39,9 +40,13 @@ import '@ionic/react/css/display.css';
 /* Theme variables */
 import './theme/variables.css';
 
-const App: React.FC = () => (
+const App: React.FC = () => { 
+
+  const browserHistory = createMemoryHistory();
+
+  return (
    <IonApp>
-    <IonReactRouter>
+    <IonReactMemoryRouter history={browserHistory}>
       <IonTabs>
         <IonRouterOutlet>
           <Route path="/faq" component={Faq} exact={true} />
@@ -66,8 +71,8 @@ const App: React.FC = () => (
           </IonTabButton>
         </IonTabBar>
       </IonTabs>
-    </IonReactRouter>
+    </IonReactMemoryRouter>
   </IonApp>
-);
+)};
 
 export default App;
