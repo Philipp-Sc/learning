@@ -494,7 +494,7 @@ const Tab1: React.FC = () => {
       variant="outline-secondary"
       title={dropdown}
       id="input-group-dropdown-1"
-      className="dropup"
+      className="dropup up"
     >
       <Dropdown.Item onClick={() => {}} >Options</Dropdown.Item> 
       <Dropdown.Divider />
