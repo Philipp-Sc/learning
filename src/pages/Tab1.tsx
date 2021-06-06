@@ -448,7 +448,7 @@ const Tab1: React.FC = () => {
   return (
     <IonPage>  
      <IonContent>   
-       <IonSlides ref={slidesRef} pager={true} options={slideOpts}  className="h-100">
+       <IonSlides ref={slidesRef} pager={false} options={slideOpts}  className="h-100">
         {Array.from(new Set(items.map((item: Item) => item.id))).map((id: number) => { 
           return (
                   <IonSlide key={`${id}`} hidden={items.filter((e: Item)=> e.id==id && (e.deleted==undefined || e.deleted<0) && !userSettings.display_none.includes(e.augment || "") && !userSettings.display_none.includes(e.deck || "undefined")).length==0}> 
@@ -488,6 +488,7 @@ const Tab1: React.FC = () => {
             {(dropdown=="Filter") && <Button style={{background: "linear-gradient(90deg, #0075ff "+(!userSettings.display_none.includes("cogOutline") ? 100 : 0)+"%, rgb(0 117 255 / 48%) 0%)", color: "white"}} variant="outline-secondary" onClick={() => {displayNone("cogOutline")}}><IonIcon icon={cogOutline}/></Button>} 
    
         <InputGroup className="mb-0">
+        <div></div>
          <DropdownButton
       as={InputGroup.Append}
       variant="outline-secondary"
@@ -510,6 +511,7 @@ const Tab1: React.FC = () => {
       <Dropdown.Item onClick={() => {setDropdown("Add");}} >Add</Dropdown.Item> 
       <Dropdown.Item onClick={() => {setDropdown("Edit");}} >Edit</Dropdown.Item> 
     </DropdownButton>
+    <div></div>
     {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && <FormControl
       placeholder="Type: Content"
       ref={inputRef}
@@ -580,7 +582,7 @@ const Tab1: React.FC = () => {
             </IonSelect>}
 
    
-     <InputGroup.Append>  
+     <InputGroup.Append className="ml-auto">  
       <div>
             {(dropdown=="Tools") && <Button variant="outline-secondary" onClick={() => {}}>{'Correct'}</Button>}
             {(dropdown=="Tools") && <Button variant="outline-secondary" onClick={() => {}}>{'Similar'}</Button>}
