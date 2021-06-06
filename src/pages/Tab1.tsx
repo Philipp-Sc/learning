@@ -1,6 +1,6 @@
 import React from 'react';
 import CardContent from '../components/CardContent';
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react'; 
+import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonSelect, IonSelectOption } from '@ionic/react'; 
 import './Tab1.css';
 import { IonGrid, IonRow, IonCol, IonToggle, IonSpinner, IonBadge} from '@ionic/react'; 
 import { IonItem, IonLabel, IonInput, IonButton, IonIcon, IonAlert } from '@ionic/react';
@@ -15,7 +15,7 @@ import {InputGroup, DropdownButton, Dropdown, FormControl, Button, Modal} from '
 import useMediaRecorder from '@wmik/use-media-recorder';
 
 
-import {IonSlides, IonSlide, IonInfiniteScroll, IonInfiniteScrollContent, IonCard} from '@ionic/react';
+import {IonSlides, IonSlide, IonInfiniteScroll, IonInfiniteScrollContent, IonCard, useIonAlert} from '@ionic/react';
 
 import { Plugins, CameraResultType } from '@capacitor/core';
 
@@ -27,6 +27,9 @@ var hash = require('object-hash');
 
 
 const Tab1: React.FC = () => {
+
+  const [present] = useIonAlert();
+
    const slideOpts = { 
     slidesPerView: 1,
     slidesPerColumn: 1,
@@ -71,7 +74,7 @@ const Tab1: React.FC = () => {
       }
     }
     var timestamp = Date.now();
-    var new_item = {"type":"imageUrl","value":imageUrl,"augment":undefined,"id":id,"timestamp":timestamp,"hash":hash([timestamp,id]),"deleted":undefined,"synced":undefined};
+    var new_item = {"type":"imageUrl","value":imageUrl,"augment":undefined,"id":id,"timestamp":timestamp,"hash":hash([timestamp,id]),"deleted":undefined,"synced":undefined, "deck":undefined};
     setItems([...items, new_item]);
     setSelectedItemHash(new_item.hash)
     setTimeout(async()=> {
@@ -84,7 +87,7 @@ const Tab1: React.FC = () => {
     //imageElement.src = imageUrl;
   }
 
-  const [dropdown, setDropdown] = useState<string>("New")
+  const [dropdown, setDropdown] = useState<string>("New") 
 
   const [show, setShow] = useState<boolean>(false);
  
@@ -99,6 +102,7 @@ const Tab1: React.FC = () => {
     hash: string;
     deleted: number | undefined;
     synced: number | undefined;
+    deck: string | undefined;
   }
 
   interface Estimate {
@@ -165,7 +169,7 @@ const Tab1: React.FC = () => {
         }
       }
       var timestamp = Date.now();
-      var new_item = {"type":"audioUrl","value":url,"augment":undefined,"timestamp":timestamp,"id":id,"hash":hash([timestamp,id]),"deleted":undefined,"synced":undefined};
+      var new_item = {"type":"audioUrl","value":url,"augment":undefined,"timestamp":timestamp,"id":id,"hash":hash([timestamp,id]),"deleted":undefined,"synced":undefined, "deck":undefined};
       setItems([...items, new_item]);
       setSelectedItemHash(new_item.hash); 
       setTimeout(async()=> {
@@ -259,6 +263,14 @@ const Tab1: React.FC = () => {
   return 1+Math.max(0,Math.max(...Array.from(new Set (items.map(e => e.id)))));
  }
 
+ const getDecks = () => {
+  return Array.from(new Set(items.map(e => ""+e.deck)));
+ }
+
+
+ const [filter, setFilter] = useState<string[]>(getDecks().filter(each => !userSettings.display_none.includes(each)))
+
+
  const handleKeyDown = async(event) => {
     if (event.key === 'Enter') {
       var content = event.target.value;
@@ -282,7 +294,7 @@ const Tab1: React.FC = () => {
         }
       }
       var timestamp = Date.now();
-      var new_item = {"type":"text","value":content,"augment":undefined,"timestamp":timestamp,"id":id,"hash":hash([timestamp,id]),"deleted":undefined,"synced":undefined}
+      var new_item = {"type":"text","value":content,"augment":undefined,"timestamp":timestamp,"id":id,"hash":hash([timestamp,id]),"deleted":undefined,"synced":undefined, "deck":undefined}
       setItems([...items, new_item]);
       setSelectedItemHash(new_item.hash);
       event.target.value = '';
@@ -370,6 +382,24 @@ const Tab1: React.FC = () => {
   }
  };
 
+ const setDeck = (deck) => {
+  var augment_item = getItemByHash(selectedItemHash);
+  if(augment_item!=undefined){
+    augment_item.deck = deck;
+    setItems([...items]); 
+  }
+ };
+ const displayNones = (augments) => {
+   augments.forEach(augment => {
+     if(userSettings.display_none.includes(augment)){
+      userSettings.display_none = userSettings.display_none.filter(e => e!=augment);
+     }else{
+      userSettings.display_none = [...userSettings.display_none,augment];
+     }
+   })
+   setUserSettings(Object.assign({}, userSettings));
+ }
+
  const displayNone = (augment) => {
    if(userSettings.display_none.includes(augment)){
     userSettings.display_none = userSettings.display_none.filter(e => e!=augment);
@@ -421,8 +451,8 @@ const Tab1: React.FC = () => {
        <IonSlides ref={slidesRef} pager={true} options={slideOpts}  className="h-100">
         {Array.from(new Set(items.map((item: Item) => item.id))).map((id: number) => { 
           return (
-                  <IonSlide key={`${id}`} hidden={items.filter((e: Item)=> e.id==id && (e.deleted==undefined || e.deleted<0) && !userSettings.display_none.includes(e.augment || "")).length==0}> 
-                      <CardContent items={items.filter((e: Item)=> !userSettings.display_none.includes(e.augment || "") && e.id==id && (e.deleted==undefined || e.deleted<0))} selectedItemHash={selectedItemHash} setSelectedItemHash={setSelectedItemHash} />
+                  <IonSlide key={`${id}`} hidden={items.filter((e: Item)=> e.id==id && (e.deleted==undefined || e.deleted<0) && !userSettings.display_none.includes(e.augment || "") && !userSettings.display_none.includes(e.deck || "undefined")).length==0}> 
+                      <CardContent items={items.filter((e: Item)=> !userSettings.display_none.includes(e.deck || "undefined") && !userSettings.display_none.includes(e.augment || "") && e.id==id && (e.deleted==undefined || e.deleted<0))} selectedItemHash={selectedItemHash} setSelectedItemHash={setSelectedItemHash} />
                   </IonSlide>
                  );
           }
@@ -450,7 +480,13 @@ const Tab1: React.FC = () => {
       </Modal>
 
      </IonContent>     
-      <div slot="bottom">   
+      <div slot="bottom" style={{textAlign: "center"}}>          {(dropdown=="Filter") && <Button style={{background: "linear-gradient(90deg, #0075ff "+(!userSettings.display_none.includes("helpOutline") ? 100 : 0)+"%, rgb(0 117 255 / 48%) 0%)", color: "white"}}  variant="outline-secondary" onClick={() => {displayNone("helpOutline")}}><IonIcon icon={helpOutline}/></Button>}
+            {(dropdown=="Filter") && <Button style={{background: "linear-gradient(90deg, #0075ff "+(!userSettings.display_none.includes("checkmarkDoneOutline") ? 100 : 0)+"%, rgb(0 117 255 / 48%) 0%)", color: "white"}} variant="outline-secondary" onClick={() => {displayNone("checkmarkDoneOutline")}}><IonIcon icon={checkmarkDoneOutline}/></Button>}
+            {(dropdown=="Filter") && <Button style={{background: "linear-gradient(90deg, #0075ff "+(!userSettings.display_none.includes("informationOutline") ? 100 : 0)+"%, rgb(0 117 255 / 48%) 0%)", color: "white"}} variant="outline-secondary" onClick={() => {displayNone("informationOutline")}}><IonIcon icon={informationOutline}/></Button>}
+            {(dropdown=="Filter") && <Button style={{background: "linear-gradient(90deg, #0075ff "+(!userSettings.display_none.includes("clipboardOutline") ? 100 : 0)+"%, rgb(0 117 255 / 48%) 0%)", color: "white"}} variant="outline-secondary" onClick={() => {displayNone("clipboardOutline")}}><IonIcon icon={clipboardOutline}/></Button>}
+            {(dropdown=="Filter") && <Button style={{background: "linear-gradient(90deg, #0075ff "+(!userSettings.display_none.includes("documentTextOutline") ? 100 : 0)+"%, rgb(0 117 255 / 48%) 0%)", color: "white"}} variant="outline-secondary" onClick={() => {displayNone("documentTextOutline")}}><IonIcon icon={documentTextOutline}/></Button>} 
+            {(dropdown=="Filter") && <Button style={{background: "linear-gradient(90deg, #0075ff "+(!userSettings.display_none.includes("cogOutline") ? 100 : 0)+"%, rgb(0 117 255 / 48%) 0%)", color: "white"}} variant="outline-secondary" onClick={() => {displayNone("cogOutline")}}><IonIcon icon={cogOutline}/></Button>} 
+   
         <InputGroup className="mb-0">
          <DropdownButton
       as={InputGroup.Append}
@@ -464,8 +500,8 @@ const Tab1: React.FC = () => {
       <Dropdown.Item onClick={() => {setDropdown("Training");}} >Training</Dropdown.Item> 
       <Dropdown.Item onClick={() => {setDropdown("Tools");}} >Tools</Dropdown.Item> 
       <Dropdown.Divider />
-      <Dropdown.Item onClick={() => {setDropdown("Hide/Show");}} >Hide</Dropdown.Item> 
-      <Dropdown.Item onClick={() => {setDropdown("Augment");}} >Augment</Dropdown.Item> 
+      <Dropdown.Item onClick={() => {setDropdown("Filter");}} >Filter</Dropdown.Item> 
+      <Dropdown.Item onClick={() => {setDropdown("Meta Data");}} >Meta Data</Dropdown.Item> 
       <Dropdown.Divider />
       <Dropdown.Item onClick={() => {setDropdown("Delete");}} >Delete</Dropdown.Item> 
       <Dropdown.Item onClick={() => {setDropdown("Duplicate");}} >Duplicate</Dropdown.Item> 
@@ -501,6 +537,48 @@ const Tab1: React.FC = () => {
     {dropdown=="Duplicate" && <Button variant="secondary" block onClick={() => {duplicateItem()}}>
     Create copy
   </Button>}
+
+    {(dropdown=="Meta Data") && 
+            <IonSelect key={selectedItemHash} value={(getItemByHash(selectedItemHash) || {"deck":undefined}).deck+""} placeholder="Select One" interface="popover" onIonChange={e => {
+              if(e.detail.value!="New"){
+                if(e.detail.value=="undefined"){
+                  setDeck(undefined);
+                }else{
+                  setDeck(e.detail.value);
+                }
+              }else{
+                present({
+                  cssClass: 'my-css',
+                  header: 'New Deck', 
+                  inputs: [
+                    {
+                      name: 'name1',
+                      type: 'text',
+                      placeholder: 'Name', 
+                    },
+                  ],
+                  buttons: [
+                    { text: 'Cancel',  handler: () => { 
+                        setDeck((getItemByHash(selectedItemHash) || {"deck":undefined}).deck);}
+                    },
+                    { text: 'Ok',  handler: (alertData) => { 
+                        setDeck(alertData.name1);}
+                    },
+                  ],
+                  onDidDismiss: (e) => console.log('did dismiss'),
+                })
+              }
+            }
+            }>
+              <IonSelectOption value="undefined">Default</IonSelectOption> 
+              {
+                getDecks()
+                .filter(e => e!="undefined")
+                .map((e,i) => {return <IonSelectOption key={i} value={e}>{e}</IonSelectOption>})
+              } 
+              <IonSelectOption value="New">New Deck</IonSelectOption>
+            </IonSelect>}
+
    
      <InputGroup.Append>  
       <div>
@@ -509,20 +587,34 @@ const Tab1: React.FC = () => {
             {(dropdown=="Tools") && <Button variant="outline-secondary" onClick={() => {}}>{'Translate'}</Button>}
             {(dropdown=="Tools") && <Button variant="outline-secondary" onClick={() => {}}>{'Explain'}</Button>}
 
-            {(dropdown=="Augment") && <Button variant="outline-secondary" onClick={() => {setAugmention('helpOutline')}}><IonIcon icon={helpOutline}/></Button>}
-            {(dropdown=="Augment") && <Button variant="outline-secondary" onClick={() => {setAugmention('checkmarkDoneOutline')}}><IonIcon icon={checkmarkDoneOutline}/></Button>}
-            {(dropdown=="Augment") && <Button variant="outline-secondary" onClick={() => {setAugmention('informationOutline')}}><IonIcon icon={informationOutline}/></Button>}
-            {(dropdown=="Augment") && <Button variant="outline-secondary" onClick={() => {setAugmention('clipboardOutline')}}><IonIcon icon={clipboardOutline}/></Button>}
-            {(dropdown=="Augment") && <Button variant="outline-secondary" onClick={() => {setAugmention('documentTextOutline')}}><IonIcon icon={documentTextOutline}/></Button>}
-            {(dropdown=="Augment") && <Button variant="outline-secondary" onClick={() => {setAugmention('cogOutline')}}><IonIcon icon={cogOutline}/></Button>}
+ {(dropdown=="Meta Data") &&  
+            <IonSelect value={(getItemByHash(selectedItemHash) || {"augment":undefined}).augment} interface="popover" placeholder="Select Type" onIonChange={e => setAugmention(e.detail.value)}>
+              <IonSelectOption value="helpOutline">Question</IonSelectOption>
+              <IonSelectOption value="checkmarkDoneOutline">Answer</IonSelectOption>
+              <IonSelectOption value="informationOutline">Info</IonSelectOption>
+              <IonSelectOption value="clipboardOutline">Notes</IonSelectOption>
+              <IonSelectOption value="documentTextOutline">Details</IonSelectOption>
+              <IonSelectOption value="cogOutline">Other</IonSelectOption>
+            </IonSelect>}
+           
+ {(dropdown=="Filter") &&  
+            <IonSelect value={filter} multiple={true} onIonChange={e => { 
+              if(e.detail.value.length>=1){
+                var decks = getDecks();
+                displayNones(decks.filter(each => userSettings.display_none.includes(each)).concat(decks.filter(each => !e.detail.value.includes(each))))
+                setFilter(e.detail.value);
+              }
+            }}>
 
-            {(dropdown=="Hide/Show") && <Button style={{background: "linear-gradient(90deg, #0075ff "+(!userSettings.display_none.includes("helpOutline") ? 100 : 0)+"%, rgb(0 117 255 / 48%) 0%)", color: "white"}}  variant="outline-secondary" onClick={() => {displayNone("helpOutline")}}><IonIcon icon={helpOutline}/></Button>}
-            {(dropdown=="Hide/Show") && <Button style={{background: "linear-gradient(90deg, #0075ff "+(!userSettings.display_none.includes("checkmarkDoneOutline") ? 100 : 0)+"%, rgb(0 117 255 / 48%) 0%)", color: "white"}} variant="outline-secondary" onClick={() => {displayNone("checkmarkDoneOutline")}}><IonIcon icon={checkmarkDoneOutline}/></Button>}
-            {(dropdown=="Hide/Show") && <Button style={{background: "linear-gradient(90deg, #0075ff "+(!userSettings.display_none.includes("informationOutline") ? 100 : 0)+"%, rgb(0 117 255 / 48%) 0%)", color: "white"}} variant="outline-secondary" onClick={() => {displayNone("informationOutline")}}><IonIcon icon={informationOutline}/></Button>}
-            {(dropdown=="Hide/Show") && <Button style={{background: "linear-gradient(90deg, #0075ff "+(!userSettings.display_none.includes("clipboardOutline") ? 100 : 0)+"%, rgb(0 117 255 / 48%) 0%)", color: "white"}} variant="outline-secondary" onClick={() => {displayNone("clipboardOutline")}}><IonIcon icon={clipboardOutline}/></Button>}
-            {(dropdown=="Hide/Show") && <Button style={{background: "linear-gradient(90deg, #0075ff "+(!userSettings.display_none.includes("documentTextOutline") ? 100 : 0)+"%, rgb(0 117 255 / 48%) 0%)", color: "white"}} variant="outline-secondary" onClick={() => {displayNone("documentTextOutline")}}><IonIcon icon={documentTextOutline}/></Button>} 
-            {(dropdown=="Hide/Show") && <Button style={{background: "linear-gradient(90deg, #0075ff "+(!userSettings.display_none.includes("cogOutline") ? 100 : 0)+"%, rgb(0 117 255 / 48%) 0%)", color: "white"}} variant="outline-secondary" onClick={() => {displayNone("cogOutline")}}><IonIcon icon={cogOutline}/></Button>} 
-      </div>
+              <IonSelectOption value="undefined">Default</IonSelectOption>
+              {
+                getDecks()
+                .filter(e => e!="undefined")
+                .map((e,i) => {return <IonSelectOption key={i} value={e}>{e}</IonSelectOption>})
+              }  
+            </IonSelect>}
+
+        </div>
 
      {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && status!="recording" && <Button variant="outline-secondary" onClick={() => {takePicture()}}><IonIcon icon={cameraOutline}/></Button>}
    <div> 
