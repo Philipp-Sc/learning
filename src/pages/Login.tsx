@@ -17,7 +17,7 @@ function validateEmail(email: string) {
 const Login: React.FC = () => {
   const history = useHistory();
   const [loading, setLoading] = useState<boolean>(false);
-  const [email, setEmail] = useState<string>(""+localStorage.getItem('email'));
+  const [email, setEmail] = useState<string>(""+(localStorage.getItem('email')==null ? "" : localStorage.getItem('email')));
   const [password, setPassword] = useState<string>("");
   const [iserror, setIserror] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("");
@@ -51,6 +51,7 @@ const Login: React.FC = () => {
           if(res.user && res.user.uid){
             localStorage.setItem("user_uid",res.user.uid); 
             setLoggedin(true)  
+            firebase.firestore().collection('user_data').doc(res.user.uid).collection('meta_data').doc("last_login").set({date: new Date().getTime()}, {merge: true})
             firebase.firestore().collection('user_data').doc(res.user.uid).collection('public') 
             .orderBy('timestamp', 'desc')
             .get().then(user_data => {

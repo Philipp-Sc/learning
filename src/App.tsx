@@ -40,6 +40,29 @@ import '@ionic/react/css/display.css';
 /* Theme variables */
 import './theme/variables.css';
 
+
+// Firebase App (the core Firebase SDK) is always required and
+// must be listed before other Firebase SDKs
+import firebase from "firebase/app";
+
+// Add the Firebase services that you want to use
+import "firebase/auth";
+
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+var firebaseConfig = {
+    apiKey: "AIzaSyDDn_F8D25raobRa_rFbIiAaRkGj_V19gs",
+    authDomain: "learning-b6f1c.firebaseapp.com",
+    projectId: "learning-b6f1c",
+    storageBucket: "learning-b6f1c.appspot.com",
+    messagingSenderId: "864390809094",
+    appId: "1:864390809094:web:897186e3f220d37350e587",
+    measurementId: "G-01VVCXZXRN"
+  };
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+//firebase.analytics();
+
 const App: React.FC = () => { 
 
   const browserHistory = createMemoryHistory();

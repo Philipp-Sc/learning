@@ -487,14 +487,13 @@ const Tab1: React.FC = () => {
             {(dropdown=="Filter") && <Button style={{background: "linear-gradient(90deg, #0075ff "+(!userSettings.display_none.includes("documentTextOutline") ? 100 : 0)+"%, rgb(0 117 255 / 48%) 0%)", color: "white"}} variant="outline-secondary" onClick={() => {displayNone("documentTextOutline")}}><IonIcon icon={documentTextOutline}/></Button>} 
             {(dropdown=="Filter") && <Button style={{background: "linear-gradient(90deg, #0075ff "+(!userSettings.display_none.includes("cogOutline") ? 100 : 0)+"%, rgb(0 117 255 / 48%) 0%)", color: "white"}} variant="outline-secondary" onClick={() => {displayNone("cogOutline")}}><IonIcon icon={cogOutline}/></Button>} 
    
-        <InputGroup className="mb-0">
-        <div></div>
+        <InputGroup className="mb-0"> 
          <DropdownButton
       as={InputGroup.Append}
       variant="outline-secondary"
       title={dropdown}
       id="input-group-dropdown-1"
-      className="dropup up"
+      className="dropup"
     >
       <Dropdown.Item onClick={() => {}} >Options</Dropdown.Item> 
       <Dropdown.Divider />
@@ -510,8 +509,7 @@ const Tab1: React.FC = () => {
       <Dropdown.Item onClick={() => {setDropdown("New");}} >New</Dropdown.Item>
       <Dropdown.Item onClick={() => {setDropdown("Add");}} >Add</Dropdown.Item> 
       <Dropdown.Item onClick={() => {setDropdown("Edit");}} >Edit</Dropdown.Item> 
-    </DropdownButton>
-    <div></div>
+    </DropdownButton> 
     {(dropdown=="New" || dropdown=="Add" || dropdown=="Edit") && <FormControl
       placeholder="Type: Content"
       ref={inputRef}
