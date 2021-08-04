@@ -51,7 +51,7 @@ const Login: React.FC = () => {
           if(res.user && res.user.uid){
             localStorage.setItem("user_uid",res.user.uid); 
             setLoggedin(true)  
-            firebase.firestore().collection('user_data').doc(res.user.uid).collection('meta_data').doc("last_login").set({date: new Date().getTime()}, {merge: true})
+            firebase.firestore().collection('user_data').doc(res.user.uid).set({date: new Date().getTime()}, {merge: true})
             firebase.firestore().collection('user_data').doc(res.user.uid).collection('public') 
             .orderBy('timestamp', 'desc')
             .get().then(user_data => {
