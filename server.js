@@ -10,7 +10,9 @@ app.use(function(req, res, next) {
   res.header("Cross-Origin-Embedder-Policy", "require-corp");
   res.header("Cross-Origin-Opener-Policy", "same-origin");
   next();
-},express.static(path.join(__dirname, 'build'))); 
+});
+app.use(express.static(path.join(__dirname, 'build')));
+app.use(express.static(path.join(__dirname, 'public'))); 
 
 
 app.listen(process.env.PORT || 8080);
