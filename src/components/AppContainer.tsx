@@ -19,9 +19,6 @@ import firebase from "firebase/app";
 import "firebase/auth";
 import "firebase/firestore";
 
-var Parallel = require('paralleljs');
-
-
 const Chess = require("chess.js");
 const EloRating = require('elo-rating');
 

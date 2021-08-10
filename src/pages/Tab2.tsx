@@ -6,12 +6,7 @@ import './Tab2.css';
 const Tab2: React.FC = () => {
   return (
     <IonPage> 
-      <IonContent fullscreen>
-        <IonHeader collapse="condense">
-          <IonToolbar>
-            <IonTitle size="large">My Best Ever Training App</IonTitle>
-          </IonToolbar>
-        </IonHeader>
+      <IonContent fullscreen> 
         <AppContainer name="Introduction page" />
       </IonContent>
     </IonPage>
