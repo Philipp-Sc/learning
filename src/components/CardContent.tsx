@@ -99,12 +99,3 @@ const CardContent: React.FC<ContainerProps> = ({items,selectedItemHash,setSelect
 
 
 export default CardContent;
-
-/* {items.length>=13 &&
-     <IonInfiniteScroll threshold="10px" position="bottom"
-          disabled={disableInfiniteScroll}
-          onIonInfinite={(e) => searchNext(e)}>
-          <IonInfiniteScrollContent
-              loadingText="Loading more ...">
-          </IonInfiniteScrollContent>
-      </IonInfiniteScroll>})*/
