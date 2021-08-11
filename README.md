@@ -1,5 +1,10 @@
+# About
+This PWA channels my passions (Mastering Chess, Learning Languages & Programming) into one app. This app is a constant work in progress, changes are pushed without testing, may ruin your user experience or result in loss of saved data.
+
 # Documentation
 # Chess
+
+**Learning Chess guided by modern techniques including: statistics, the best chess engines, psychology and machine learning.**
 
 *Coach Settings (change by tapping the labels)*
 
@@ -29,6 +34,9 @@ Pieces (you can click/tap the pieces on the board to get extra information)
 * Packing density
 
 # Language Learning
+
+**Language Learning with instant feedback, space repetition, voice recognition and your own frictionless content creation.**
+...
 
 # Manual
 
