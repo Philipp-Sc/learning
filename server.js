@@ -17,8 +17,8 @@ app.use(express.static(path.join(__dirname, 'build')));
 app.use(express.static(path.join(__dirname, 'public'))); 
 
 https.createServer({
-  key: fs.readFileSync('server.key'),
-  cert: fs.readFileSync('server.cert')
+  key: fs.readFileSync('privkey.pem'),
+  cert: fs.readFileSync('cert.pem')
 }, app)
 .listen(process.env.PORT || 8080, function () {
   console.log('Example app listening on port 8080!')
