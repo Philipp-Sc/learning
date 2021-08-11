@@ -1,5 +1,5 @@
 # About
-This PWA channels my passions (Mastering Chess, Learning Languages & Programming) into one app. This app is a constant work in progress, changes are pushed without testing, may ruin your user experience or result in loss of saved data.
+This PWA channels my passions (Mastering Chess, Learning Languages & Programming) into one app. This app is a constant work in progress, changes are pushed without testing, may ruin your user experience or result in loss of saved data. It's not a bug, it's a feature!
 
 # Documentation
 # Chess
