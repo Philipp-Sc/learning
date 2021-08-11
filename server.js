@@ -1,6 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path'); 
+var fs = require('fs')
+var https = require('https')
 const app = express();
 var cors = require('cors')
  
@@ -14,5 +16,10 @@ app.use(function(req, res, next) {
 app.use(express.static(path.join(__dirname, 'build')));
 app.use(express.static(path.join(__dirname, 'public'))); 
 
-
-app.listen(process.env.PORT || 8080);
+https.createServer({
+  key: fs.readFileSync('server.key'),
+  cert: fs.readFileSync('server.cert')
+}, app)
+.listen(process.env.PORT || 8080, function () {
+  console.log('Example app listening on port 8080!')
+})
