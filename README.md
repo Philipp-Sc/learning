@@ -1,5 +1,5 @@
 # About
-This PWA channels my passions (Mastering Chess, Learning Languages & Programming) into one app. This app is a constant work in progress, changes are pushed without testing, may ruin your user experience or result in loss of saved data. It's not a bug, it's a feature!
+This PWA channels my passions (Mastering Chess, Learning Languages & Programming) into one app. This app is a constant work in progress, changes are pushed without testing, result in loss of data and may ruin your user experience. It's not a bug, it's a feature!
 
 # Documentation
 # Chess
@@ -67,6 +67,11 @@ Pieces (you can click/tap the pieces on the board to get extra information)
 
 
 ``
+
+# Contact
+
+philipp.schluetermann@udo.edu
+
 # License
 <a href="https://www.philipp-schluetermann.de/about/"> Philipp Schlütermann </a> may distribute, remix, adapt, and build upon this work, even commercially.
 
