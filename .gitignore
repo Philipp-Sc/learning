@@ -26,3 +26,8 @@ yarn-error.log*
 
 # Optional eslint cache
 .eslintcache
+
+# https certs
+cert.pem
+privkey.pem
+
