@@ -26,6 +26,7 @@
     "cors": "^2.8.5",
     "elo-rating": "^1.0.1",
     "express": "^4.17.1",
+    "express-rate-limit": "^5.3.0",
     "firebase": "^8.4.3",
     "fs": "^0.0.1-security",
     "https": "^1.0.0",
