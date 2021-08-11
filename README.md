@@ -4,7 +4,7 @@ This PWA channels my passions (Mastering Chess, Learning Languages & Programming
 # Documentation
 # Chess
 
-**Learning Chess guided by modern techniques including: statistics, the best chess engines, psychology and machine learning.**
+**Learning Chess (intended for expert chess players) guided by modern techniques including: statistics, the best chess engines, psychology and machine learning. **
 
 *Coach Settings (change by tapping the labels)*
 
