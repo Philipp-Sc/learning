@@ -1,3 +1,32 @@
+# Manual
+
+**Clone the repository**
+
+`git clone https://github.com/Philipp-Sc/learning.git`
+
+`cd learning`
+
+**Https** *(required)*
+
+* Put the ssh certificates (cert.pem, privkey.pem) for your domain here. 
+* You may use https://hub.docker.com/r/certbot/certbot/ to generate the certificates with Let's Encrypt. 
+
+**Build the Docker image**
+
+`docker build -t philipp-sc/learning `
+
+**Start the container and run the ExpressJS server**
+
+`docker run --name=learning-xtreme -d -p 443:8080 philipp-sc/learning npm start`
+
+*Make sure the port 443 is open to accept incoming requests*
+
+**View the logs**
+
+`docker logs learning-xtreme`
+
+
+``
 # License
 <a href="https://www.philipp-schluetermann.de/about/"> Philipp Schlütermann </a> may distribute, remix, adapt, and build upon this work, even commercially.
 
