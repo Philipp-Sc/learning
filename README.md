@@ -46,6 +46,38 @@ Pieces (you can click/tap the pieces on the board to get extra information)
 
 `cd learning`
 
+# Run on localhost (development & testing)
+
+
+**Update npm**
+
+`npm install -g npm`
+
+
+**Install dependencies**
+
+`npm install`
+
+`npm install @wmik/use-media-recorder --force`
+
+**Build the Capacitor PWA**
+
+`npm run build`
+
+**Host with express.js** *(required)*
+
+*express.js is required because stockfish.js (https://github.com/niklasf/stockfish.wasm) uses sharedarraybuffer (https://developer.chrome.com/blog/enabling-shared-array-buffer/))*
+
+`node server-localhost.js`
+
+*without stockfish.js the express.js server is not needed, use:*
+
+`ionic serve --livereload;`
+
+
+
+# Host externaly (production)
+
 **Https** *(required)*
 
 * Put the ssh certificates (cert.pem, privkey.pem) for your domain here. 
@@ -55,7 +87,7 @@ Pieces (you can click/tap the pieces on the board to get extra information)
 
 `docker build -t philipp-sc/learning `
 
-**Start the container and run the ExpressJS server**
+**Start the container and run the express.js server**
 
 `docker run --name=learning-xtreme -d -p 443:8080 philipp-sc/learning npm start`
 
