@@ -46,7 +46,7 @@ Pieces (you can click/tap the pieces on the board to get extra information)
 
 * `cd learning`
 
-# Run on localhost (development & testing)
+# Run on localhost (development)
 
 
 **Update npm**
@@ -76,7 +76,7 @@ Pieces (you can click/tap the pieces on the board to get extra information)
 
 
 
-# Host externaly (production)
+# Hosting
 
 **Https** *(required)*
 
