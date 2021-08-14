@@ -42,37 +42,37 @@ Pieces (you can click/tap the pieces on the board to get extra information)
 
 **Clone the repository**
 
-`git clone https://github.com/Philipp-Sc/learning.git`
+* `git clone https://github.com/Philipp-Sc/learning.git`
 
-`cd learning`
+* `cd learning`
 
 # Run on localhost (development & testing)
 
 
 **Update npm**
 
-`npm install -g npm`
+* `npm install -g npm`
 
 
 **Install dependencies**
 
-`npm install`
+* `npm install`
 
-`npm install @wmik/use-media-recorder --force`
+* `npm install @wmik/use-media-recorder --force`
 
 **Build the Capacitor PWA**
 
-`npm run build`
+* `npm run build`
 
 **Host with express.js** *(required)*
 
 *express.js is required because stockfish.js (https://github.com/niklasf/stockfish.wasm) uses sharedarraybuffer (https://developer.chrome.com/blog/enabling-shared-array-buffer/))*
 
-`node server-localhost.js`
+* `node server-localhost.js`
 
 *without stockfish.js the express.js server is not needed, use:*
 
-`ionic serve --livereload;`
+* `ionic serve --livereload;`
 
 
 
@@ -85,20 +85,18 @@ Pieces (you can click/tap the pieces on the board to get extra information)
 
 **Build the Docker image**
 
-`docker build -t philipp-sc/learning `
+* `docker build -t philipp-sc/learning `
 
 **Start the container and run the express.js server**
 
-`docker run --name=learning-xtreme -d -p 443:8080 philipp-sc/learning npm start`
+* `docker run --name=learning-xtreme -d -p 443:8080 philipp-sc/learning npm start`
 
 *Make sure the port 443 is open to accept incoming requests*
 
 **View the logs**
 
-`docker logs learning-xtreme`
-
-
-``
+* `docker logs learning-xtreme`
+ 
 
 # Contact
 
