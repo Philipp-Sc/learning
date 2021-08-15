@@ -11,25 +11,12 @@ var types = {engine: "EngineGames.pgn", human: "HumanGames2200+.pgn"}
 // 3. ...
 // with regex ([0-9]+\. \.\.\.) and remove
 
-export async function chessGames(type) { 
-   function get(){
-   	  return JSON.parse(window.localStorage.getItem(types[type]))
-   } 
-   if(window.localStorage.getItem(types[type])){ 
-		return {res: true, get: get()};
-   }
+export async function chessGames(type) {  
    try {
         const response = await fetch('/games/'+types[type]);
         const text = await response.text();  
-        var pgn = parser.parse(text, {startRule: "games"})  
-        try {
-    	window.localStorage.setItem(types[type],JSON.stringify(pgn));
-        return {res: true, get: get()};
-        } catch (error){
-            console.error(error);
-            console.log("WARNING: Not saving "+type+" games");
-            return {res: true, get: pgn}
-        }
+        var pgn = parser.parse(text, {startRule: "games"})   
+        return {res: true, get: pgn}; 
     } catch (error) {
         console.log("WARNING: Failed to fetch "+type+" games. Check your internet connection.")
         console.error(error);
