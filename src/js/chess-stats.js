@@ -1,6 +1,9 @@
+
+import * as chess_meta from "../js/chess-meta.js"
+
 const Chess = require("chess.js");
 
-export function getMovesAsFENs(game, process){ 
+function getMovesAsFENs(game, process){ 
 	var newGame = new Chess();
 	var fens : string[] = [];
 	for (var i = 0; i < game.moves.length; i++) {
@@ -187,7 +190,7 @@ function info_move(last_move){
 }
 
 
-export function getStatisticsForPosition(new_game,last_move) {
+function getStatisticsForPosition(new_game,last_move) {
                 var fen = new_game.fen();
 
 				var material_ = material(fen);
@@ -207,3 +210,46 @@ export function getStatisticsForPosition(new_game,last_move) {
                 statistics = Object.assign({}, statistics, info_move_);
                 return statistics;
             }
+
+function sum(ob1, ob2) {
+      let sum = {};
+
+      Object.keys(ob1).forEach(key => {
+        if (ob2.hasOwnProperty(key)) {
+          sum[key] = ob1[key] + ob2[key]
+        }  
+      })
+      return sum;
+}
+
+
+export function create_aggregated_data(playerColor) {
+
+	chess_meta.chessGames("engine").then(humanGames => humanGames.get).then(games => {
+	        var games_FEN = games
+	              .filter(e => playerColor=='w' ? (e.tags.Result=="1-0" || e.tags.Result=="1/2-1/2") : (e.tags.Result=="0-1" || e.tags.Result=="1/2-1/2"))
+	              .map(game => getMovesAsFENs(game, getStatisticsForPosition))
+	        var result = [];
+
+	        var zero; 
+	        for(var i=0;i<180;i++){ 
+	            zero = {};
+	            Object.keys(games_FEN[0][0]).forEach(k => zero[k] = 0);
+	            // @ts-ignore
+	            games_FEN.forEach(e => {if(e[i]){zero = sum(zero,e[i])};}); 
+	            // @ts-ignore
+	            Object.keys(zero).map(function(key, index) {
+	              if(key=="game count" || key=="index"){return;}
+	              // @ts-ignore
+	              zero[key] = (zero[key]/zero["game count"]).toFixed(2);
+	            });
+	            zero["index"]=result.length
+	            // @ts-ignore
+	            result.push(zero);
+	        }
+	        console.log(JSON.stringify(result));
+
+
+	      })
+	 
+}
