@@ -8,7 +8,20 @@ This PWA channels my passions (Mastering Chess, Learning Languages & Programming
 
 *Coach Settings (change by tapping the labels)*
 
-* **@profile {2200,2300,2400,2500}** defines the opponent skill level in terms of consistency. How does this work? A pgn chess database of stockfish annotated games (played by humans) is provided. The app uses this database to determine the skill level of the specified elo range for example "@profile 2200" is 2200 - 2300. The skill level tells the engine the target evaluation for each move. This has some interesting side effects, if you play badly the engine is likely to mirror you and also make a mistake to balance the evaluation. To limit this behaviour the additional parameter @mistake_tolerance exists. On the other hand if you play well the strength of the stockfish engine is reduced since it will play inconsistently just like humans do. E.g not always play the best move.
+* **@profile {2200,2300,2400,2500}** defines the opponent skill level in terms of consistency. 
+  
+  A pgn chess database of stockfish annotated games (played by humans) is provided. 
+  The algorithm uses this database to determine the **skill level** of the specified elo range for example "@profile 2200" filters the games by elo 2200 - 2300. 
+  
+  The **skill level** tells the engine the **target evaluation** for each move. 
+  
+  With that: 
+  * The opponement only plays good as long as you play decent.
+  * If you are behind, it will also play badly and give you a chance to come back.
+    To limit this behaviour the additional parameter @mistake_tolerance exists. 
+  * On the other hand if you play well the strength of the stockfish engine is reduced. It will play inconsistently picking moves by the **target evaluation**. E.g not always play the best move. This is best for training, if the chess engine just butchers you, learning is difficult.
+
+
 * **@mistake_tolerance [0-1]** if you make a mistake or blunder that worsens your position (evaluated by the engine) so far bellow the given threshold the engine will take advantage and try to win. E.g a @mistake_tolerance 0.5 means if your position is about half a pawn worse then the engine will try to win by playing the top rated moves. 
 * **@depth [1-19]** engine search depth, the higher the depth the more accurate the evaluation. 
 * **@no_book / @ custom_book** use the pgn chess database for the first 5 opening moves, use this parameter to have more human like games.
