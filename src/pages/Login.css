@@ -1,8 +1,6 @@
 ion-grid { max-width: 500px; margin-top: 15%;}
 
  .my-custom-class {
-  --background: #222;
+  --background: white;
   --spinner-color: #fff;
-
-  color: #fff;
 }

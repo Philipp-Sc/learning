@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import './ExploreContainer.css'; 
 import ModalChessMetaContent from './ModalChessMetaContent';
+import ChessMetaContent from './ChessMetaContent';
 import { IonBadge, IonRadioGroup, IonRadio, IonLoading, IonContent, IonItem, IonLabel, IonTextarea, IonList, IonListHeader, IonSelect, IonSelectOption, IonPage, IonItemDivider } from '@ionic/react';
 import { trash, share, caretForwardCircle, heart, close, pencil, book, bookOutline } from 'ionicons/icons';
 
@@ -680,9 +681,8 @@ const AppContainer: React.FC<ContainerProps> = ({ name }) => {
         onDidDismiss={() => setLoading(false)}
         message={'Please wait...'}
         duration={15000}
-      />
-     <IonList>    
-    </IonList> 
+      /> 
+      <br/>
        <IonBadge onClick={() => {setElo(elo+100);refElo.current=refElo.current+100; if(refElo.current>max_elo){setElo(min_elo);refElo.current=min_elo;} }}>@profile {elo}</IonBadge>
        <IonBadge onClick={() => {setDepth(depth+1);refDepth.current=refDepth.current+1; if(refDepth.current==max_depth){setDepth(1);refDepth.current=1;} }}>@depth {depth}</IonBadge>
        <IonBadge onClick={() => {setUseBook(prev => !prev);refBook.current = !refBook.current;}}>@{useBook ? "custom_book" : "no_book"}</IonBadge>
@@ -713,58 +713,14 @@ const AppContainer: React.FC<ContainerProps> = ({ name }) => {
        <IonBadge onClick={() => {if(refSecToWait.current==0){setPlayerColor(color => color=='w' ? 'b' : 'w');if(playerColor=='w' || refHalfMoves.current>0){engine_turn();}}}}>Switch sides!</IonBadge>
        <br/><br/>
 
-    <IonBadge>Asking the right questions is key.</IonBadge>
-    <IonBadge>Scroll down to get inspiration for your Chess play.</IonBadge>
-    <br/>
-    <br/>
-    <br/>
- 
-    <br/>
-    <br/>
+       <ChessMetaContent 
+          halfMoves={refHalfMoves.current}
+          playerColor={playerColor}
+          moveStats={refMoveStats.current}
+          live={liveRef.current}
+          evaluation={evaluationRef.current}
+       />
 
-       <IonBadge>Analysis: {(-1*liveRef.current.evaluation)+" @depth "+liveRef.current.depth}</IonBadge>
-       <br/>
-       <IonBadge>Engine's Move: {(-1*evaluationRef.current.evaluation)+" @depth "+evaluationRef.current.depth}</IonBadge>
-    <br/><br/>
-       <IonBadge>Avg. Perf.: {(-1*refMoveStats.current.average_eval).toFixed(2)}</IonBadge>
-       <IonBadge>Median Perf.: {(-1*refMoveStats.current.median_eval).toFixed(2)}</IonBadge>
-  
-    <br/>
-    <br/>
-    <br/> 
-    <IonBadge>Learn about latent features that help your analysis:</IonBadge> 
-    <br/> 
-    <br/> 
-       <IonBadge>Material:</IonBadge>
-       <IonBadge>{(parseFloat(game_stats[refHalfMoves.current]["Material w"])-39).toFixed(2)}</IonBadge>
-       <IonBadge>({(parseFloat(game_stats[refHalfMoves.current]["Material b"])-39).toFixed(2)})</IonBadge>
-       <br/>
-       <IonBadge>Degree of Freedom:</IonBadge>
-       <IonBadge>{(parseFloat(game_stats[Math.max(refHalfMoves.current-1,0)]["Opponement Mobility"])/20).toFixed(2)}</IonBadge>
-       <IonBadge>({(parseFloat(game_stats[refHalfMoves.current]["Opponement Mobility"])/20).toFixed(2)})</IonBadge>
-       <br/> 
-       <IonBadge>Mobility:</IonBadge>
-       <br/>&nbsp;&nbsp;
-       <IonBadge>P,B,N,R,Q,K</IonBadge>&nbsp;
-       <IonBadge>{parseFloat(game_stats[Math.max(refHalfMoves.current-1,0)]["Opponement Mobility / Pieces"]).toFixed(2)}</IonBadge>
-       <IonBadge>({parseFloat(game_stats[refHalfMoves.current]["Opponement Mobility / Pieces"]).toFixed(2)})</IonBadge>
-       <br/>&nbsp;&nbsp; 
-       <IonBadge>B,N,R</IonBadge>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-       <IonBadge>{parseFloat(game_stats[Math.max(refHalfMoves.current-1,0)]["Opponement Mobility / Minor Pieces"]).toFixed(2)}</IonBadge>
-       <IonBadge>({parseFloat(game_stats[refHalfMoves.current]["Opponement Mobility / Minor Pieces"]).toFixed(2)})</IonBadge>
-       <br/>
-       
-       <br/>
-       <br/>
-    <br/>  
-    <IonBadge>Get some hints how high level games look like:</IonBadge> 
-    <br/> 
-  <br/>
-    <br/>
-    <br/>
-    <br/>
-
-    <br/><br/><br/>
        <IonBadge>Import PGN</IonBadge>
        <IonBadge>Export PGN</IonBadge>
 
@@ -774,7 +730,7 @@ const AppContainer: React.FC<ContainerProps> = ({ name }) => {
         cssClass='my-custom-class'
         buttons={
           pieceLookup[refPieceClicked.current.split("")[1]].map((e,i) => {
-            return {
+            return { 
              text: e.length==1 ? e.replace("P","")+refSquareClicked.current : e,
              icon: refPieceClicked.current.split("")[0]=='w' ? book : bookOutline,
              handler: () => { 
