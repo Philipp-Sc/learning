@@ -1,10 +1,23 @@
-# About
-This PWA channels my passions (Mastering Chess, Learning Languages & Programming) into one app. This app is a constant work in progress, changes are pushed without testing, result in loss of data and may ruin your user experience. It's not a bug, it's a feature!
+<p align="center">
+  <img height="369px" src="https://github.com/Philipp-Sc/learning/blob/main/Screenshot_20210816_.png?raw=true" />
+  <img height="369px" src="https://github.com/Philipp-Sc/learning/blob/main/Screenshot_20210816.png?raw=true" />
+</p> 
+
+This PWA channels my passions (Mastering Chess, Learning Languages & Software Development). 
+
+I work on <a href="https://github.com/Philipp-Sc/learning">Philipp-Sc/learning</a> to implement features that I do not see elsewhere:
+
+* Studying Chess with the help of Data Science, eventually AI.
+* Learning Languages frictionless while on the go traveling abroad.
+
+
+It is written using Ionic, Capacitorjs and Expressjs. 
+
 
 # Documentation
 # Chess
 
-**Learning Chess (intended for expert chess players) guided by modern techniques including: statistics, the best chess engines, psychology and machine learning.**
+**Learning Chess (intended for expert chess players) guided by modern techniques including: statistics, chess engines, psychology and machine learning.**
 
 *Coach Settings (change by tapping the labels)*
 
