@@ -140,7 +140,7 @@ function mobility(game, fen, last_move){
     var non_pawn_moves = moves.filter(e => e.toLowerCase()!=e)
    
    	return {
-   		"Opponement Mobility": moves.length,
+   	"Opponement Mobility": moves.length,
 		"Opponement Mobility / Pieces": moves.length/(last_move.turn=="b" ? fen_.filter(e => filterPieces("white",e) || e=='K').length : fen_.filter(e => filterPieces("black",e) || e=='k').length),
 		"Opponement Mobility / Knights": moves.length/(last_move.turn=="b" ? fen_.filter(e => e=='N').length : fen_.filter(e => e=='n').length),
 		"Opponement Mobility / Bishops": moves.length/(last_move.turn=="b" ? fen_.filter(e => e=='B').length : fen_.filter(e => e=='b').length),
@@ -201,7 +201,7 @@ function getStatisticsForPosition(new_game,last_move) {
 
                 var statistics =  {
 	               "index": 0, 
-				   "game count": 1
+				   			 "game count": 1
                 }
                 statistics = Object.assign({}, statistics, material_);
                 statistics = Object.assign({}, statistics, package_density_);
@@ -223,7 +223,7 @@ function sum(ob1, ob2) {
 }
 
 
-export function create_aggregated_data(playerColor) {
+export async function getGameStatistics(playerColor) {
 
 	chess_meta.chessGames("engine").then(humanGames => humanGames.get).then(games => {
 	        var games_FEN = games
@@ -248,8 +248,56 @@ export function create_aggregated_data(playerColor) {
 	            result.push(zero);
 	        }
 	        console.log(JSON.stringify(result));
-
-
 	      })
-	 
+}
+
+
+export async function getSkillProfile(elo,depth) {
+	  return chess_meta.chessGames("human").then(humanGames => humanGames.get).then(games => {
+  
+       const processing1 = (games_1,games_2,i) => {
+        var evaluations = undefined; 
+         if(i%2==0){ // white, because it starts at 0
+              evaluations = games_1
+              .filter(e => e.moves[i]!=undefined && e.moves[i].commentAfter!=null && e.moves[i].turn=='w')
+              .map(e => {return (e.moves[i].commentAfter || "[%depth20 0] [%depth1 0]" ).replace("\n"," ").replace(/[\[\]\%]/g,"").split("depth").filter(e => e.length >0).map(e => { return {"depth": e.split(" ")[0], "eval": e.split(" ")[1]} }).filter( e => e.depth==depth)[0].eval
+             })
+              .map(e => parseFloat(e))
+              .filter(e => !isNaN(e))
+              .map(e => e*100); 
+        }else{
+             evaluations = games_2
+              .filter(e => e.moves[i]!=undefined && e.moves[i].turn=='b' && e.moves[i].commentAfter!=null)
+              .map(e => (e.moves[i].commentAfter || "[depth20 0] [depth1 0]" ).replace("\n"," ").replace(/[\[\]]/g,"").split("depth").filter(e => e.length >0).map(e => { return {"depth": e.split(" ")[0], "eval": e.split(" ")[1]} }).filter( e => e.depth==depth)[0].eval)
+             // .map(e => (e.moves[i].commentAfter || "[%depth20 0] [%depth1 0]" ).replace("\n"," ").replace(/[\[\]\%]/g,"").split("depth").filter(e => e.length >0).map(e => { return {"depth": e.split(" ")[0], "eval": e.split(" ")[1]} }).filter( e => e.depth==depth_for_database)[0].eval)
+              .map(e => parseFloat(e))
+              .filter(e => !isNaN(e))
+              .map(e => e*(-100));
+        } 
+       return  evaluations;
+       }
+       const processing2 = (evaluations) => {
+          const average = arr => arr.reduce( ( p, c ) => p + c, 0 ) / arr.length;
+          const median = arr => {
+            const mid = Math.floor(arr.length / 2),
+              nums = [...arr].sort((a, b) => a - b);
+            return arr.length % 2 !== 0 ? nums[mid] : (nums[mid - 1] + nums[mid]) / 2;
+          };
+          return {"avg" : average(evaluations),
+                  "median" : median(evaluations),
+                  "dist" : evaluations
+                  };
+       } 
+       const processing = (games) => {
+       var games_1 = games 
+              .filter(e => e.tags.WhiteELO >=elo && e.tags.WhiteELO <=elo+100)
+              .filter(e => (e.tags.Result=="1-0" || e.tags.Result=="1/2-1/2"))
+       var games_2 = games
+              .filter(e => e.tags.BlackELO >=elo && e.tags.BlackELO <=elo+100)
+              .filter(e => (e.tags.Result=="0-1" || e.tags.Result=="1/2-1/2"))
+
+        return processing1.bind(null,games_1,games_2)
+        }  
+       return Array(269).fill(0).map((e,i)=> processing(games)(i)).map(processing2); 
+     })
 }
