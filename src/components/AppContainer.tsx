@@ -341,8 +341,6 @@ const AppContainer: React.FC<ContainerProps> = ({ name }) => {
 
   const history = useHistory();
   const [plan, setPlan] = useState<string>('Free');
-
-  const [loading, setLoading] = useState<boolean>(false);
   
  
   
@@ -588,7 +586,6 @@ const AppContainer: React.FC<ContainerProps> = ({ name }) => {
     */
     // @ts-ignore
     stockfish.postMessage('setoption name MultiPV value '+refMultipv.current) 
-
     }, []); 
 /*
   useEffect(() => { 
@@ -618,7 +615,6 @@ const AppContainer: React.FC<ContainerProps> = ({ name }) => {
     }
     }, [secToWait]);  
  
-
   useEffect(() => {  
     if(refEngineOn.current){
       console.log("engine started!")
@@ -645,16 +641,17 @@ const AppContainer: React.FC<ContainerProps> = ({ name }) => {
            stockfish.postMessage("ucinewgame");
         }
     }
-
     }, [engineOn]);  
  
-
    useEffect(async() => {
       // to save storage or time, prepare, host all offered skill profiles.
-      skill_profile = await chess_stats.getSkillProfile(refElo.current,depth_for_database)
-      console.log(skill_profile)
+      skill_profile = chess_meta[refElo.current]
 
       if(create_aggregated_data_development_option){ // this creates game_stats, can not be done at runtime.
+
+        // create skill profile like above
+        skill_profile = await chess_stats.getSkillProfile(refElo.current,depth_for_database)
+        console.log(JSON.stringify(skill_profile))
         // now go over the games and the moves
         // then map to stats
         chess_stats.getGameStatistics("w")
@@ -675,13 +672,6 @@ const AppContainer: React.FC<ContainerProps> = ({ name }) => {
  
   return (
     <div className="container" id="app">
-      <IonLoading
-        cssClass='my-custom-class'
-        isOpen={loading}
-        onDidDismiss={() => setLoading(false)}
-        message={'Please wait...'}
-        duration={15000}
-      /> 
       <br/>
        <IonBadge onClick={() => {setElo(elo+100);refElo.current=refElo.current+100; if(refElo.current>max_elo){setElo(min_elo);refElo.current=min_elo;} }}>@profile {elo}</IonBadge>
        <IonBadge onClick={() => {setDepth(depth+1);refDepth.current=refDepth.current+1; if(refDepth.current==max_depth){setDepth(1);refDepth.current=1;} }}>@depth {depth}</IonBadge>
@@ -722,13 +712,13 @@ const AppContainer: React.FC<ContainerProps> = ({ name }) => {
        />
 
        <IonBadge>Import PGN</IonBadge>
-       <IonBadge>Export PGN</IonBadge>
+       <IonBadge>Export PGN</IonBadge><br/><br/><br/><br/><br/><br/>
 
- <IonActionSheet
-        isOpen={showActionSheet}
-        onDidDismiss={() => setShowActionSheet(false)}
-        cssClass='my-custom-class'
-        buttons={
+        <IonActionSheet
+          isOpen={showActionSheet}
+          onDidDismiss={() => setShowActionSheet(false)}
+          cssClass='my-custom-class'
+          buttons={
           pieceLookup[refPieceClicked.current.split("")[1]].map((e,i) => {
             return { 
              text: e.length==1 ? e.replace("P","")+refSquareClicked.current : e,
@@ -739,10 +729,9 @@ const AppContainer: React.FC<ContainerProps> = ({ name }) => {
              }
             }
           })
-        }
-      >
-      </IonActionSheet> 
-       <ModalChessMetaContent 
+          }>
+        </IonActionSheet> 
+        <ModalChessMetaContent 
           halfMoves={refHalfMoves.current}
           playerColor={playerColor}
           pieceClicked={refPieceClicked.current}
@@ -750,7 +739,6 @@ const AppContainer: React.FC<ContainerProps> = ({ name }) => {
           modalIndex={modalIndex}
           showModal={showModal}
           setShowModal={setShowModal}/>
-     
        </div>
   );
 }; 
@@ -799,6 +787,8 @@ const AppContainer: React.FC<ContainerProps> = ({ name }) => {
     // given all previous positions p with the error[a_prev-a_now] at @depth
     // integrety is the variance of the errors
     // low variance == high integrety
+
+    // chaos 
 
 export default AppContainer;
 
