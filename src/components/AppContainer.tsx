@@ -645,7 +645,7 @@ const AppContainer: React.FC<ContainerProps> = ({ name }) => {
  
    useEffect(async() => {
       // to save storage or time, prepare, host all offered skill profiles.
-      skill_profile = chess_meta[refElo.current]
+      skill_profile = chess_meta.skill_profiles[refElo.current]
 
       if(create_aggregated_data_development_option){ // this creates game_stats, can not be done at runtime.
 
