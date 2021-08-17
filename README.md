@@ -159,6 +159,11 @@ THIS SOFTWARE IS PROVIDED AS IS AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES, I
   Maintained with bugfixes to keep supporting older browsers, but active development is happening on stockfish.wasm.
 	
   https://github.com/niklasf/stockfish.js
-		
-		
+  
+**Chess Utilities**
+
+* PGN Parsing https://github.com/mliebelt/pgn-parser
+* Chess.js https://github.com/jhlywa/chess.js
+* Chessboard.js https://github.com/willb335/chessboardjsx
+* Elo-Rating https://www.npmjs.com/package/elo-rating		
 		
