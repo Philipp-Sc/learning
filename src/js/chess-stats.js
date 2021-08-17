@@ -255,21 +255,19 @@ export async function getGameStatistics(playerColor) {
 export async function getSkillProfile(elo,depth) {
 	  return chess_meta.chessGames("human").then(humanGames => humanGames.get).then(games => {
   
-       const processing1 = (games_1,games_2,i) => {
+       const processing1 = (games_1,games_2,i) => { 
         var evaluations = undefined; 
          if(i%2==0){ // white, because it starts at 0
               evaluations = games_1
-              .filter(e => e.moves[i]!=undefined && e.moves[i].commentAfter!=null && e.moves[i].turn=='w')
-              .map(e => {return (e.moves[i].commentAfter || "[%depth20 0] [%depth1 0]" ).replace("\n"," ").replace(/[\[\]\%]/g,"").split("depth").filter(e => e.length >0).map(e => { return {"depth": e.split(" ")[0], "eval": e.split(" ")[1]} }).filter( e => e.depth==depth)[0].eval
-             })
+              .filter(e => e.moves[i]!=undefined && e.moves[i].turn=='w' && e.moves[i].commentDiag!=null)
+              .map(e => ("[%depth20 "+e.moves[i].commentDiag.depth20+"] [%depth1"+e.moves[i].commentDiag.depth1+"]" || "[%depth20 0] [%depth1 0]" ).replace("\n"," ").replace(/[\[\]\%]/g,"").split("depth").filter(e => e.length >0).map(e => { return {"depth": e.split(" ")[0], "eval": e.split(" ")[1]} }).filter( e => e.depth==depth)[0].eval)
               .map(e => parseFloat(e))
               .filter(e => !isNaN(e))
               .map(e => e*100); 
         }else{
              evaluations = games_2
-              .filter(e => e.moves[i]!=undefined && e.moves[i].turn=='b' && e.moves[i].commentAfter!=null)
-              .map(e => (e.moves[i].commentAfter || "[depth20 0] [depth1 0]" ).replace("\n"," ").replace(/[\[\]]/g,"").split("depth").filter(e => e.length >0).map(e => { return {"depth": e.split(" ")[0], "eval": e.split(" ")[1]} }).filter( e => e.depth==depth)[0].eval)
-             // .map(e => (e.moves[i].commentAfter || "[%depth20 0] [%depth1 0]" ).replace("\n"," ").replace(/[\[\]\%]/g,"").split("depth").filter(e => e.length >0).map(e => { return {"depth": e.split(" ")[0], "eval": e.split(" ")[1]} }).filter( e => e.depth==depth_for_database)[0].eval)
+              .filter(e => e.moves[i]!=undefined && e.moves[i].turn=='b' && e.moves[i].commentDiag!=null)
+              .map(e => ("[%depth20 "+e.moves[i].commentDiag.depth20+"] [%depth1"+e.moves[i].commentDiag.depth1+"]" || "[%depth20 0] [%depth1 0]" ).replace("\n"," ").replace(/[\[\]\%]/g,"").split("depth").filter(e => e.length >0).map(e => { return {"depth": e.split(" ")[0], "eval": e.split(" ")[1]} }).filter( e => e.depth==depth)[0].eval)
               .map(e => parseFloat(e))
               .filter(e => !isNaN(e))
               .map(e => e*(-100));
@@ -288,16 +286,16 @@ export async function getSkillProfile(elo,depth) {
                   "dist" : evaluations
                   };
        } 
-       const processing = (games) => {
+       const processing = (games) => { 
        var games_1 = games 
-              .filter(e => e.tags.WhiteELO >=elo && e.tags.WhiteELO <=elo+100)
-              .filter(e => (e.tags.Result=="1-0" || e.tags.Result=="1/2-1/2"))
+              .filter(e => e.tags.WhiteElo >=elo && e.tags.WhiteElo <=elo+100)
+              .filter(e => (e.tags.Result=="1-0" || e.tags.Result=="1/2-1/2")) 
        var games_2 = games
-              .filter(e => e.tags.BlackELO >=elo && e.tags.BlackELO <=elo+100)
+              .filter(e => e.tags.BlackElo >=elo && e.tags.BlackElo <=elo+100)
               .filter(e => (e.tags.Result=="0-1" || e.tags.Result=="1/2-1/2"))
 
         return processing1.bind(null,games_1,games_2)
-        }  
+        }   
        return Array(269).fill(0).map((e,i)=> processing(games)(i)).map(processing2); 
      })
 }

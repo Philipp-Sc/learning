@@ -17,7 +17,7 @@ import * as chess_meta from "../js/chess-meta.js"
 import * as chess_stats from "../js/chess-stats.js"
 import * as chess_engine from "../js/chess-engine.js"
 
-import parser from '@mliebelt/pgn-parser'
+import {parser} from '@mliebelt/pgn-parser'
 
 
 import firebase from "firebase/app";
@@ -645,7 +645,7 @@ const AppContainer: React.FC<ContainerProps> = ({ name }) => {
  
    useEffect(async() => {
       // to save storage or time, prepare, host all offered skill profiles.
-      skill_profile = chess_meta.skill_profiles[refElo.current]
+      skill_profile = chess_meta.skill_profiles[refElo.current] 
 
       if(create_aggregated_data_development_option){ // this creates game_stats, can not be done at runtime.
 

@@ -1,5 +1,5 @@
 
-import parser from '@mliebelt/pgn-parser'
+import {parser} from '@mliebelt/pgn-parser'
 const Chess = require("chess.js");
 
 var types = {engine: "EngineGames.pgn", human: "HumanGames2200+.pgn"}
