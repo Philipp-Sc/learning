@@ -1,0 +1,51 @@
+
+
+/*
+ <IonBadge>White</IonBadge>
+       <IonBadge>({parseFloat(game_stats[Math.max(refHalfMoves.current-1,0)]["Expansion factor w"]).toFixed(2)})</IonBadge>
+       <IonBadge>Black</IonBadge>
+       <IonBadge>({parseFloat(game_stats[Math.max(refHalfMoves.current-1,0)]["Expansion factor b"]).toFixed(2)})</IonBadge>
+      <IonBadge>White</IonBadge>
+       <IonBadge>({parseFloat(game_stats[Math.max(refHalfMoves.current-1,0)]["Expansion factor Queen Side w"]).toFixed(2)})</IonBadge>
+       <IonBadge>Black</IonBadge>
+       <IonBadge>({parseFloat(game_stats[Math.max(refHalfMoves.current-1,0)]["Expansion factor Queen Side b"]).toFixed(2)})</IonBadge>
+       <IonBadge>White</IonBadge>
+       <IonBadge>({parseFloat(game_stats[Math.max(refHalfMoves.current-1,0)]["Expansion factor King Side w"]).toFixed(2)})</IonBadge>
+       <IonBadge>Black</IonBadge>
+       <IonBadge>({parseFloat(game_stats[Math.max(refHalfMoves.current-1,0)]["Expansion factor King Side b"]).toFixed(2)})</IonBadge>
+       
+*/
+//       <IonBadge>#Open File > 0: {}</IonBadge>
+    // load  engine database. for every game transform it to a list of FENs
+    // also transform pgn to a list of moves that show which piece is captured by which
+    // count P or p
+    // count B or b
+    // count N or n
+    // count Q or q
+    // count R or r
+    // transform FEN to boolean board free/not free square, check free lines 
+    // # Nx, Bx, Rx, Qx, Kx, [a-g]x
+    // perc of possible (B x n, N x b, BxB, NxN) exchanges count(has possible exchange) vs actual
+    // percentage of influence
+    // perc. castled by now
+
+    // outward influence of bishops and knights (with pawns)
+    // remove all other own pieces except pawns and king, count number of moves.
+
+    //1) Material (xx)
+    //2) Mobility (xx) (pawn mobility, piece mobility, queen mobility)
+    //3) Expansion factor. (global,queenside,kingside)
+    // expansion factor only pawns
+    //4) Packing density. (x) == fire power
+    //5) Integrety 
+
+    // what are the lead ups likelyhoods to forec zugzwang
+    // given all previous positions p with the error[a_prev-a_now] at @depth
+    // integrety is the variance of the errors
+    // low variance == high integrety
+
+    // chaos 
+
+
+    
+/*<IonBadge>Elo: {playerElo}</IonBadge>*/

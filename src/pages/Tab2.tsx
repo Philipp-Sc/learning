@@ -7,7 +7,7 @@ const Tab2: React.FC = () => {
   return (
     <IonPage> 
       <IonContent fullscreen> 
-        <AppContainer name="Introduction page" />
+        <AppContainer/>
       </IonContent>
     </IonPage>
   );

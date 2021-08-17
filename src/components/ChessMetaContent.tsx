@@ -31,7 +31,7 @@ interface ContainerProps {
 
 const ChessMetaContent: React.FC<ContainerProps> = ({halfMoves,playerColor,moveStats,live,evaluation}) => {
  
- 	const game_stats = chess_meta[playerColor=="w" ? "white" : black];
+ 	const game_stats = chess_meta[playerColor=="w" ? "white" : "black"];
 
 
 	return <div>

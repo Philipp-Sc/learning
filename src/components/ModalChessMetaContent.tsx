@@ -10,16 +10,6 @@ import {InputGroup, DropdownButton, Dropdown, FormControl, Button, Modal, Card} 
 
 import * as chess_meta from "../js/chess-meta.js"
 
-const pieceLookup = {
-	"Q": ["Major Pieces","Queen", "Q"],
-	"B": ["Minor Pieces","Bishops", "B"],
-	"N": ["Minor Pieces","Knights", "K"],
-	"R": ["Major Pieces","Rooks", "R"],
-	"P": ["Pawns", "P"],
-	"K": ["King", "K"]
-}
- 
-
 interface ContainerProps {
   halfMoves: number;
   playerColor: string;
@@ -33,14 +23,14 @@ interface ContainerProps {
 
 const ModalChessMetaContent: React.FC<ContainerProps> = ({halfMoves,playerColor,pieceClicked,squareClicked,modalIndex,showModal,setShowModal}) => {
  
- 	const game_stats = chess_meta[playerColor=="w" ? "white" : black];
+ 	const game_stats = chess_meta[playerColor=="w" ? "white" : "black"];
 
 
 	return <IonModal isOpen={showModal} onDidDismiss={() => setShowModal(false)} cssClass='my-custom-class2'>
         
-       <IonBadge>{pieceLookup[pieceClicked.split("")[1]][modalIndex].length==1 ? pieceLookup[pieceClicked.split("")[1]][modalIndex].replace("P","")+squareClicked : pieceLookup[pieceClicked.split("")[1]][modalIndex]} ({pieceClicked.split("")[0]=="w" ? "white" : "black"})</IonBadge>
+       <IonBadge>{chess_meta.pieceLookup[pieceClicked.split("")[1]][modalIndex].length==1 ? chess_meta.pieceLookup[pieceClicked.split("")[1]][modalIndex].replace("P","")+squareClicked : chess_meta.pieceLookup[pieceClicked.split("")[1]][modalIndex]} ({pieceClicked.split("")[0]=="w" ? "white" : "black"})</IonBadge>
          
-       {[pieceLookup[pieceClicked.split("")[1]][modalIndex]=="Pawns"].filter(e => e==true).map(e => (
+       {[chess_meta.pieceLookup[pieceClicked.split("")[1]][modalIndex]=="Pawns"].filter(e => e==true).map(e => (
         <div>
         <table>
         <tr>
@@ -110,7 +100,7 @@ const ModalChessMetaContent: React.FC<ContainerProps> = ({halfMoves,playerColor,
         </div>
         ))} 
 
-         {[pieceLookup[pieceClicked.split("")[1]][modalIndex]=="Bishops"].filter(e => e==true).map(e => (
+         {[chess_meta.pieceLookup[pieceClicked.split("")[1]][modalIndex]=="Bishops"].filter(e => e==true).map(e => (
         <div>
         <IonBadge>Mobility:</IonBadge> 
         <IonBadge>{parseFloat(game_stats[Math.max(halfMoves-1,0)]["Opponement Mobility / Bishops"]).toFixed(2)}</IonBadge>
@@ -131,7 +121,7 @@ const ModalChessMetaContent: React.FC<ContainerProps> = ({halfMoves,playerColor,
         </div>
         ))} 
 
-         {[pieceLookup[pieceClicked.split("")[1]][modalIndex]=="Knights"].filter(e => e==true).map(e => (
+         {[chess_meta.pieceLookup[pieceClicked.split("")[1]][modalIndex]=="Knights"].filter(e => e==true).map(e => (
         <div>
         <IonBadge>Mobility:</IonBadge> 
         <IonBadge>{parseFloat(game_stats[Math.max(halfMoves-1,0)]["Opponement Mobility / Knights"]).toFixed(2)}</IonBadge>
@@ -152,7 +142,7 @@ const ModalChessMetaContent: React.FC<ContainerProps> = ({halfMoves,playerColor,
         </div>
         ))} 
 
-          {[pieceLookup[pieceClicked.split("")[1]][modalIndex]=="Rooks"].filter(e => e==true).map(e => (
+          {[chess_meta.pieceLookup[pieceClicked.split("")[1]][modalIndex]=="Rooks"].filter(e => e==true).map(e => (
         <div>
         <IonBadge>Mobility:</IonBadge> 
         <IonBadge>{parseFloat(game_stats[Math.max(halfMoves-1,0)]["Opponement Mobility / Rooks"]).toFixed(2)}</IonBadge>
@@ -168,7 +158,7 @@ const ModalChessMetaContent: React.FC<ContainerProps> = ({halfMoves,playerColor,
         </div>
         ))} 
        
-          {[pieceLookup[pieceClicked.split("")[1]][modalIndex]=="Queen"].filter(e => e==true).map(e => (
+          {[chess_meta.pieceLookup[pieceClicked.split("")[1]][modalIndex]=="Queen"].filter(e => e==true).map(e => (
         <div>
         <IonBadge>Mobility:</IonBadge> 
         <IonBadge>{parseFloat(game_stats[Math.max(halfMoves-1,0)]["Opponement Mobility / Queens"]).toFixed(2)}</IonBadge> 
@@ -184,7 +174,7 @@ const ModalChessMetaContent: React.FC<ContainerProps> = ({halfMoves,playerColor,
         </div>
         ))} 
 
-         {[pieceLookup[pieceClicked.split("")[1]][modalIndex]=="King"].filter(e => e==true).map(e => (
+         {[chess_meta.pieceLookup[pieceClicked.split("")[1]][modalIndex]=="King"].filter(e => e==true).map(e => (
         <div>
         <IonBadge>Mobility:</IonBadge> 
         <IonBadge>{parseFloat(game_stats[Math.max(halfMoves-1,0)]["Opponement Mobility / King"]).toFixed(2)}</IonBadge>
@@ -202,7 +192,7 @@ const ModalChessMetaContent: React.FC<ContainerProps> = ({halfMoves,playerColor,
         </div>
         ))} 
 
-        {[pieceLookup[pieceClicked.split("")[1]][modalIndex]=="Minor Pieces"].filter(e => e==true).map(e => (
+        {[chess_meta.pieceLookup[pieceClicked.split("")[1]][modalIndex]=="Minor Pieces"].filter(e => e==true).map(e => (
         <div>
         <IonBadge>Mobility:</IonBadge> 
         <IonBadge>{parseFloat(game_stats[Math.max(halfMoves-1,0)]["Opponement Mobility / Minor Pieces"]).toFixed(2)}</IonBadge>
@@ -218,7 +208,7 @@ const ModalChessMetaContent: React.FC<ContainerProps> = ({halfMoves,playerColor,
         </div>
         ))} 
 
-         {[pieceLookup[pieceClicked.split("")[1]][modalIndex]=="Major Pieces"].filter(e => e==true).map(e => (
+         {[chess_meta.pieceLookup[pieceClicked.split("")[1]][modalIndex]=="Major Pieces"].filter(e => e==true).map(e => (
         <div>
         <IonBadge>Mobility:</IonBadge> 
         <IonBadge>{parseFloat(game_stats[Math.max(halfMoves-1,0)]["Opponement Mobility / Major Pieces"]).toFixed(2)}</IonBadge>
