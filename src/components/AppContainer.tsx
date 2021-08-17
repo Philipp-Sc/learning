@@ -522,13 +522,13 @@ const AppContainer: React.FC<ContainerProps> = () => {
       }
     }
 
-    console.log("Stockfish "+window.sf_version);
-    if(window.sf_version==14){
+    console.log(window.sf_version);
+    if(window.sf_version=="Stockfish 14 (nnue-wasm)" || window.sf_version=="Stockfish 14 (wasm)"){
       // @ts-ignore
       window.stockfish.addMessageListener(line => {  
         messageListener(line);
       });
-    }else if(window.sf_version==11 || window.sf_version==10){
+    }else if(window.sf_version=="Stockfish 10"){
       window.stockfish.onmessage = function(event) {
         //NOTE: Web Workers wrap the response in an object.
         // console.log(event.data ? event.data : event); 
@@ -542,6 +542,10 @@ const AppContainer: React.FC<ContainerProps> = () => {
     window.stockfish.postMessage('uci'); 
     // @ts-ignore
     window.stockfish.postMessage('setoption name MultiPV value '+refMultipv.current) 
+    if(window.sf_version=="Stockfish 14 (nnue-wasm)"){
+      // @ts-ignore
+      window.stockfish.postMessage("setoption name Use NNUE value true")
+     } 
     }, []);  
 
   useEffect(() => {   
