@@ -61,8 +61,7 @@ function callbackLegacy(){
 }
 
 function importStockfish(){
-	var iOS = /(iPad|iPhone|iPod)/g.test(navigator.userAgent);
-	if(wasmThreadsSupported() && !iOS){
+	if(wasmThreadsSupported()){
 		const script = document.createElement("script");    
 		script.async = false;    
 		script.src = "./stockfish/wasm/stockfish.js";    
