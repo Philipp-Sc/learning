@@ -137,3 +137,28 @@ You may distribute, remix, adapt, and build upon this work for non-commercial us
 3. Commercial use is prohibited without specific prior written permission from the author.
 
 THIS SOFTWARE IS PROVIDED AS IS AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+
+# Thanks
+
+**Stockfish**
+
+* Multi-threaded WASM. Uses SIMD. Strongest.
+	
+  See https://github.com/hi-ogawa/Stockfish for a WebAssembly port with NNUE support.
+  
+  See https://github.com/hi-ogawa/stockfish-nnue-wasm-demo/blob/master/public/index.html for how to use Stockfish 14 (nnue-wasm).
+  
+* Multi-threaded WASM, but using the classical handcrafted evaluation function.
+	
+  https://github.com/niklasf/stockfish.wasm
+  
+* Slower-single threaded WASM fallback.
+  
+  With extremely slow pure JavaScript fallback.
+	
+  Maintained with bugfixes to keep supporting older browsers, but active development is happening on stockfish.wasm.
+	
+  https://github.com/niklasf/stockfish.js
+		
+		
+		
