@@ -521,16 +521,20 @@ const AppContainer: React.FC<ContainerProps> = () => {
         //applyMove(line.split(" ")[1])
       }
     }
-    try{
+
+    console.log("Stockfish "+window.sf_version);
+    if(window.sf_version==14){
       // @ts-ignore
       window.stockfish.addMessageListener(line => {  
         messageListener(line);
       });
-    }catch(error){
-      console.log("Stockfish 11");
+    }else if(window.sf_version==11 || window.sf_version==10){
       window.stockfish.onmessage = function(event) {
         //NOTE: Web Workers wrap the response in an object.
-        // console.log(event.data ? event.data : event);
+        // console.log(event.data ? event.data : event); 
+        if(event.data=="" || event.data==null){
+          return;
+        }
         messageListener(event.data ? event.data : event)
       };
     }

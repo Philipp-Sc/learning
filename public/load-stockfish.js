@@ -42,6 +42,7 @@ function callback(){
 	try{ 
 		Stockfish().then(sf => {
 			window.stockfish = sf;
+			window.sf_version = 14;
 		});
 	}catch(error){
 		console.log(error);
@@ -54,6 +55,7 @@ function callbackLegacy(){
 		window.stockfish.onmessage = function(event) {
 		    console.log(event.data ? event.data : event);
 		};
+		window.sf_version = 11;
 	}catch(error){
 		console.log(error);
 	}
@@ -61,7 +63,7 @@ function callbackLegacy(){
 }
 
 function importStockfish(){
-	if(wasmThreadsSupported()){
+	if(wasmThreadsSupported() && false){
 		const script = document.createElement("script");    
 		script.async = false;    
 		script.src = "./stockfish/wasm/stockfish.js";    
@@ -69,7 +71,7 @@ function importStockfish(){
 	      callback();
 	    };
 		document.body.appendChild(script); 
-	}else{
+	}else if(/(iPad|iPhone|iPod)/g.test(navigator.userAgent)==false){
 		const script = document.createElement("script");    
 		script.async = false;    
 		script.src = "./stockfish/v11/stockfish.js";    
@@ -77,6 +79,15 @@ function importStockfish(){
 	      callbackLegacy();
 	    };
 		document.body.appendChild(script); 
+	}else{
+		var wasmSupported = typeof WebAssembly === 'object' && WebAssembly.validate(Uint8Array.of(0x0, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00));
+
+		window.stockfish = new Worker(wasmSupported ? './stockfish/v10/stockfish.wasm.js' : './stockfish/v10/stockfish.js');
+		window.stockfish.onmessage = function(event) {
+		    console.log(event.data ? event.data : event);
+		};
+
+		window.sf_version = 10; 
 	}
 }
 
