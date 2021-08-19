@@ -382,17 +382,6 @@ const AppContainer: React.FC<ContainerProps> = () => {
      // start search
      // @ts-ignore
      window.stockfish.postMessage("go depth "+live_rating_depth);
-     // I need my own stockfish strength limitation
-     // 1) depth, limits the accuracy 
-     // 2) skill profile, limits the strength:
-     //    2000 - 2100
-     //    2100 - 2200
-     //    ..
-     //    2700+
-     // 3) enable/disable book:
-     //  - filter games by skill profile and randomly choose their openings ca 8-12 moves.
-     // * alternative: upload player pgn database - use their skill profile 
-     // this could be as a preparation for a match, to train to realize when to look for weakness. 
      setEngineOn(true);
      refEngineOn.current=true;
    },500)
@@ -571,6 +560,9 @@ const AppContainer: React.FC<ContainerProps> = () => {
       <IonBadge onClick={() => {toggle_engine_tolerance()}}>@{"mistake_tolerance "+refEngineBlunderTolerance.current/10}</IonBadge>
       
       <IonBadge>{refSecToWait.current}</IonBadge>
+
+
+      
       <Chessboard
         width={refBoardWidth.current}
         position={refFen.current}
@@ -586,6 +578,34 @@ const AppContainer: React.FC<ContainerProps> = () => {
         onPieceClick={show_piece_stats}
         onSquareClick={show_piece_stats_square}
       />
+      <IonActionSheet
+        isOpen={showActionSheet}
+        onDidDismiss={() => setShowActionSheet(false)}
+        cssClass='my-custom-class'
+        buttons={
+        chess_meta.pieceLookup[refPieceClicked.current.split("")[1]].map((e,i) => {
+          return { 
+           text: e.length==1 ? e.replace("P","")+refSquareClicked.current : e,
+           icon: refPieceClicked.current.split("")[0]=='w' ? book : bookOutline,
+           handler: () => { 
+            setModalIndex(i);
+            setShowModal(true);
+           }
+          }
+        })
+      }>
+      </IonActionSheet> 
+      <ModalChessMetaContent 
+          halfMoves={refHalfMoves.current}
+          playerColor={playerColor}
+          pieceClicked={refPieceClicked.current}
+          squareClicked={refSquareClicked.current}
+          modalIndex={modalIndex}
+          showModal={showModal}
+          setShowModal={setShowModal}/>
+
+
+
       <IonBadge>Games: {gameCount}</IonBadge>
       <IonBadge>Halfmoves: {refHalfMoves.current}</IonBadge>
       <br/>
@@ -605,32 +625,6 @@ const AppContainer: React.FC<ContainerProps> = () => {
 
       <IonBadge>Import PGN</IonBadge>
       <IonBadge>Export PGN</IonBadge><br/><br/><br/><br/><br/><br/>
-
-      <IonActionSheet
-          isOpen={showActionSheet}
-          onDidDismiss={() => setShowActionSheet(false)}
-          cssClass='my-custom-class'
-          buttons={
-          chess_meta.pieceLookup[refPieceClicked.current.split("")[1]].map((e,i) => {
-            return { 
-             text: e.length==1 ? e.replace("P","")+refSquareClicked.current : e,
-             icon: refPieceClicked.current.split("")[0]=='w' ? book : bookOutline,
-             handler: () => { 
-              setModalIndex(i);
-              setShowModal(true);
-             }
-            }
-          })
-      }>
-      </IonActionSheet> 
-      <ModalChessMetaContent 
-          halfMoves={refHalfMoves.current}
-          playerColor={playerColor}
-          pieceClicked={refPieceClicked.current}
-          squareClicked={refSquareClicked.current}
-          modalIndex={modalIndex}
-          showModal={showModal}
-          setShowModal={setShowModal}/>
     </div>
   );
 }; 

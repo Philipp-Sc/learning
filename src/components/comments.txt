@@ -1,4 +1,5 @@
-
+//mark piece that you moved with a number, best move 1, second best 2, etc
+// Update Ionic App & Logo
 
 /*
  <IonBadge>White</IonBadge>
