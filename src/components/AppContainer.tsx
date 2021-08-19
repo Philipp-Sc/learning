@@ -455,29 +455,41 @@ const AppContainer: React.FC<ContainerProps> = () => {
     }
 
     console.log(window.sf_version);
-    if(window.sf_version=="Stockfish 14 (nnue-wasm)" || window.sf_version=="Stockfish 14 (wasm)"){
-      // @ts-ignore
-      window.stockfish.addMessageListener(line => {  
-        messageListener(line);
-      });
-    }else if(window.sf_version=="Stockfish 10"){
-      window.stockfish.onmessage = function(event) {
-        //NOTE: Web Workers wrap the response in an object.
-        // console.log(event.data ? event.data : event); 
-        if(event.data=="" || event.data==null){
-          return;
+
+    const initEngine = () => {
+       if(window.sf_version=="Stockfish 14 (nnue-wasm)" || window.sf_version=="Stockfish 14 (wasm)"){
+          // @ts-ignore
+          window.stockfish.addMessageListener(line => {  
+            messageListener(line);
+          });
+        }else if(window.sf_version=="Stockfish 10"){
+          window.stockfish.onmessage = function(event) {
+            //NOTE: Web Workers wrap the response in an object.
+            // console.log(event.data ? event.data : event); 
+            if(event.data=="" || event.data==null){
+              return;
+            }
+            messageListener(event.data ? event.data : event)
+          };
         }
-        messageListener(event.data ? event.data : event)
-      };
+        // @ts-ignore
+        window.stockfish.postMessage('uci'); 
+        // @ts-ignore
+        window.stockfish.postMessage('setoption name MultiPV value '+refMultipv.current) 
+        if(window.sf_version=="Stockfish 14 (nnue-wasm)"){
+          // @ts-ignore
+          window.stockfish.postMessage("setoption name Use NNUE value true")
+         } 
     }
-    // @ts-ignore
-    window.stockfish.postMessage('uci'); 
-    // @ts-ignore
-    window.stockfish.postMessage('setoption name MultiPV value '+refMultipv.current) 
-    if(window.sf_version=="Stockfish 14 (nnue-wasm)"){
-      // @ts-ignore
-      window.stockfish.postMessage("setoption name Use NNUE value true")
-     } 
+
+    setTimeout(() => {
+      if(window.stockfish){
+        initEngine();
+       }else{
+        console.log("stockfish.js loading..")
+        setTimeout(initEngine,500);
+       }
+    },0)
     }, []);  
 
   useEffect(() => {   
@@ -562,7 +574,7 @@ const AppContainer: React.FC<ContainerProps> = () => {
       <IonBadge>{refSecToWait.current}</IonBadge>
 
 
-      
+
       <Chessboard
         width={refBoardWidth.current}
         position={refFen.current}
