@@ -15,7 +15,8 @@ import { ChessInstance, ShortMove } from "chess.js";
 
 import * as chess_meta from "../js/chess-meta.js"
 import * as chess_stats from "../js/chess-stats.js"
-import * as chess_engine from "../js/chess-engine.js"
+import * as chess_engine from "../js/chess-engine.js" 
+
 
 import {parser} from '@mliebelt/pgn-parser'
 
@@ -456,40 +457,8 @@ const AppContainer: React.FC<ContainerProps> = () => {
 
     console.log(window.sf_version);
 
-    const initEngine = () => {
-       if(window.sf_version=="Stockfish 14 (nnue-wasm)" || window.sf_version=="Stockfish 14 (wasm)"){
-          // @ts-ignore
-          window.stockfish.addMessageListener(line => {  
-            messageListener(line);
-          });
-        }else if(window.sf_version=="Stockfish 10"){
-          window.stockfish.onmessage = function(event) {
-            //NOTE: Web Workers wrap the response in an object.
-            // console.log(event.data ? event.data : event); 
-            if(event.data=="" || event.data==null){
-              return;
-            }
-            messageListener(event.data ? event.data : event)
-          };
-        }
-        // @ts-ignore
-        window.stockfish.postMessage('uci'); 
-        // @ts-ignore
-        window.stockfish.postMessage('setoption name MultiPV value '+refMultipv.current) 
-        if(window.sf_version=="Stockfish 14 (nnue-wasm)"){
-          // @ts-ignore
-          window.stockfish.postMessage("setoption name Use NNUE value true")
-         } 
-    }
+    chess_engine.startEngine(messageListener);
 
-    setTimeout(() => {
-      if(window.stockfish){
-        initEngine();
-       }else{
-        console.log("stockfish.js loading..")
-        setTimeout(initEngine,500);
-       }
-    },0)
     }, []);  
 
   useEffect(() => {   
