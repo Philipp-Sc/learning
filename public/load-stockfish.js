@@ -57,6 +57,11 @@ function wasmThreadsSupported() {
   return true;
 }
 
+function getConnection() { 
+  return navigator.connection || navigator.mozConnection ||
+    navigator.webkitConnection || navigator.msConnection;
+}
+
 function callback(){
 	try{ 
 		Stockfish().then(sf => {
@@ -68,7 +73,11 @@ function callback(){
 }
 
 function importStockfish(){
-	if(isSupported()){
+  // 1Mbps: 1MB file will take eight seconds to download
+  // 10Mbps: 50MB -> 40s 
+
+  // Only use NNUE version, when network speed is sufficient. Otherwise the download takes to long.
+	if(isSupported() && getConnection().downlink>=10){
 		// Multi-threaded WASM. Uses SIMD. Strongest.
 		window.sf_version = "Stockfish 14 (nnue-wasm)";
 		// See https://github.com/hi-ogawa/Stockfish for a WebAssembly port with NNUE support.
