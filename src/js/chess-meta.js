@@ -1,4 +1,7 @@
 
+import {average,median} from "./utilities.js"
+
+
 import {parser} from '@mliebelt/pgn-parser'
 const Chess = require("chess.js");
 
@@ -79,4 +82,52 @@ export async function getMoveFromHumans(chess,elo,playerColor,depth_for_database
     return {move: undefined, engine_meter:undefined}
 }
  
+
+export async function save_game (player_game_data,stockfishOutHistory,chess,playerColor,playerElo,eloSetting,depthSetting,resign=false) {
+      chess.header('White', playerColor=='w' ? 'Player' : 'Engine', 'Black', playerColor=='b' ? 'Player' : 'Engine');
+      chess.header('PlayerElo', ""+playerElo);
+      chess.header('Elo', ""+eloSetting);
+      chess.header('Depth', ""+depthSetting);
+      if((chess.in_checkmate() && chess.turn()==playerColor) || resign){
+        chess.header('Result', playerColor=='w' ? "0-1" : "1-0")
+      }else if(chess.in_draw()){
+        chess.header('Result', "1/2-1/2") 
+      }else{
+        chess.header('Result', playerColor=='w' ? "1-0" : "0-1")
+      }
+      var chess_pgn = chess.pgn();
+
+      player_game_data.pgn_db.push(chess_pgn); 
+      player_game_data.pgn_analysis.push(stockfishOutHistory); 
+ 
+      //console.log((player_pgn_db.map((e,i) => hydrate_game(e,player_pgn_analysis[i]))));
+      window.localStorage.setItem("player_game_data",JSON.stringify({"pgn_db": player_game_data.pgn_db, "pgn_analysis": player_game_data.pgn_analysis}));
+  }
+
+const hydrate_game = (pgn,analysis) => { 
+var game = parser.parse(pgn, {startRule: "game"});  
+  for(var i=0;i<game.moves.length;i++){
+    if(analysis[i]!=undefined && !(typeof game.moves[i]=== 'string')){
+      if(analysis.filter(e => e!=null && e.move!=null && e.move-1==i).length==1){ 
+        game.moves[i].commentAfter = JSON.stringify({evaluation: ((analysis.filter(e =>  e!=null && e.move!=null && e.move-1==i)[0].cp/100)), depth: analysis.filter(e =>  e!=null && e.move!=null && e.move-1==i)[0].depth});
+      }
+    } 
+  }
+return game;
+
+};
+
+export const historicPerformanceAtMoveNumber = (halfMoves,player_game_data) => {
+    var games = player_game_data.pgn_db.map((e,i) => hydrate_game(e,player_game_data.pgn_analysis[i]))
+    var aggMovePerformance : { average_eval: number, median_eval:number} = { average_eval: NaN,median_eval: NaN};
+
+    var historyPerfromanceAtMoveNumber = games.map(game => game.moves.map(i =>i.commentAfter).filter(m => m!=null).map(m => JSON.parse(m).evaluation))
+                      .filter(game => game[halfMoves]).map(game => game[halfMoves])
+
+    aggMovePerformance.average_eval = average(historyPerfromanceAtMoveNumber);
+    aggMovePerformance.median_eval = median(historyPerfromanceAtMoveNumber);
+
+    // returns NaN when no data available for move
+    return aggMovePerformance;
+  }
 

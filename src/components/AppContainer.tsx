@@ -61,7 +61,7 @@ const AppContainer: React.FC<ContainerProps> = () => {
   const stockfishOutList : StockfishOut[]  = []
   const stockfishOut2DList : StockfishOut[][]  = []
   const default_eval : { evaluation: number, depth: number} = { evaluation: 0.0, depth: 0};
-  const default_moveStats : { average_eval: number, median_eval:number} = { average_eval: NaN,median_eval: NaN};
+  const default_movePerformance : { average_eval: number, median_eval:number} = { average_eval: NaN,median_eval: NaN};
   var position_info: { depth: number, multipv: number, cp: number, pv: string, info: string, timestamp: number, move: number, flag: string }[] = [];
 
   var live_rating_depth = 20;
@@ -101,8 +101,8 @@ const AppContainer: React.FC<ContainerProps> = () => {
   const [live, setLive] = useState(default_eval);
   const liveRef = useRef(live);
 
-  const [liveHistory, setLiveHistory] = useState(stockfishOutList);
-  const refLiveHistory = useRef(liveHistory); 
+  const [stockfishOutHistory, setStockfishOutHistory] = useState(stockfishOutList);
+  const refStockfishOutHistory = useRef(stockfishOutHistory); 
 
   const [depth, setDepth] = useState(1);
   const refDepth = useRef(depth);
@@ -150,29 +150,24 @@ const AppContainer: React.FC<ContainerProps> = () => {
   const [boardWidth, setBoardWidth] = useState(window.innerWidth);
   const refBoardWidth = useRef(boardWidth);
 
-  const [moveStats, setMoveStats] = useState(default_moveStats);
-  const refMoveStats = useRef(moveStats);
+  const [movePerformance, setMovePerformance] = useState(default_movePerformance);
+  const refMovePerformance = useRef(movePerformance);
 
   const [showActionSheet, setShowActionSheet] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalIndex, setModalIndex] = useState<number>(0);
 
-//>>
-
+// app chess logic
   const game_over = (resign=false) => {
     if(chess.game_over() || resign){
-      chess.header('White', playerColor=='w' ? 'Player' : 'Engine', 'Black', playerColor=='b' ? 'Player' : 'Engine');
-      chess.header('Elo', ""+refElo.current);
-      chess.header('Depth', ""+refDepth.current);
-      var playerWin = -1; 
-      if((chess.in_checkmate() && chess.turn()==playerColor) || resign){
-        chess.header('Result', playerColor=='w' ? "0-1" : "1-0")
-        playerWin = 0;
-        var result = EloRating.calculate(playerElo, playerElo, playerWin==0,50);
-        setPlayerElo(result.playerRating)
+      chess_meta.save_game({pgn_db: player_pgn_db_ref.current,pgn_analysis: player_pgn_analysis_ref.current},refStockfishOutHistory.current,chess,playerColor,playerElo,refElo.current,refDepth.current,resign)
+      
+      var playerWin = (chess.in_checkmate() && chess.turn()==playerColor) || resign ? 0 : (chess.in_draw() ? 0.5 : 1);
+      var result = EloRating.calculate(playerElo, playerElo, playerWin==1,50-playerWin);
+      setPlayerElo(result.playerRating)
+      if((chess.in_checkmate() && chess.turn()==playerColor) || resign){   
         if(min_elo==refElo.current){
           if(1==refDepth.current){
-
           }else{
             setElo(max_elo);
             refElo.current=max_elo;
@@ -183,19 +178,9 @@ const AppContainer: React.FC<ContainerProps> = () => {
           setElo(elo-100);
           refElo.current=refElo.current-100;
         } 
-
-      }else if(chess.in_draw()){
-        chess.header('Result', "1/2-1/2")
-        playerWin = 0.5;
-
-      }else{
-        chess.header('Result', playerColor=='w' ? "1-0" : "0-1")
-        playerWin = 1;
-        var result = EloRating.calculate(playerElo, playerElo, playerWin==1,50);
-        setPlayerElo(result.playerRating)
+      }else if(!chess.in_draw()){    
         if(max_elo==refElo.current){
-          if(max_elo==refDepth.current){
-
+          if(max_depth==refDepth.current){
           }else{
             setElo(min_elo);
             refElo.current=min_elo;
@@ -208,58 +193,12 @@ const AppContainer: React.FC<ContainerProps> = () => {
         } 
       }
 
-      var chess_pgn = chess.pgn();
-      player_pgn_db.push(chess_pgn); 
-      player_pgn_analysis.push(refLiveHistory.current); 
- 
-      console.log((player_pgn_db.map((e,i) => hydrate_game(e,player_pgn_analysis[i]))));
-      window.localStorage.setItem("player_game_data",JSON.stringify({"pgn_db": player_pgn_db_ref.current, "pgn_analysis": player_pgn_analysis_ref.current}));
-
-      setLiveHistory(liveHistory_);
-      refLiveHistory.current=liveHistory_;
+      setStockfishOutHistory(stockfishOutList);
+      refStockfishOutHistory.current=stockfishOutHistory;
       setGameCount(gameCount+1);
     } 
 
   }
-
-  const set_stats_of_move = () => {
-    var move = refHalfMoves.current;
-    var games = player_pgn_db.map((e,i) => hydrate_game(e,player_pgn_analysis[i]))
-    var moveStats_ : { average_eval: number, median_eval:number} = { average_eval: NaN, median_eval: NaN};
-
-    var games_ = games.map(game => game.moves.map(i =>i.commentAfter).filter(m => m!=null).map(m => JSON.parse(m).evaluation))
-
-    const average = arr => arr.reduce( ( p, c ) => p + c, 0 ) / arr.length;
-    const median = arr => {
-        const mid = Math.floor(arr.length / 2),
-          nums = [...arr].sort((a, b) => a - b);
-        return arr.length % 2 !== 0 ? nums[mid] : (nums[mid - 1] + nums[mid]) / 2;
-      };
-
-    moveStats_.average_eval = average(games_.filter(game => game[move]).map(game => game[move]));
-    moveStats_.median_eval = median(games_.filter(game => game[move]).map(game => game[move]));
-
-    setMoveStats(moveStats_);
-    refMoveStats.current = moveStats_;
-  }
-
-  const hydrate_game = (pgn,analysis) => {
-    var game = parser.parse(pgn, {startRule: "game"});  
-      for(var i=0;i<game.moves.length;i++){
-        if(analysis[i]!=undefined && !(typeof game.moves[i]=== 'string')){
-          if(analysis.filter(e => e!=null && e.move!=null && e.move-1==i).length==1){
-            // (playerColor=='w' ? -1 : 1)*
-            game.moves[i].commentAfter = JSON.stringify({evaluation: ((analysis.filter(e =>  e!=null && e.move!=null && e.move-1==i)[0].cp/100)), depth: analysis.filter(e =>  e!=null && e.move!=null && e.move-1==i)[0].depth});
-            //game.moves[i].commentBefore = analysis.filter(e => e.move-1==i)[0].info
-          }
-        } 
-      }
-    return game;
-
-  };
-
-  //^^
-
 
   const handleMove = (move: ShortMove) => {
     if (chess.move(move)) {
@@ -309,7 +248,7 @@ const AppContainer: React.FC<ContainerProps> = () => {
     var stockfish_eval = {evaluation: (liveStockfishOutList[0].cp/100), depth: liveStockfishOutList[0].depth};
     setLive(stockfish_eval);
     liveRef.current = stockfish_eval;
-    refLiveHistory.current[liveStockfishOutList[0].move-1]=(liveStockfishOutList[0]); // -1 because the evaluation revers to the prev position
+    refStockfishOutHistory.current[liveStockfishOutList[0].move-1]=(liveStockfishOutList[0]); // -1 because the evaluation revers to the prev position
   };
 
   const move_ready = async() => { 
@@ -383,7 +322,11 @@ const AppContainer: React.FC<ContainerProps> = () => {
       setEngineOnPrevMove(refHalfMoves.current);
       refEngineOnPrevMove.current = refHalfMoves.current;
     }
-    set_stats_of_move()
+
+    var aggMovePerformance = chess_meta.historicPerformanceAtMoveNumber(refHalfMoves.current,{pgn_db: player_pgn_db_ref.current,pgn_analysis: player_pgn_analysis_ref.current});
+    setMovePerformance(aggMovePerformance);
+    refMovePerformance.current = aggMovePerformance;
+
     };
 
   const new_game = () => { 
@@ -655,7 +598,7 @@ const AppContainer: React.FC<ContainerProps> = () => {
       <ChessMetaContent 
           halfMoves={refHalfMoves.current}
           playerColor={playerColor}
-          moveStats={refMoveStats.current}
+          movePerformance={refMovePerformance.current}
           live={liveRef.current}
           evaluation={evaluationRef.current}
       />

@@ -10,7 +10,7 @@ import {InputGroup, DropdownButton, Dropdown, FormControl, Button, Modal, Card} 
 
 import * as chess_meta from "../js/chess-meta.js"
  
-interface MoveStats {
+interface MovePerformance {
   average_eval: number;
   median_eval:number;
 }
@@ -23,15 +23,18 @@ interface Evaluation {
 interface ContainerProps {
   halfMoves: number;
   playerColor: string; 
-  moveStats: MoveStats;
+  movePerformance: MovePerformance;
   evaluation: Evaluation;
   live: Evaluation;
 }
 
 
-const ChessMetaContent: React.FC<ContainerProps> = ({halfMoves,playerColor,moveStats,live,evaluation}) => {
+const ChessMetaContent: React.FC<ContainerProps> = ({halfMoves,playerColor,movePerformance,live,evaluation}) => {
  
  	const game_stats = chess_meta[playerColor=="w" ? "white" : "black"];
+
+  const avg_player_perf = (-1*movePerformance.average_eval).toFixed(2);
+  const median_player_perf = (-1*movePerformance.median_eval).toFixed(2);
 
 
 	return <div>
@@ -48,8 +51,8 @@ const ChessMetaContent: React.FC<ContainerProps> = ({halfMoves,playerColor,moveS
        <br/>
        <IonBadge>Engine's Move: {(-1*evaluation.evaluation)+" @depth "+evaluation.depth}</IonBadge>
            <br/><br/>
-       <IonBadge>Avg. Perf.: {(-1*moveStats.average_eval).toFixed(2)}</IonBadge>
-       <IonBadge>Median Perf.: {(-1*moveStats.median_eval).toFixed(2)}</IonBadge>
+       <IonBadge>Avg. Perf.: {isNaN(avg_player_perf) ? "No data available" : avg_player_perf}</IonBadge>
+       <IonBadge>Median Perf.: {isNaN(median_player_perf) ? "No data available" : median_player_perf}</IonBadge>
   
     <br/>
     <br/>
