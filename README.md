@@ -14,6 +14,16 @@ I work on <a href="https://github.com/Philipp-Sc/learning">Philipp-Sc/learning</
 It is written using Ionic, Capacitorjs and Expressjs. 
 
 
+# Roadmap
+# Chess
+* **@self_play** Have the opponement play the same opening and eventually mirror your playing style based on your past games. Bobby Fisher has been known to play himself. Alpha Zero was trained using self play.
+* **@hindsight** Visualize the evaluation change of your last move. Immidiat feedback indicating that you improved or maintained the positions evaluation. 
+* Show the players ELO rating and the best win in terms of @profile + @depth.
+* **@custom_book** Extend functionality: 1) Filter by Elo independent from current elo. 2) Allow the use of the engine pgn database as source. 3) Optional weighting of common opening moves. Still random but prefer common openings. 4) Allow user to provide pgn database.
+
+# Language
+* ...
+
 # Documentation
 # Chess
 
