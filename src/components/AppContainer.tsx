@@ -16,6 +16,7 @@ import { ChessInstance, ShortMove } from "chess.js";
 import * as chess_meta from "../js/chess-meta.js"
 import * as chess_stats from "../js/chess-stats.js"
 import * as chess_engine from "../js/chess-engine.js" 
+import * as chess_trainer from "../js/chess-trainer.js" 
 
 
 import {parser} from '@mliebelt/pgn-parser'
@@ -30,9 +31,6 @@ import { isPlatform } from '@ionic/react';
 
 const Chess = require("chess.js");
 const EloRating = require('elo-rating');
-
-
-
  
 const AppContainer: React.FC<ContainerProps> = () => {
 
@@ -50,7 +48,7 @@ const AppContainer: React.FC<ContainerProps> = () => {
   const player_game_data = JSON.parse(window.localStorage.getItem("player_game_data") || "{}");
   const new_player_data : string[] = [];
 
-  interface StockfishOut { 
+  interface StockfishInfoOut { 
     depth: number;
     multipv: number; 
     cp: number; 
@@ -59,14 +57,16 @@ const AppContainer: React.FC<ContainerProps> = () => {
     timestamp: number;
     move: number ;
   }
-  const stockfishOutList : StockfishOut[]  = []
-  const stockfishOut2DList : StockfishOut[][]  = []
-  const default_eval : { evaluation: number, depth: number} = { evaluation: 0.0, depth: 0};
+
+  const stockfishOutList : StockfishInfoOut[]  = [];
+  const stockfishOut2DList : StockfishInfoOut[][]  = [];
+  const stockfishInfoOutDefault : StockfishInfoOut = {depth: NaN, multipv: NaN, cp: NaN, pv: "", info:"",timestamp:NaN,move:NaN};
+  
   const default_movePerformance : { average_eval: number, median_eval:number} = { average_eval: NaN,median_eval: NaN};
-  var position_info: { depth: number, multipv: number, cp: number, pv: string, info: string, timestamp: number, move: number, flag: string }[] = [];
+  var position_info_list_at_depth: StockfishInfoOut[] = [];
 
   var live_rating_depth = 20;
-  var liveStockfishOutList: StockfishOut[] = [];
+  var liveStockfishInfoOutList: StockfishInfoOut[] = [];
   
   const [chess] = useState<ChessInstance>(
     new Chess("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
@@ -96,14 +96,11 @@ const AppContainer: React.FC<ContainerProps> = () => {
 
   const [gameCount, setGameCount] = useState(parseInt(window.localStorage.getItem("gameCount") || "0"));
 
-  const [evaluation, setEvaluation] = useState(default_eval);
-  const evaluationRef = useRef(evaluation);
+  const [stockfishInfoOutEvaluation, setStockfishInfoOutEvaluation] = useState(stockfishInfoOutDefault);
+  const stockfishInfoOutEvaluationRef = useRef(stockfishInfoOutEvaluation);
 
-  const [live, setLive] = useState(default_eval);
-  const liveRef = useRef(live);
-
-  const [stockfishOutHistory, setStockfishOutHistory] = useState(stockfishOutList);
-  const refStockfishOutHistory = useRef(stockfishOutHistory); 
+  const [stockfishOutHistory, setStockfishInfoOutHistory] = useState(stockfishOutList);
+  const refStockfishInfoOutHistory = useRef(stockfishOutHistory); 
 
   const [depth, setDepth] = useState(1);
   const refDepth = useRef(depth);
@@ -160,9 +157,9 @@ const AppContainer: React.FC<ContainerProps> = () => {
 
 // app chess logic
   const game_over = (resign=false) => {
+    setGameCount(gameCount+1);
     if(chess.game_over() || resign){
-      chess_meta.save_game({pgn_db: player_pgn_db_ref.current,pgn_analysis: player_pgn_analysis_ref.current},refStockfishOutHistory.current,chess,playerColor,playerElo,refElo.current,refDepth.current,resign)
-      
+      chess_meta.save_game({pgn_db: player_pgn_db_ref.current,pgn_analysis: player_pgn_analysis_ref.current},refStockfishInfoOutHistory.current,chess,playerColor,playerElo,refElo.current,refDepth.current,resign)
       var playerWin = (chess.in_checkmate() && chess.turn()==playerColor) || resign ? 0 : (chess.in_draw() ? 0.5 : 1);
       var result = EloRating.calculate(playerElo, playerElo, playerWin==1,50-playerWin);
       setPlayerElo(result.playerRating)
@@ -193,10 +190,6 @@ const AppContainer: React.FC<ContainerProps> = () => {
           refElo.current=refElo.current+100
         } 
       }
-
-      setStockfishOutHistory(stockfishOutList);
-      refStockfishOutHistory.current=stockfishOutHistory;
-      setGameCount(gameCount+1);
     } 
 
   }
@@ -205,6 +198,14 @@ const AppContainer: React.FC<ContainerProps> = () => {
     if (chess.move(move)) {
       setFen(chess.fen());   
       refFen.current=chess.fen();
+
+      /*
+      var res = {}
+      res["moveFrom"] = {move["from"]: {backgroundColor: 'orange'}};
+      res["moveTo"] = {move["to"]: {backgroundColor: 'orange'}};
+      
+      window.highlightMove = res;
+*/
       document.dispatchEvent(new Event('move_executed'))   
       engine_turn();
     }
@@ -245,13 +246,6 @@ const AppContainer: React.FC<ContainerProps> = () => {
     console.log("player_turn")
   };
   
-  const live_info = () => {
-    var stockfish_eval = {evaluation: (liveStockfishOutList[0].cp/100), depth: liveStockfishOutList[0].depth};
-    setLive(stockfish_eval);
-    liveRef.current = stockfish_eval;
-    refStockfishOutHistory.current[liveStockfishOutList[0].move-1]=(liveStockfishOutList[0]); // -1 because the evaluation revers to the prev position
-  };
-
   const move_ready = async() => { 
     if(refSecToWait.current>0){
       setTimeout(() => {move_ready();},1000);
@@ -259,55 +253,14 @@ const AppContainer: React.FC<ContainerProps> = () => {
     }
     setTimeout(async() => {
 
-      if(opening_move_duration*2+1>=refHalfMoves.current && refBook.current){
-
-        var humanMove = chess_meta.getMoveFromHumans(chess,refElo.current,playerColor,depth_for_database);
-        setEvaluation(humanMove.engine_meter)
-        evaluationRef.current=humanMove.engine_meter;
-        applyMove(humanMove.move);
-      }
-
-      /*
-      The opponement only plays good as long as you play decent.
-      If you are behind, it will also play badly and give you a chance to come back.
-      This is best for training, if the chess engine just butchers you, learning is difficult.
-      */
-
-      //console.log("position_info");   
-      //console.log(position_info);    
-
-      var limited_strength_move_pool = position_info.filter(e => e.move==refHalfMoves.current && e.multipv<=refMultipv.current);
-
-      console.log("The following "+refMultipv.current+" moves are available: ");   
-      console.log(limited_strength_move_pool);   
-
-      if(skill_profile[refHalfMoves.current]==undefined){ // unlikely case
-        console.log("skill_profile[refHalfMoves.current]==undefined") 
-        console.log("for example when the game lasts many moves") 
-        console.log(refHalfMoves.current)
-        console.log("just taking the best move now")
-      }else if(refEngineBlunderTolerance.current/10<liveRef.current.evaluation){
-        console.log("you breached the mistake tolerance")
-        console.log("just taking the best move now")
-      }else{
-        var myArray = skill_profile[refHalfMoves.current].dist;
-        var randomGoal = myArray[Math.floor(Math.random()*myArray.length)];
-        console.log("The following evaluation was randomly choosen from the skill profile: ")
-        console.log("Random evaluation: "+randomGoal);
-        console.log("Median evaluation: "+skill_profile[refHalfMoves.current].median)
-        var justifiedGoal = (skill_profile[refHalfMoves.current].median + randomGoal) / 2
-        console.log("Resulting adjusted evaluation: "+justifiedGoal); 
-        limited_strength_move_pool = limited_strength_move_pool.filter(e => e.cp == limited_strength_move_pool.map(e => e.cp).reduce(function(prev, curr) {
-          return (Math.abs(curr - (justifiedGoal)) < Math.abs(prev - (justifiedGoal)) ? curr : prev);
-        }));
-      }
-      console.log("This leaves the following moves: ")
-      console.log(limited_strength_move_pool) 
-      console.log("Selecting the first (best) one: "+limited_strength_move_pool[0].pv)
-      var engine_meter = { evaluation: (limited_strength_move_pool[0].cp/100), depth: refDepth.current};
-      setEvaluation(engine_meter)
-      evaluationRef.current=engine_meter;
-      applyMove(limited_strength_move_pool[0].pv) 
+      const engineMove = await chess_trainer.selectEngineMove(opening_move_duration,refHalfMoves.current,chess,refElo.current,playerColor,depth_for_database, refBook.current,
+                          position_info_list_at_depth,refStockfishInfoOutHistory.current,
+                          refEngineBlunderTolerance.current,
+                          skill_profile);
+      console.log(engineMove)
+      setStockfishInfoOutEvaluation(engineMove)
+      stockfishInfoOutEvaluationRef.current=engineMove;
+      applyMove(engineMove.pv) 
       setMoveReady(false)
       refMoveReady.current=false; 
 
@@ -345,10 +298,11 @@ const AppContainer: React.FC<ContainerProps> = () => {
     var temp = chess.fen();
     setFen(temp); 
     refFen.current=temp;
-    setEvaluation(default_eval)
-    evaluationRef.current = default_eval;
-    setLive(default_eval)
-    liveRef.current = default_eval;
+    setStockfishInfoOutEvaluation(stockfishInfoOutDefault)
+    stockfishInfoOutEvaluationRef.current = stockfishInfoOutDefault; 
+
+    setStockfishInfoOutHistory(stockfishOutList);
+    refStockfishInfoOutHistory.current=stockfishOutHistory;
     setMoveTimestamp(new Date().getTime());
     };    
 
@@ -407,24 +361,11 @@ const AppContainer: React.FC<ContainerProps> = () => {
     document.addEventListener("move_ready", move_ready);
     document.addEventListener("move_executed", move_executed);
     document.addEventListener("new_game", new_game);
-    document.addEventListener("live_info", live_info); 
 
     function messageListener(line) {
       if(line.split(" ")[0]=="info"){
         if(line.split(" ")[1]=="depth" && line.split(" ")[3]!="currmove"){
-          if(""+refDepth.current==""+line.split(" ")[2]){ // only for then engine player @depth
-             position_info[parseInt(line.split(" multipv ")[1].split(" ")[0])-1] = {
-                "depth": parseInt(line.split(" ")[2]),
-                "multipv": parseInt(line.split(" multipv ")[1].split(" ")[0]),
-                "cp": line.includes("mate") ? 999 * parseInt(line.split(" mate ")[1].split(" ")[0]) : parseInt(line.split(" cp ")[1].split(" ")[0]),
-                "pv": line.split(" pv ")[1].split(" ")[0],
-                "info": line,
-                "timestamp": new Date().getTime(),
-                "move": refHalfMoves.current,
-                "flag" : "new"
-              }
-          }
-          liveStockfishOutList[parseInt(line.split(" multipv ")[1].split(" ")[0])-1] = {
+          var info = {
                 "depth": parseInt(line.split(" ")[2]),
                 "multipv": parseInt(line.split(" multipv ")[1].split(" ")[0]),
                 "cp": line.includes("mate") ? 999 * parseInt(line.split(" mate ")[1].split(" ")[0]) : parseInt(line.split(" cp ")[1].split(" ")[0]),
@@ -433,16 +374,23 @@ const AppContainer: React.FC<ContainerProps> = () => {
                 "timestamp": new Date().getTime(),
                 "move":  refEngineOnPrevMove.current
               }  
-          document.dispatchEvent(new Event('live_info')) 
-          if(refMoveReady.current==false && position_info.filter(e => e.move==refHalfMoves.current).length==refMultipv.current){
+          if(""+refDepth.current==""+line.split(" ")[2]){ // only for the engine player @depth
+             position_info_list_at_depth[parseInt(line.split(" multipv ")[1].split(" ")[0])-1] = info;
+          }
+          liveStockfishInfoOutList[parseInt(line.split(" multipv ")[1].split(" ")[0])-1] = info; 
+          // overrides entries with updated depth
+          
+          refStockfishInfoOutHistory.current[liveStockfishInfoOutList[0].move-1]=liveStockfishInfoOutList[0]; // -1 because the evaluation revers to the prev position
+          
+          if(refMoveReady.current==false && position_info_list_at_depth.filter(e => e.move==refHalfMoves.current).length==refMultipv.current){
             console.log("move_ready event")
             setMoveReady(true)
             refMoveReady.current=true; 
             document.dispatchEvent(new Event('move_ready')) 
           } 
-          //console.log("position_info added:")
+          //console.log("position_info_list_at_depth added:")
           //console.log(parseInt(line.split(" multipv ")[1].split(" ")[0])-1)
-          //console.log(position_info[parseInt(line.split(" multipv ")[1].split(" ")[0])-1]) 
+          //console.log(position_info_list_at_depth[parseInt(line.split(" multipv ")[1].split(" ")[0])-1]) 
         }         
       }
       //console.log(line)
@@ -496,7 +444,7 @@ const AppContainer: React.FC<ContainerProps> = () => {
            refManualEngineStop.current=false;
           // now is searching the current position
            start_engine();
-        }else if (refManualEngineStop.current==false && liveRef.current.depth==live_rating_depth){
+        }else if (refManualEngineStop.current==false && (refStockfishInfoOutHistory.current[refStockfishInfoOutHistory.current.length-1] || {depth: NaN}).depth==live_rating_depth){
           // engine finished because it found the best move
             console.log("(finished search)")   
         }else if(refEngineNewGame.current==true){
@@ -532,6 +480,10 @@ const AppContainer: React.FC<ContainerProps> = () => {
      }
    }
  
+// generate pieceTheme, with Numbers on pieces.
+// color square green, with timeout, if move in top 1
+// yellow if evaluation stays the same or increases
+
   return (
     <div className="container" id="app">
       <br/>
@@ -545,6 +497,8 @@ const AppContainer: React.FC<ContainerProps> = () => {
 
 
       <Chessboard
+        squareStyles={{}}
+        showNotation={true}
         width={refBoardWidth.current}
         position={refFen.current}
         orientation={playerColor=='w' ? 'white' : 'black'}
@@ -600,8 +554,10 @@ const AppContainer: React.FC<ContainerProps> = () => {
           halfMoves={refHalfMoves.current}
           playerColor={playerColor}
           movePerformance={refMovePerformance.current}
-          live={liveRef.current}
-          evaluation={evaluationRef.current}
+          live={{
+            evaluation: (refStockfishInfoOutHistory.current[refStockfishInfoOutHistory.current.length-1] || {cp: NaN}).cp/100,
+            depth: (refStockfishInfoOutHistory.current[refStockfishInfoOutHistory.current.length-1] || {depth:NaN}).depth}}
+          evaluation={{evaluation: stockfishInfoOutEvaluationRef.current.cp/100,depth: stockfishInfoOutEvaluationRef.current.depth}}
       />
 
       <IonBadge>Import PGN</IonBadge>

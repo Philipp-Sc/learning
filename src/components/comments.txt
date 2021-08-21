@@ -1,4 +1,5 @@
 //mark piece that you moved with a number, best move 1, second best 2, etc
+// what has motion stays in motion
 // Update Ionic App & Logo
 
 /*
