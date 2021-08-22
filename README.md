@@ -17,7 +17,6 @@ It is written using Ionic, Capacitorjs and Expressjs.
 # Roadmap
 # Chess
 * **@self_play** Have the opponement play the same opening and eventually mirror your playing style based on your past games. Bobby Fisher has been known to play himself. Alpha Zero was trained using self play.
-* **@hindsight** Visualize the evaluation change of your last move. Immidiat feedback indicating that you improved or maintained the positions evaluation. 
 * Show the players ELO rating and the best win in terms of @profile + @depth.
 * **@custom_book** Extend functionality: 1) Filter by Elo independent from current elo. 2) Allow the use of the engine pgn database as source. 3) Optional weighting of common opening moves. Still random but prefer common openings. 4) Allow user to provide pgn database.
 
@@ -30,6 +29,9 @@ It is written using Ionic, Capacitorjs and Expressjs.
 **Learning Chess (intended for expert chess players) guided by modern techniques including: statistics, chess engines, psychology and machine learning.**
 
 *Coach Settings (change by tapping the labels)*
+
+
+*Above the board:*
 
 * **@profile {2200,2300,2400,2500}** defines the opponent skill level in terms of consistency. 
   
@@ -48,6 +50,11 @@ It is written using Ionic, Capacitorjs and Expressjs.
 * **@mistake_tolerance [0-1]** if you make a mistake or blunder that worsens your position (evaluated by the engine) so far bellow the given threshold the engine will take advantage and try to win. E.g a @mistake_tolerance 0.5 means if your position is about half a pawn worse then the engine will try to win by playing the top rated moves. 
 * **@depth [1-19]** engine search depth, the higher the depth the more accurate the evaluation. 
 * **@no_book / @ custom_book** use the pgn chess database for the first 5 opening moves, use this parameter to have more human like games.
+
+
+*Below the board:*
+
+* **@highlight analysis** if active the analysis is shown live on the board as the engine opponent evaluates the position.
 
 
 *Actions (activate by tapping the labels or the pieces on the board!)*
