@@ -26,10 +26,12 @@ interface ContainerProps {
   movePerformance: MovePerformance;
   evaluation: Evaluation;
   live: Evaluation;
+  highlightAnalysis: boolean;
+  setHighlightAnalysis: () => void;
 }
 
 
-const ChessMetaContent: React.FC<ContainerProps> = ({halfMoves,playerColor,movePerformance,live,evaluation}) => {
+const ChessMetaContent: React.FC<ContainerProps> = ({halfMoves,playerColor,movePerformance,live,evaluation,highlightAnalysis,setHighlightAnalysis}) => {
  
  	const game_stats = chess_meta[playerColor=="w" ? "white" : "black"];
 
@@ -47,7 +49,7 @@ const ChessMetaContent: React.FC<ContainerProps> = ({halfMoves,playerColor,moveP
     <br/>
     <br/>
 
-       <IonBadge>Analysis: {(-1*live.evaluation)+" @depth "+live.depth}</IonBadge>
+       <IonBadge onClick={() => {setHighlightAnalysis(!highlightAnalysis)}}>{highlightAnalysis ? "@highlight " : "@"}analysis: {(-1*live.evaluation)+" @depth "+live.depth}</IonBadge>
        <br/>
        <IonBadge>Engine's Move: {(-1*evaluation.evaluation)+" @depth "+evaluation.depth}</IonBadge>
            <br/><br/>

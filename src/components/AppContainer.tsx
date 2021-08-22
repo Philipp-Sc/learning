@@ -1,15 +1,10 @@
-import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './ExploreContainer.css'; 
 import ModalChessMetaContent from './ModalChessMetaContent';
 import ChessMetaContent from './ChessMetaContent';
-import { IonBadge, IonRadioGroup, IonRadio, IonLoading, IonContent, IonItem, IonLabel, IonTextarea, IonList, IonListHeader, IonSelect, IonSelectOption, IonPage, IonItemDivider } from '@ionic/react';
-import { trash, share, caretForwardCircle, heart, close, pencil, book, bookOutline } from 'ionicons/icons';
-
-import {  IonCol } from '@ionic/react';  
-import { IonModal, IonActionSheet, IonButton } from '@ionic/react';
-
-import { useHistory } from "react-router-dom";
-
+import { IonBadge, IonActionSheet} from '@ionic/react';
+import { book, bookOutline } from 'ionicons/icons';
+ 
 import Chessboard from "chessboardjsx";
 import { ChessInstance, ShortMove } from "chess.js";
 
@@ -19,20 +14,10 @@ import * as chess_engine from "../js/chess-engine.js"
 import * as chess_trainer from "../js/chess-trainer.js" 
 
 
-import {parser} from '@mliebelt/pgn-parser'
-
-
-import firebase from "firebase/app";
-// Add the Firebase services that you want to use
-import "firebase/auth";
-import "firebase/firestore";
-
-import { isPlatform } from '@ionic/react';
-
 const Chess = require("chess.js");
 const EloRating = require('elo-rating');
  
-const AppContainer: React.FC<ContainerProps> = () => {
+const AppContainer: React.FC = () => {
 
   const create_aggregated_data_development_option = false;
 
@@ -113,6 +98,9 @@ const AppContainer: React.FC<ContainerProps> = () => {
 
   const [isDraggable,setIsDraggable] = useState(true);
   const refIsDraggable = useRef(isDraggable);
+
+  const [highlightAnalysis,setHighlightAnalysis] = useState(true);
+
 
   const [pieceUpdated,setPieceUpdated] = useState(false);
   const [pieceClicked,setPieceClicked] = useState("wQ");
@@ -199,13 +187,6 @@ const AppContainer: React.FC<ContainerProps> = () => {
       setFen(chess.fen());   
       refFen.current=chess.fen();
 
-      /*
-      var res = {}
-      res["moveFrom"] = {move["from"]: {backgroundColor: 'orange'}};
-      res["moveTo"] = {move["to"]: {backgroundColor: 'orange'}};
-      
-      window.highlightMove = res;
-*/
       document.dispatchEvent(new Event('move_executed'))   
       engine_turn();
     }
@@ -226,7 +207,7 @@ const AppContainer: React.FC<ContainerProps> = () => {
         game_over();
         setTimeout(() => {
                 document.dispatchEvent(new Event('new_game'))
-        }, 3000);
+        }, 0);
       }
   }
 
@@ -240,7 +221,7 @@ const AppContainer: React.FC<ContainerProps> = () => {
       game_over(); 
       setTimeout(() => {
               document.dispatchEvent(new Event('new_game'))
-      }, 3000);
+      }, 0);
       return;
     }
     console.log("player_turn")
@@ -352,6 +333,38 @@ const AppContainer: React.FC<ContainerProps> = () => {
       refSquareClicked.current=square; 
     }
   }
+
+const highlightSquares = (stockfishInfoOutHistory, chess) => {
+      // make the think process of the engine player visible in a way.
+
+      console.log(stockfishInfoOutHistory)
+
+      var board = {
+        columns: ["a", "b", "c", "d", "e", "f", "g", "h"],
+        rows: [8, 7, 6, 5, 4, 3, 2, 1]
+      };
+      var allSquares = board.columns.reduce(
+        (prev, next) => [...prev, ...board.rows.map(x => next + x)],
+        []
+      );
+      var squares = allSquares.map((e) => {var o = {};var v={backgroundColor: undefined}; o[e]=v; return o}).reduce(function(result, item) {
+        var key = Object.keys(item)[0]; 
+        result[key] = item[key];
+        return result;
+      }, {});
+ 
+      if(highlightAnalysis && stockfishInfoOutHistory.length>=1){
+        var a = (stockfishInfoOutHistory[stockfishInfoOutHistory.length-1] || {cp: NaN}).cp/100;
+        var move = chess.history({ verbose: true })[stockfishInfoOutHistory.length-1];
+        if(move){
+        console.log("INFO <---- ")
+        console.log(move.to);
+        squares[move.to].backgroundColor = 'rgba('+(a*-1>=0 ? 0 : 255)+','+(a*-1>=0 ? 255 : 0)+',0,'+(Math.min(1,Math.abs(a)))+')'
+        console.log(squares[move.to].backgroundColor)
+        }
+      } 
+      return squares;
+}
  
  useEffect(() => { 
 
@@ -495,9 +508,8 @@ const AppContainer: React.FC<ContainerProps> = () => {
       <IonBadge>{refSecToWait.current}</IonBadge>
 
 
-
       <Chessboard
-        squareStyles={{}}
+        squareStyles={highlightSquares(refStockfishInfoOutHistory.current,chess)}
         showNotation={true}
         width={refBoardWidth.current}
         position={refFen.current}
@@ -539,8 +551,6 @@ const AppContainer: React.FC<ContainerProps> = () => {
           showModal={showModal}
           setShowModal={setShowModal}/>
 
-
-
       <IonBadge>Games: {gameCount}</IonBadge>
       <IonBadge>Halfmoves: {refHalfMoves.current}</IonBadge>
       <br/>
@@ -558,6 +568,8 @@ const AppContainer: React.FC<ContainerProps> = () => {
             evaluation: (refStockfishInfoOutHistory.current[refStockfishInfoOutHistory.current.length-1] || {cp: NaN}).cp/100,
             depth: (refStockfishInfoOutHistory.current[refStockfishInfoOutHistory.current.length-1] || {depth:NaN}).depth}}
           evaluation={{evaluation: stockfishInfoOutEvaluationRef.current.cp/100,depth: stockfishInfoOutEvaluationRef.current.depth}}
+          highlightAnalysis={highlightAnalysis}
+          setHighlightAnalysis={setHighlightAnalysis}
       />
 
       <IonBadge>Import PGN</IonBadge>
