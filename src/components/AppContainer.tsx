@@ -80,6 +80,7 @@ const AppContainer: React.FC = () => {
 
 
   const [gameCount, setGameCount] = useState(parseInt(window.localStorage.getItem("gameCount") || "0"));
+  const [latestWin, setLatestWin] = useState((window.localStorage.getItem("latestWin") || "No data available."));
 
   const [stockfishInfoOutEvaluation, setStockfishInfoOutEvaluation] = useState(stockfishInfoOutDefault);
   const stockfishInfoOutEvaluationRef = useRef(stockfishInfoOutEvaluation);
@@ -151,7 +152,10 @@ const AppContainer: React.FC = () => {
     if(chess.game_over() || resign){
       chess_meta.save_game({pgn_db: player_pgn_db_ref.current,pgn_analysis: player_pgn_analysis_ref.current},refStockfishInfoOutHistory.current,chess,playerColor,playerElo,refElo.current,refDepth.current,resign)
       var playerWin = (chess.in_checkmate() && chess.turn()==playerColor) || resign ? 0 : (chess.in_draw() ? 0.5 : 1);
-      var result = EloRating.calculate(playerElo, playerElo, playerWin==1,50-playerWin);
+      if(playerWin==1){
+        setLatestWin("@profile "+elo+" @depth "+depth);
+      }
+      var result = EloRating.calculate(playerElo, playerElo, playerWin==1,50);
       setPlayerElo(result.playerRating)
       if((chess.in_checkmate() && chess.turn()==playerColor) || resign){   
         if(min_elo==refElo.current){
@@ -446,7 +450,8 @@ const highlightBoard = (movePerformance) => {
   useEffect(() => { 
     window.localStorage.setItem("playerElo",""+playerElo);
     window.localStorage.setItem("gameCount",""+gameCount);
-    }, [playerElo, gameCount]);  
+    window.localStorage.setItem("latestWin",""+latestWin);
+    }, [playerElo, gameCount,latestWin]);  
  
   useEffect(() => {  
     if(refSecToWait.current>0){
@@ -561,6 +566,7 @@ const highlightBoard = (movePerformance) => {
           showModal={showModal}
           setShowModal={setShowModal}/>
 
+
       <IonBadge>Games: {gameCount}</IonBadge>
       <IonBadge>Halfmoves: {refHalfMoves.current}</IonBadge>
       <br/>
@@ -569,10 +575,13 @@ const highlightBoard = (movePerformance) => {
       <IonBadge onClick={() => {setSecToWait(0);refSecToWait.current=0;}} >Force move!</IonBadge>
       <IonBadge onClick={() => {if(refSecToWait.current==0){setPlayerColor(color => color=='w' ? 'b' : 'w');if(playerColor=='w' || refHalfMoves.current>0){engine_turn();}}}}>Switch sides!</IonBadge>
       <br/><br/>
+      <IonBadge>Elo: {playerElo}</IonBadge> 
+      <IonBadge>Latest win: {latestWin}</IonBadge> 
+      <br/><br/>
 
       <ChessMetaContent 
           halfMoves={refHalfMoves.current}
-          playerColor={playerColor}
+          playerColor={playerColor} 
           movePerformance={refMovePerformance.current}
           live={{
             evaluation: (refStockfishInfoOutHistory.current[refStockfishInfoOutHistory.current.length-1] || {cp: NaN}).cp/100,
