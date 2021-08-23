@@ -288,8 +288,10 @@ const AppContainer: React.FC = () => {
     setStockfishInfoOutEvaluation(stockfishInfoOutDefault)
     stockfishInfoOutEvaluationRef.current = stockfishInfoOutDefault; 
 
+    const stockfishOutList : StockfishInfoOut[]  = [];
     setStockfishInfoOutHistory(stockfishOutList);
-    refStockfishInfoOutHistory.current=stockfishOutList;
+    refStockfishInfoOutHistory.current = stockfishOutList; 
+
     setMoveTimestamp(new Date().getTime());
     };    
 
