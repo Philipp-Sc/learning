@@ -17,7 +17,6 @@ It is written using Ionic, Capacitorjs and Expressjs.
 # Roadmap
 # Chess
 * **@self_play** Have the opponement play the same opening and eventually mirror your playing style based on your past games. Bobby Fisher has been known to play himself. Alpha Zero was trained using self play.
-* Show the players ELO rating and the best win in terms of @profile + @depth.
 * **@custom_book** Extend functionality: 1) Filter by Elo independent from current elo. 2) Allow the use of the engine pgn database as source. 3) Optional weighting of common opening moves. Still random but prefer common openings. 4) Allow user to provide pgn database.
 
 # Language
@@ -59,7 +58,6 @@ It is written using Ionic, Capacitorjs and Expressjs.
 * **@highligh avg. perf.** if active the board is highlighted either in green or in red based on your past performance at the current move number.
 * **@highligh median. perf.** if active the board is highlighted either in green or in red based on your past performance at the current move number.
  (If **@highligh avg. perf.** and **@highligh median. perf.** are active the average of both is taken to determine the color.)
-
 
 *Actions (activate by tapping the labels or the pieces on the board!)*
 
