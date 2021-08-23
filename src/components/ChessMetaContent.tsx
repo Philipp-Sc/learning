@@ -28,10 +28,14 @@ interface ContainerProps {
   live: Evaluation;
   highlightAnalysis: boolean;
   setHighlightAnalysis: () => void;
+  avgPerf: boolean;
+  setAvgPerf: () => void;
+  medianPerf: boolean;
+  setMedianPerf: () => void;
 }
 
 
-const ChessMetaContent: React.FC<ContainerProps> = ({halfMoves,playerColor,movePerformance,live,evaluation,highlightAnalysis,setHighlightAnalysis}) => {
+const ChessMetaContent: React.FC<ContainerProps> = ({halfMoves,playerColor,movePerformance,live,evaluation,highlightAnalysis,setHighlightAnalysis,avgPerf,setAvgPerf,medianPerf,setMedianPerf}) => {
  
  	const game_stats = chess_meta[playerColor=="w" ? "white" : "black"];
 
@@ -53,8 +57,8 @@ const ChessMetaContent: React.FC<ContainerProps> = ({halfMoves,playerColor,moveP
        <br/>
        <IonBadge>Engine's Move: {(-1*evaluation.evaluation)+" @depth "+evaluation.depth}</IonBadge>
            <br/><br/>
-       <IonBadge>Avg. Perf.: {isNaN(avg_player_perf) ? "No data available" : avg_player_perf}</IonBadge>
-       <IonBadge>Median Perf.: {isNaN(median_player_perf) ? "No data available" : median_player_perf}</IonBadge>
+       <IonBadge  onClick={() => {setAvgPerf(!avgPerf)}}>{avgPerf ? "@highlight " : "@"}avg. perf.: {isNaN(avg_player_perf) ? "No data available" : avg_player_perf}</IonBadge>
+       <IonBadge  onClick={() => {setMedianPerf(!medianPerf)}}>{medianPerf ? "@highlight " : "@"}median perf.: {isNaN(median_player_perf) ? "No data available" : median_player_perf}</IonBadge>
   
     <br/>
     <br/>

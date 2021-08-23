@@ -100,6 +100,8 @@ const AppContainer: React.FC = () => {
   const refIsDraggable = useRef(isDraggable);
 
   const [highlightAnalysis,setHighlightAnalysis] = useState(true);
+  const [avgPerf,setAvgPerf] = useState(true);
+  const [medianPerf,setMedianPerf] = useState(true);
 
 
   const [pieceUpdated,setPieceUpdated] = useState(false);
@@ -283,7 +285,7 @@ const AppContainer: React.FC = () => {
     stockfishInfoOutEvaluationRef.current = stockfishInfoOutDefault; 
 
     setStockfishInfoOutHistory(stockfishOutList);
-    refStockfishInfoOutHistory.current=stockfishOutHistory;
+    refStockfishInfoOutHistory.current=stockfishOutList;
     setMoveTimestamp(new Date().getTime());
     };    
 
@@ -335,10 +337,6 @@ const AppContainer: React.FC = () => {
   }
 
 const highlightSquares = (stockfishInfoOutHistory, chess) => {
-      // make the think process of the engine player visible in a way.
-
-      console.log(stockfishInfoOutHistory)
-
       var board = {
         columns: ["a", "b", "c", "d", "e", "f", "g", "h"],
         rows: [8, 7, 6, 5, 4, 3, 2, 1]
@@ -356,14 +354,29 @@ const highlightSquares = (stockfishInfoOutHistory, chess) => {
       if(highlightAnalysis && stockfishInfoOutHistory.length>=1){
         var a = (stockfishInfoOutHistory[stockfishInfoOutHistory.length-1] || {cp: NaN}).cp/100;
         var move = chess.history({ verbose: true })[stockfishInfoOutHistory.length-1];
-        if(move){
-        console.log("INFO <---- ")
-        console.log(move.to);
-        squares[move.to].backgroundColor = 'rgba('+(a*-1>=0 ? 0 : 255)+','+(a*-1>=0 ? 255 : 0)+',0,'+(Math.min(1,Math.abs(a)))+')'
-        console.log(squares[move.to].backgroundColor)
+        if(move){ 
+          squares[move.to].backgroundColor = 'rgba('+(a*-1>=0 ? 0 : 255)+','+(a*-1>=0 ? 255 : 0)+',0,'+(Math.min(1,Math.abs(a)))+')'
         }
       } 
       return squares;
+}
+
+const highlightBoard = (movePerformance) => {
+
+  var a = avgPerf ? movePerformance.average_eval :  movePerformance.median_eval;
+
+  if(medianPerf && avgPerf){
+    a = (a+movePerformance.median_eval)/2
+  }else if(!medianPerf && !avgPerf){
+    a = 0;
+  }
+
+  return {
+          marginBottom: '30px',
+          borderRadius: '5px',
+          boxShadow: `0 10px 30px `+'rgba('+(a*-1>=0 ? 0 : 255)+','+(a*-1>=0 ? 255 : 0)+',0,'+(Math.min(1,Math.abs(a)))+')'
+        }
+
 }
  
  useEffect(() => { 
@@ -492,11 +505,7 @@ const highlightSquares = (stockfishInfoOutHistory, chess) => {
       refEngineBlunderTolerance.current=refEngineBlunderTolerance.current+1;
      }
    }
- 
-// generate pieceTheme, with Numbers on pieces.
-// color square green, with timeout, if move in top 1
-// yellow if evaluation stays the same or increases
-
+  
   return (
     <div className="container" id="app">
       <br/>
@@ -510,8 +519,9 @@ const highlightSquares = (stockfishInfoOutHistory, chess) => {
 
       <Chessboard
         squareStyles={highlightSquares(refStockfishInfoOutHistory.current,chess)}
+        boardStyle={highlightBoard(refMovePerformance.current)}
         showNotation={true}
-        width={refBoardWidth.current}
+        width={refBoardWidth.current} 
         position={refFen.current}
         orientation={playerColor=='w' ? 'white' : 'black'}
         onDrop={(move) =>
@@ -570,6 +580,10 @@ const highlightSquares = (stockfishInfoOutHistory, chess) => {
           evaluation={{evaluation: stockfishInfoOutEvaluationRef.current.cp/100,depth: stockfishInfoOutEvaluationRef.current.depth}}
           highlightAnalysis={highlightAnalysis}
           setHighlightAnalysis={setHighlightAnalysis}
+          avgPerf={avgPerf}
+          setAvgPerf={setAvgPerf}
+          medianPerf={medianPerf}
+          setMedianPerf={setMedianPerf}
       />
 
       <IonBadge>Import PGN</IonBadge>
