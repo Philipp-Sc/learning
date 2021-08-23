@@ -56,6 +56,10 @@ It is written using Ionic, Capacitorjs and Expressjs.
 
 * **@highlight analysis** if active the analysis is shown live on the board as the engine opponent evaluates the position.
 
+* **@highligh avg. perf.** if active the board is highlighted either in green or in red based on your past performance at the current move number.
+* **@highligh median. perf.** if active the board is highlighted either in green or in red based on your past performance at the current move number.
+ (If **@highligh avg. perf.** and **@highligh median. perf.** are active the average of both is taken to determine the color.)
+
 
 *Actions (activate by tapping the labels or the pieces on the board!)*
 
