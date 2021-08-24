@@ -20,6 +20,8 @@ It is written using Ionic, Capacitorjs and Expressjs.
 * Show the players ELO rating and the best win in terms of @profile + @depth.
 * **@custom_book** Extend functionality: 1) Filter by Elo independent from current elo. 2) Allow the use of the engine pgn database as source. 3) Optional weighting of common opening moves. Still random but prefer common openings. 4) Allow user to provide pgn database.
 * **@engine move** add square coloring to board for 1) Played engine move, 2) during calculation all top choices, 3) during calculation the current top move, 4) no visualization and hiding evaluation
+* **@gpt3 comments** have gpt3 generated comments about opening information, ideas. Possibly ask gpt3 questions about your game plan. Get back a classification of your plan. Newbie, Expert, Grandmaster,..
+
 
 # Language
 * ...
