@@ -292,6 +292,11 @@ const AppContainer: React.FC = () => {
     setStockfishInfoOutHistory(stockfishOutList);
     refStockfishInfoOutHistory.current = stockfishOutList; 
 
+
+    const default_movePerformance : { average_eval: number, median_eval:number} = { average_eval: NaN,median_eval: NaN};
+    setMovePerformance(default_movePerformance);
+    refMovePerformance.current = default_movePerformance;
+
     setMoveTimestamp(new Date().getTime());
     };    
 
@@ -515,14 +520,19 @@ const highlightBoard = (movePerformance) => {
   
   return (
     <div className="container" id="app">
+      <div style={{marginTop:'10px', paddingRight: '30px'}}> 
+      <IonBadge>Elo: {playerElo}</IonBadge> 
+      <IonBadge>Latest win: {latestWin}</IonBadge> 
       <br/>
       <IonBadge onClick={() => {setElo(elo+100);refElo.current=refElo.current+100; if(refElo.current>max_elo){setElo(min_elo);refElo.current=min_elo;} }}>@profile {elo}</IonBadge>
       <IonBadge onClick={() => {setDepth(depth+1);refDepth.current=refDepth.current+1; if(refDepth.current==max_depth){setDepth(1);refDepth.current=1;} }}>@depth {depth}</IonBadge>
       <IonBadge onClick={() => {setUseBook(prev => !prev);refBook.current = !refBook.current;}}>@{useBook ? "custom_book" : "no_book"}</IonBadge>
-      <IonBadge onClick={() => {toggle_engine_tolerance()}}>@{"mistake_tolerance "+refEngineBlunderTolerance.current/10}</IonBadge>
-      
-      <IonBadge>{refSecToWait.current}</IonBadge>
+      <IonBadge onClick={() => {toggle_engine_tolerance()}}>@{"blunder_tolerance "+refEngineBlunderTolerance.current/10}</IonBadge>
+      </div>
 
+      <div style={{textAlign:'right', marginRight: '10px', marginTop: '-26px'}}>
+      <IonBadge>{refSecToWait.current}</IonBadge>
+      </div>
 
       <Chessboard
         squareStyles={highlightSquares(refStockfishInfoOutHistory.current,chess)}
@@ -576,9 +586,6 @@ const highlightBoard = (movePerformance) => {
 
       <IonBadge onClick={() => {setSecToWait(0);refSecToWait.current=0;}} >Force move!</IonBadge>
       <IonBadge onClick={() => {if(refSecToWait.current==0){setPlayerColor(color => color=='w' ? 'b' : 'w');if(playerColor=='w' || refHalfMoves.current>0){engine_turn();}}}}>Switch sides!</IonBadge>
-      <br/><br/>
-      <IonBadge>Elo: {playerElo}</IonBadge> 
-      <IonBadge>Latest win: {latestWin}</IonBadge> 
       <br/><br/>
 
       <ChessMetaContent 
