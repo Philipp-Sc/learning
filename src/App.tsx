@@ -11,7 +11,7 @@ import {
 import { IonReactRouter, IonReactMemoryRouter } from '@ionic/react-router';
 import { createMemoryHistory} from 'history';
 
-import { createGesture, Gesture } from '@ionic/react';
+import { createGesture, Gesture, setupConfig } from '@ionic/react';
 
 //import { ellipse, square, triangle } from 'ionicons/icons';
 import Tab1 from './pages/Tab1';
@@ -79,6 +79,10 @@ const App: React.FC = () => {
           onMove: ev => console.log(ev)
         });
   gesture.enable(true);
+ 
+  setupConfig({
+    swipeBackEnabled: false
+  });
 
   return (
    <IonApp>
