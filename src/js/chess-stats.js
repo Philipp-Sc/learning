@@ -41,25 +41,24 @@ function material(fen){
 			// ['unusual {high, low} material (white)']
         "Material {black}": totalMaterialBlack,
 			// ['unusual {high, low} material (black)']
-        "P count": piecesWhite.filter(e => e=='P').length,
-        "p count": piecesBlack.filter(e => e=='p').length,
-        "N count": piecesWhite.filter(e => e=='N').length,
-        "n count": piecesBlack.filter(e => e=='n').length,
-        "B count": piecesWhite.filter(e => e=='B').length,
-        "b count": piecesBlack.filter(e => e=='b').length,
-        "R count": piecesWhite.filter(e => e=='R').length,
-        "r count": piecesBlack.filter(e => e=='r').length,
-        "Q count": piecesWhite.filter(e => e=='Q').length,
-        "q count": piecesBlack.filter(e => e=='q').length,
-			// ['unusual {high, low} {Pawn, Knight, Bishop, Rook, Queen} count']
-        "B > n": (piecesWhite.filter(e => e=='B').length > piecesBlack.filter(e => e=='n').length) ? 1 : 0,
-			// ['unusual {high, low} amount of bishops vs opponement knights']
-        "N > b": (piecesWhite.filter(e => e=='N').length > piecesBlack.filter(e => e=='b').length) ? 1 : 0,
-			// ['unusual {high, low} amount of knights vs opponement bishops']
-        "B == N": (piecesWhite.filter(e => e=='B').length == piecesWhite.filter(e => e=='N').length) ? 1 : 0,
-			// ['unusual {high, low} value for equal number of knights and bishops']
-        "P == p": (piecesWhite.filter(e => e=='P').length == piecesBlack.filter(e => e=='p').length) ? 1 : 0
-			// ['unusual {high, low} value for equal number of pawns']
+        "P count {white}": piecesWhite.filter(e => e=='P').length,
+        "p count {black}": piecesBlack.filter(e => e=='p').length,
+        "N count {white}": piecesWhite.filter(e => e=='N').length,
+        "n count {black}": piecesBlack.filter(e => e=='n').length,
+        "B count {white}": piecesWhite.filter(e => e=='B').length,
+        "b count {black}": piecesBlack.filter(e => e=='b').length,
+        "R count {white}": piecesWhite.filter(e => e=='R').length,
+        "r count {black}": piecesBlack.filter(e => e=='r').length,
+        "Q count {white}": piecesWhite.filter(e => e=='Q').length,
+        "q count {black}": piecesBlack.filter(e => e=='q').length, 
+        "B > n {white}": (piecesWhite.filter(e => e=='B').length > piecesBlack.filter(e => e=='n').length) ? 1 : 0, 
+        "N > b {white}": (piecesWhite.filter(e => e=='N').length > piecesBlack.filter(e => e=='b').length) ? 1 : 0, 
+        "B == N {white}": (piecesWhite.filter(e => e=='B').length == piecesWhite.filter(e => e=='N').length) ? 1 : 0, 
+        "P == p {white}": (piecesWhite.filter(e => e=='P').length == piecesBlack.filter(e => e=='p').length) ? 1 : 0,
+        "b > N {black}": (piecesBlack.filter(e => e=='b').length > piecesWhite.filter(e => e=='N').length) ? 1 : 0, 
+        "n > B {black}": (piecesBlack.filter(e => e=='n').length > piecesWhite.filter(e => e=='B').length) ? 1 : 0, 
+        "b == n {black}": (piecesBlack.filter(e => e=='b').length == piecesBlack.filter(e => e=='n').length) ? 1 : 0, 
+        "p == P {black}": (piecesBlack.filter(e => e=='p').length == piecesWhite.filter(e => e=='P').length) ? 1 : 0 
     }
 }
 
@@ -103,30 +102,18 @@ function package_density(fen){
       }
   }
   return {
-       "Pawn protected squares ratio (excluding: protected pawns, overprotection)": out_.both["Pawn protected squares (excluding: protected pawns, overprotection)"],
-			// ['unusual {high, low} pawn outward protected squares ratio']
-       "Pawn protected squares per pawn ratio (excluding: protected pawns, overprotection)": out_.both["Pawn protected squares per pawn (excluding: protected pawns, overprotection)"],
-			// ['unusual {high, low} outward protected square per pawn ratio']
-       "Pawn over protected squares ratio (excluding: protected pawns)": out_.both["Pawn over protected squares (excluding: protected pawns)"],
-      // ['unusual {high, low} pawn over(outward)protection ratio']
-       "Pawn packing density ratio (excluding: prodected pawns)": out_.both["Pawn packing density (excluding: prodected pawns)"],
-      // ['unusual {high, low} pawn outward packing density ratio']
-       "Pawn protected squares (excluding: protected pawns, overprotection) {white}": out_.color.w["Pawn protected squares (excluding: protected pawns, overprotection)"],
-      // ['unusual {high, low} pawn outward protected squares w']
-       "Pawn protected squares per pawn (excluding: protected pawns, overprotection) {white}": out_.color.w["Pawn protected squares per pawn (excluding: protected pawns, overprotection)"],
-      // ['unusual {high, low} outward protected square per pawn w']
-       "Pawn over protected squares (excluding: protected pawns) {white}": out_.color.w["Pawn over protected squares (excluding: protected pawns)"],
-      // ['unusual {high, low} pawn over(outward)protection w']
-       "Pawn packing density (excluding: prodected pawns) {white}": out_.color.w["Pawn packing density (excluding: prodected pawns)"],
-      // ['unusual {high, low} pawn outward packing density w']
-       "Pawn protected squares (excluding: protected pawns, overprotection) {black}": out_.color.b["Pawn protected squares (excluding: protected pawns, overprotection)"],
-      // ['unusual {high, low} pawn outward protected squares b']
-       "Pawn protected squares per pawn (excluding: protected pawns, overprotection) {black}": out_.color.b["Pawn protected squares per pawn (excluding: protected pawns, overprotection)"],
-      // ['unusual {high, low} outward protected square per pawn b']
-       "Pawn over protected squares (excluding: protected pawns) {black}": out_.color.b["Pawn over protected squares (excluding: protected pawns)"],
-      // ['unusual {high, low} pawn over(outward)protection b']
-       "Pawn packing density (excluding: prodected pawns) {black}": out_.color.b["Pawn packing density (excluding: prodected pawns)"],
-      // ['unusual {high, low} pawn outward packing density b']
+       "Protected-squares ratio (excl. pieces as defenders, protected pawns, overprotection)": out_.both["Pawn protected squares (excluding: protected pawns, overprotection)"],
+			 "Protected-squares per pawn ratio (excl. pieces as defenders, protected pawns, overprotection)": out_.both["Pawn protected squares per pawn (excluding: protected pawns, overprotection)"],
+			 "Over-protected-squares ratio (excl. pieces as defenders, protected pawns)": out_.both["Pawn over protected squares (excluding: protected pawns)"],
+       "Packing density ratio (excl. pieces as defenders, prodected pawns)": out_.both["Pawn packing density (excluding: prodected pawns)"],
+       "Protected-squares (excl. pieces as defenders, protected pawns, overprotection) {white}": out_.color.w["Pawn protected squares (excluding: protected pawns, overprotection)"],
+       "Protected-squares per pawn (excl. pieces as defenders, protected pawns, overprotection) {white}": out_.color.w["Pawn protected squares per pawn (excluding: protected pawns, overprotection)"],
+       "Over-protected-squares (excl. pieces as defenders, protected pawns) {white}": out_.color.w["Pawn over protected squares (excluding: protected pawns)"],
+       "Packing density (excl. pieces as defenders, prodected pawns) {white}": out_.color.w["Pawn packing density (excluding: prodected pawns)"],
+       "Protected-squares (excl. pieces as defenders, protected pawns, overprotection) {black}": out_.color.b["Pawn protected squares (excluding: protected pawns, overprotection)"],
+       "Protected-squares per pawn (excl. pieces as defenders, protected pawns, overprotection) {black}": out_.color.b["Pawn protected squares per pawn (excluding: protected pawns, overprotection)"],
+       "Over-protected squares (excl. pieces as defenders, protected pawns) {black}": out_.color.b["Pawn over protected squares (excluding: protected pawns)"],
+       "Packing density (excl. pieces as defenders, protected pawns) {black}": out_.color.b["Pawn packing density (excluding: prodected pawns)"]
   } 
 }
 
@@ -139,23 +126,23 @@ function expansion_factor(fen){
     var temp11 = [temp10[1]/temp10[0],temp10[3]/temp10[2],temp10[5]/temp10[4]].map(e => isNaN(e) ? 0 : e==Infinity? 0 : e)
 
     return {
-			"Expansion factor Queen Side":  temp11[0],
+			"Expansion Factor Queen Side":  temp11[0],
 			// ['unusual {high, low} Queen Side Expansion']
-			"Expansion factor King Side": temp11[1],
+			"Expansion Factor King Side": temp11[1],
 			// ['unusual {high, low} King Side Expansion']
-			"Expansion factor King Side {white}": temp10[0],
+			"Expansion Factor King Side {white}": temp10[0],
 			// ['unusual {high, low} Queen Side Expansion (white)']
-			"Expansion factor King Side {black}": temp10[1],
+			"Expansion Factor King Side {black}": temp10[1],
 			// ['unusual {high, low} Queen Side Expansion (black)']
-			"Expansion factor Queen Side {white}": temp10[2],
+			"Expansion Factor Queen Side {white}": temp10[2],
 			// ['unusual {high, low} King Side Expansion (white)']
-			"Expansion factor Queen Side {black}": temp10[3],
+			"Expansion Factor Queen Side {black}": temp10[3],
 			// ['unusual {high, low} King Side Expansion (black)']
-			"Expansion factor": temp11[2],
+			"Expansion Factor": temp11[2],
 			// ['unusual {high, low} Expansion']
-			"Expansion factor {white}": temp10[4],
+			"Expansion Factor {white}": temp10[4],
 			// ['unusual {high, low} Expansion (white)']
-   			"Expansion factor {black}": temp10[5],
+   		"Expansion Factor {black}": temp10[5],
 			// ['unusual {high, low} Expansion (black)']
     }
 }
@@ -198,13 +185,13 @@ function mobility(game, fen, last_move){
     var non_pawn_moves = moves.filter(e => e.toLowerCase()!=e) 
 
    	return {
-   	"Opponement Mobility (all)": moves.length,
-   	"Opponement Mobility (pieces)": non_pawn_moves.length,	
-   	"Opponement Mobility (pawns)": pawn_moves.length/(getColorOfMove(last_move)=="b" ? piecesWhite.filter(e => e=='P').length : piecesBlack.filter(e => e=='p').length),
-	  "Opponement Mobility (pieces) per Minor Pieces": non_pawn_moves.filter(e => !e.includes('Q') && !e.includes('K')).length/(getColorOfMove(last_move)=="b" ? piecesWhite.filter(e => e=='B' || e=='N' || e=='R').length : piecesBlack.filter(e => e=='b' || e=='n' || e=='r').length),
-		"Opponement Mobility (pieces) per Major Pieces": non_pawn_moves.filter(e => !e.includes('Q') && !e.includes('K')).length/(getColorOfMove(last_move)=="b" ? piecesWhite.filter(e => e=='Q' || e=='R').length : piecesBlack.filter(e => e=='q' || e=='r').length),
+   	"Opponement Mobility (All)": moves.length,
+   	"Opponement Mobility (Pieces)": non_pawn_moves.length,	
+   	"Opponement Mobility (Pawns)": pawn_moves.length/(getColorOfMove(last_move)=="b" ? piecesWhite.filter(e => e=='P').length : piecesBlack.filter(e => e=='p').length),
+	  "Opponement Mobility (Pieces) per Minor Piece": non_pawn_moves.filter(e => !e.includes('Q') && !e.includes('K')).length/(getColorOfMove(last_move)=="b" ? piecesWhite.filter(e => e=='B' || e=='N' || e=='R').length : piecesBlack.filter(e => e=='b' || e=='n' || e=='r').length),
+		"Opponement Mobility (Pieces) per Major Piece": non_pawn_moves.filter(e => !e.includes('Q') && !e.includes('K')).length/(getColorOfMove(last_move)=="b" ? piecesWhite.filter(e => e=='Q' || e=='R').length : piecesBlack.filter(e => e=='q' || e=='r').length),
    	// ['unusual {high, low} total mobility']
-  	"Opponement Mobility (pawns) per pawn": pawn_moves.length/(getColorOfMove(last_move)=="b" ? piecesWhite.filter(e => e=='P').length : piecesBlack.filter(e => e=='p').length)
+  	"Opponement Mobility (Pawns) per Pawn": pawn_moves.length/(getColorOfMove(last_move)=="b" ? piecesWhite.filter(e => e=='P').length : piecesBlack.filter(e => e=='p').length)
 		// ['unusual {high, low} pawn mobility']
 	 	// ['unusual {high, low} piece mobility per {Queen, King, Minor Piece, Major Piece}']
    	}
