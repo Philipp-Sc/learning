@@ -10,6 +10,9 @@ import {
 } from '@ionic/react';
 import { IonReactRouter, IonReactMemoryRouter } from '@ionic/react-router';
 import { createMemoryHistory} from 'history';
+
+import { createGesture, Gesture } from '@ionic/react';
+
 //import { ellipse, square, triangle } from 'ionicons/icons';
 import Tab1 from './pages/Tab1';
 import Tab2 from './pages/Tab2';
@@ -67,11 +70,21 @@ const App: React.FC = () => {
 
   const browserHistory = createMemoryHistory();
 
+  // fixes annoying unintended iOS left swipe
+  let gesture = createGesture({
+          el: document.getElementById('root'),
+          threshold: 0,
+          gestureName: 'my-gesture',
+          gesturePriority: 40.5, // priority of swipe to go back is 40 
+          onMove: ev => console.log(ev)
+        });
+  gesture.enable(true);
+
   return (
    <IonApp>
     <IonReactMemoryRouter history={browserHistory}>
       <IonTabs>
-        <IonRouterOutlet>
+        <IonRouterOutlet swipeGesture={false}>
           <Route path="/faq" component={Faq} exact={true} />
           <Route path="/signup" component={Signup} exact={true} />
           <Route path="/about" component={About} exact={true} />
