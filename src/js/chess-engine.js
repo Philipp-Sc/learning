@@ -25,6 +25,7 @@ const initEngine = (messageListener) => {
 }
 
 export const startEngine = (messageListener) => {
+  console.log(window.sf_version);
   if(window.stockfish){
     initEngine(messageListener);
    }else{

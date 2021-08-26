@@ -142,6 +142,9 @@ const AppContainer: React.FC = () => {
   const [movePerformance, setMovePerformance] = useState(default_movePerformance);
   const refMovePerformance = useRef(movePerformance);
 
+  const [notificationOut,setNotificationOut] = useState([]);
+  const refNotificationOut = useRef(notificationOut);
+
   const [showActionSheet, setShowActionSheet] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalIndex, setModalIndex] = useState<number>(0);
@@ -192,6 +195,18 @@ const AppContainer: React.FC = () => {
     if (chess.move(move)) {
       setFen(chess.fen());   
       refFen.current=chess.fen();
+
+
+      window.my_stats_now = chess_stats.getStatisticsForPosition(chess,chess.history({verbose:true}).reverse()[0]);
+      window.stats_opp = chess_meta[playerColor=="w" ? "white" : "black"][halfMoves];
+      delete window.stats_opp["game count"];
+      delete window.stats_opp["index"];
+      delete window.stats_opp["Material"];
+      //logic here !
+      var notification = chess_stats.getDistanceVectorForStatistics({'playerStats':window.my_stats_now,'stats': window.stats_opp})
+      .filter(e => e.includes(playerColor=="w" ? "{white}" : "{black}")).map(e => e.replace(playerColor=="w" ? "{white}" : "{black}",""));
+      setNotificationOut(notification);
+      refNotificationOut.current=notification;
 
       document.dispatchEvent(new Event('move_executed'))   
       engine_turn();
@@ -424,23 +439,15 @@ const highlightBoard = (movePerformance) => {
             setMoveReady(true)
             refMoveReady.current=true; 
             document.dispatchEvent(new Event('move_ready')) 
-          } 
-          //console.log("position_info_list_at_depth added:")
-          //console.log(parseInt(line.split(" multipv ")[1].split(" ")[0])-1)
-          //console.log(position_info_list_at_depth[parseInt(line.split(" multipv ")[1].split(" ")[0])-1]) 
+          }  
         }         
-      }
-      //console.log(line)
+      } 
       if(line.split(" ")[0]=="bestmove"){
         console.log(line)
         setEngineOn(false);
-        refEngineOn.current=false;  
-        //console.log(line.split(" ")[1])
-        //applyMove(line.split(" ")[1])
+        refEngineOn.current=false;   
       }
     }
-
-    console.log(window.sf_version);
 
     chess_engine.startEngine(messageListener);
 
@@ -500,8 +507,8 @@ const highlightBoard = (movePerformance) => {
 
       if(create_aggregated_data_development_option){
         // create skill profile 
-        skill_profile = await chess_stats.getSkillProfile(refElo.current,depth_for_database)
-        console.log(JSON.stringify(skill_profile)) 
+        // skill_profile = await chess_stats.getSkillProfile(refElo.current,depth_for_database)
+        // console.log(JSON.stringify(skill_profile)) 
         // create game (best-play) statistics
         chess_stats.getGameStatistics("w")
         chess_stats.getGameStatistics("b")
@@ -602,6 +609,7 @@ const highlightBoard = (movePerformance) => {
           setAvgPerf={setAvgPerf}
           medianPerf={medianPerf}
           setMedianPerf={setMedianPerf}
+          notificationOut={refNotificationOut.current}
       />
 
       <IonBadge>Import PGN</IonBadge>

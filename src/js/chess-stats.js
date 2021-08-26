@@ -35,9 +35,12 @@ function material(fen){
     var totalMaterialBlack = countMaterial(piecesBlack);
 
     return {
-    	"Material": totalMaterialWhite+totalMaterialBlack,
-        "Material w": totalMaterialWhite,
-        "Material b": totalMaterialBlack,
+    	  "Total Material": totalMaterialWhite+totalMaterialBlack,
+			// ['unusual {high, low} total material']
+        "Material {white}": totalMaterialWhite,
+			// ['unusual {high, low} material (white)']
+        "Material {black}": totalMaterialBlack,
+			// ['unusual {high, low} material (black)']
         "P count": piecesWhite.filter(e => e=='P').length,
         "p count": piecesBlack.filter(e => e=='p').length,
         "N count": piecesWhite.filter(e => e=='N').length,
@@ -48,10 +51,15 @@ function material(fen){
         "r count": piecesBlack.filter(e => e=='r').length,
         "Q count": piecesWhite.filter(e => e=='Q').length,
         "q count": piecesBlack.filter(e => e=='q').length,
+			// ['unusual {high, low} {Pawn, Knight, Bishop, Rook, Queen} count']
         "B > n": (piecesWhite.filter(e => e=='B').length > piecesBlack.filter(e => e=='n').length) ? 1 : 0,
+			// ['unusual {high, low} amount of bishops vs opponement knights']
         "N > b": (piecesWhite.filter(e => e=='N').length > piecesBlack.filter(e => e=='b').length) ? 1 : 0,
+			// ['unusual {high, low} amount of knights vs opponement bishops']
         "B == N": (piecesWhite.filter(e => e=='B').length == piecesWhite.filter(e => e=='N').length) ? 1 : 0,
+			// ['unusual {high, low} value for equal number of knights and bishops']
         "P == p": (piecesWhite.filter(e => e=='P').length == piecesBlack.filter(e => e=='p').length) ? 1 : 0
+			// ['unusual {high, low} value for equal number of pawns']
     }
 }
 
@@ -71,41 +79,54 @@ function package_density(fen){
 
     var out = {
       w: {moves: moves_w,
-        "pawn outward protected squares": new Set(moves_w.map(e => e.split("x")[1])).size,
-        "outward protected square per pawn": new Set(moves_w.map(e => e.split("x")[1])).size/w_pawn_count,
-        "pawn over(outward)protection": moves_w.map(e => e.split("x")[1]).length/(new Set(moves_w.map(e => e.split("x")[1])).size),
-        "pawn outward packing density": moves_w.map(e => e.split("x")[1]).length / w_pawn_count
+        "Pawn protected squares (excluding: protected pawns, overprotection)": new Set(moves_w.map(e => e.split("x")[1])).size,
+        "Pawn protected squares per pawn (excluding: protected pawns, overprotection)": new Set(moves_w.map(e => e.split("x")[1])).size/w_pawn_count,
+        "Pawn over protected squares (excluding: protected pawns)": moves_w.map(e => e.split("x")[1]).length - (new Set(moves_w.map(e => e.split("x")[1])).size),
+        "Pawn packing density (excluding: prodected pawns)": moves_w.map(e => e.split("x")[1]).length / w_pawn_count
+        // exposed surface area per pawn
         },
       b:{moves: moves_b,
-        "pawn outward protected squares": new Set(moves_b.map(e => e.split("x")[1])).size,
-        "outward protected square per pawn": new Set(moves_b.map(e => e.split("x")[1])).size/b_pawn_count,
-        "pawn over(outward)protection": moves_b.map(e => e.split("x")[1]).length/(new Set(moves_b.map(e => e.split("x")[1])).size),
-        "pawn outward packing density": moves_b.map(e => e.split("x")[1]).length / b_pawn_count
+        "Pawn protected squares (excluding: protected pawns, overprotection)": new Set(moves_b.map(e => e.split("x")[1])).size,
+        "Pawn protected squares per pawn (excluding: protected pawns, overprotection)": new Set(moves_b.map(e => e.split("x")[1])).size/b_pawn_count,
+        "Pawn over protected squares (excluding: protected pawns)": moves_b.map(e => e.split("x")[1]).length - (new Set(moves_b.map(e => e.split("x")[1])).size),
+        "Pawn packing density (excluding: prodected pawns)": moves_b.map(e => e.split("x")[1]).length / b_pawn_count
         }
     }
     var out_ = {
       color:out,
       both: {
-        "pawn outward protected squares": out.w["pawn outward protected squares"]/out.b["pawn outward protected squares"],
-        "outward protected square per pawn": out.w["outward protected square per pawn"]/out.b["outward protected square per pawn"],
-        "pawn over(outward)protection": out.w["pawn over(outward)protection"]/out.b["pawn over(outward)protection"],
-        "pawn outward packing density": out.w["pawn outward packing density"]/out.b["pawn outward packing density"]
+        "Pawn protected squares (excluding: protected pawns, overprotection)": out.w["Pawn protected squares (excluding: protected pawns, overprotection)"]/out.b["Pawn protected squares (excluding: protected pawns, overprotection)"],
+        "Pawn protected squares per pawn (excluding: protected pawns, overprotection)": out.w["Pawn protected squares per pawn (excluding: protected pawns, overprotection)"]/out.b["Pawn protected squares per pawn (excluding: protected pawns, overprotection)"],
+        "Pawn over protected squares (excluding: protected pawns)": out.w["Pawn over protected squares (excluding: protected pawns)"] - out.b["Pawn over protected squares (excluding: protected pawns)"],
+        "Pawn packing density (excluding: prodected pawns)": out.w["Pawn packing density (excluding: prodected pawns)"]/out.b["Pawn packing density (excluding: prodected pawns)"]
        
       }
   }
   return {
-       "pawn outward protected squares ratio": out_.both["pawn outward protected squares"],
-       "outward protected square per pawn ratio": out_.both["outward protected square per pawn"],
-       "pawn over(outward)protection ratio": out_.both["pawn over(outward)protection"],
-       "pawn outward packing density ratio": out_.both["pawn outward packing density"],
-       "pawn outward protected squares w": out_.color.w["pawn outward protected squares"],
-       "outward protected square per pawn w": out_.color.w["outward protected square per pawn"],
-       "pawn over(outward)protection w": out_.color.w["pawn over(outward)protection"],
-       "pawn outward packing density w": out_.color.w["pawn outward packing density"],
-       "pawn outward protected squares b": out_.color.b["pawn outward protected squares"],
-       "outward protected square per pawn b": out_.color.b["outward protected square per pawn"],
-       "pawn over(outward)protection b": out_.color.b["pawn over(outward)protection"],
-       "pawn outward packing density b": out_.color.b["pawn outward packing density"],
+       "Pawn protected squares ratio (excluding: protected pawns, overprotection)": out_.both["Pawn protected squares (excluding: protected pawns, overprotection)"],
+			// ['unusual {high, low} pawn outward protected squares ratio']
+       "Pawn protected squares per pawn ratio (excluding: protected pawns, overprotection)": out_.both["Pawn protected squares per pawn (excluding: protected pawns, overprotection)"],
+			// ['unusual {high, low} outward protected square per pawn ratio']
+       "Pawn over protected squares ratio (excluding: protected pawns)": out_.both["Pawn over protected squares (excluding: protected pawns)"],
+      // ['unusual {high, low} pawn over(outward)protection ratio']
+       "Pawn packing density ratio (excluding: prodected pawns)": out_.both["Pawn packing density (excluding: prodected pawns)"],
+      // ['unusual {high, low} pawn outward packing density ratio']
+       "Pawn protected squares (excluding: protected pawns, overprotection) {white}": out_.color.w["Pawn protected squares (excluding: protected pawns, overprotection)"],
+      // ['unusual {high, low} pawn outward protected squares w']
+       "Pawn protected squares per pawn (excluding: protected pawns, overprotection) {white}": out_.color.w["Pawn protected squares per pawn (excluding: protected pawns, overprotection)"],
+      // ['unusual {high, low} outward protected square per pawn w']
+       "Pawn over protected squares (excluding: protected pawns) {white}": out_.color.w["Pawn over protected squares (excluding: protected pawns)"],
+      // ['unusual {high, low} pawn over(outward)protection w']
+       "Pawn packing density (excluding: prodected pawns) {white}": out_.color.w["Pawn packing density (excluding: prodected pawns)"],
+      // ['unusual {high, low} pawn outward packing density w']
+       "Pawn protected squares (excluding: protected pawns, overprotection) {black}": out_.color.b["Pawn protected squares (excluding: protected pawns, overprotection)"],
+      // ['unusual {high, low} pawn outward protected squares b']
+       "Pawn protected squares per pawn (excluding: protected pawns, overprotection) {black}": out_.color.b["Pawn protected squares per pawn (excluding: protected pawns, overprotection)"],
+      // ['unusual {high, low} outward protected square per pawn b']
+       "Pawn over protected squares (excluding: protected pawns) {black}": out_.color.b["Pawn over protected squares (excluding: protected pawns)"],
+      // ['unusual {high, low} pawn over(outward)protection b']
+       "Pawn packing density (excluding: prodected pawns) {black}": out_.color.b["Pawn packing density (excluding: prodected pawns)"],
+      // ['unusual {high, low} pawn outward packing density b']
   } 
 }
 
@@ -119,78 +140,120 @@ function expansion_factor(fen){
 
     return {
 			"Expansion factor Queen Side":  temp11[0],
+			// ['unusual {high, low} Queen Side Expansion']
 			"Expansion factor King Side": temp11[1],
-			"Expansion factor Queen Side w": temp10[0],
-			"Expansion factor Queen Side b": temp10[1],
-			"Expansion factor King Side w": temp10[2],
-			"Expansion factor King Side b": temp10[3],
+			// ['unusual {high, low} King Side Expansion']
+			"Expansion factor King Side {white}": temp10[0],
+			// ['unusual {high, low} Queen Side Expansion (white)']
+			"Expansion factor King Side {black}": temp10[1],
+			// ['unusual {high, low} Queen Side Expansion (black)']
+			"Expansion factor Queen Side {white}": temp10[2],
+			// ['unusual {high, low} King Side Expansion (white)']
+			"Expansion factor Queen Side {black}": temp10[3],
+			// ['unusual {high, low} King Side Expansion (black)']
 			"Expansion factor": temp11[2],
-			"Expansion factor w": temp10[4],
-   			"Expansion factor b": temp10[5],
+			// ['unusual {high, low} Expansion']
+			"Expansion factor {white}": temp10[4],
+			// ['unusual {high, low} Expansion (white)']
+   			"Expansion factor {black}": temp10[5],
+			// ['unusual {high, low} Expansion (black)']
     }
 }
 
+
+function getColorOfMove(last_move){
+	if(last_move.turn){
+		return last_move.turn;
+	}else{
+		return last_move.color;
+	}
+}
+
+function getNotationOfMove(last_move){
+	if(last_move.notation){
+		return last_move.notation.notation;
+	}else{
+		return last_move.san;
+	}
+}
+
+function getFigureOfMove(last_move){
+	if(last_move.notation){
+		return last_move.notation.fig;
+	}else{
+		if(last_move.piece=="p"){
+			return null;
+		}
+		return last_move.color=='w' ? last_move.piece.toUpperCase() : last_move.piece.toLowerCase();
+	}
+}
+
 function mobility(game, fen, last_move){
-	var fen_ = fen.split(" ")[0].split("");
+	  var fen_ = fen.split(" ")[0].split("");
 
     var piecesWhite = fen_.filter(e => filterPieces("white",e));
     var piecesBlack = fen_.filter(e => filterPieces("black",e));
-	var moves = game.moves();
+	  var moves = game.moves();
     var pawn_moves = moves.filter(e => e.length==2 && e.toLowerCase()==e);
-    var non_pawn_moves = moves.filter(e => e.toLowerCase()!=e)
-   
-   	return {
-   	"Opponement Mobility": moves.length,
-		"Opponement Mobility / Pieces": moves.length/(last_move.turn=="b" ? fen_.filter(e => filterPieces("white",e) || e=='K').length : fen_.filter(e => filterPieces("black",e) || e=='k').length),
-		"Opponement Mobility / Knights": moves.length/(last_move.turn=="b" ? fen_.filter(e => e=='N').length : fen_.filter(e => e=='n').length),
-		"Opponement Mobility / Bishops": moves.length/(last_move.turn=="b" ? fen_.filter(e => e=='B').length : fen_.filter(e => e=='b').length),
-		"Opponement Mobility / Rooks": moves.length/(last_move.turn=="b" ? fen_.filter(e => e=='R').length : fen_.filter(e => e=='r').length),
-		"Opponement Mobility / Pawns": pawn_moves.length/(last_move.turn=="b" ? piecesWhite.filter(e => e=='P').length : piecesBlack.filter(e => e=='p').length),
-		"Opponement Mobility / Queens": non_pawn_moves.filter(e => e.includes('Q')).length/(last_move.turn=="b" ? piecesWhite.filter(e => e=='Q').length : piecesBlack.filter(e => e=='q').length),
-		"Opponement Mobility / King": non_pawn_moves.filter(e => e.includes('K')).length/(last_move.turn=="b" ? piecesWhite.filter(e => e=='K').length : piecesBlack.filter(e => e=='k').length),
-		"Opponement Mobility / Minor Pieces": non_pawn_moves.filter(e => !e.includes('Q') && !e.includes('K')).length/(last_move.turn=="b" ? piecesWhite.filter(e => e=='B' || e=='N' || e=='R').length : piecesBlack.filter(e => e=='b' || e=='n' || e=='r').length),
-		"Opponement Mobility / Major Pieces": non_pawn_moves.filter(e => !e.includes('Q') && !e.includes('K')).length/(last_move.turn=="b" ? piecesWhite.filter(e => e=='Q' || e=='R').length : piecesBlack.filter(e => e=='q' || e=='r').length),
+    var non_pawn_moves = moves.filter(e => e.toLowerCase()!=e) 
 
+   	return {
+   	"Opponement Mobility (all)": moves.length,
+   	"Opponement Mobility (pieces)": non_pawn_moves.length,	
+   	"Opponement Mobility (pawns)": pawn_moves.length/(getColorOfMove(last_move)=="b" ? piecesWhite.filter(e => e=='P').length : piecesBlack.filter(e => e=='p').length),
+	  "Opponement Mobility (pieces) per Minor Pieces": non_pawn_moves.filter(e => !e.includes('Q') && !e.includes('K')).length/(getColorOfMove(last_move)=="b" ? piecesWhite.filter(e => e=='B' || e=='N' || e=='R').length : piecesBlack.filter(e => e=='b' || e=='n' || e=='r').length),
+		"Opponement Mobility (pieces) per Major Pieces": non_pawn_moves.filter(e => !e.includes('Q') && !e.includes('K')).length/(getColorOfMove(last_move)=="b" ? piecesWhite.filter(e => e=='Q' || e=='R').length : piecesBlack.filter(e => e=='q' || e=='r').length),
+   	// ['unusual {high, low} total mobility']
+  	"Opponement Mobility (pawns) per pawn": pawn_moves.length/(getColorOfMove(last_move)=="b" ? piecesWhite.filter(e => e=='P').length : piecesBlack.filter(e => e=='p').length)
+		// ['unusual {high, low} pawn mobility']
+	 	// ['unusual {high, low} piece mobility per {Queen, King, Minor Piece, Major Piece}']
    	}
 }
 
+
+
 function info_move(last_move){
 	return {
-			"P": (last_move.turn=="w" && !last_move.notation.notation.includes('x') && last_move.notation.notation.toLowerCase() == last_move.notation.notation && last_move.notation.fig==null)  ? 1 : 0,
-			"p": (last_move.turn=="b" && !last_move.notation.notation.includes('x') && last_move.notation.notation.toLowerCase() == last_move.notation.notation && last_move.notation.fig==null)  ? 1 : 0,
-			"B": (last_move.turn=="w" && !last_move.notation.notation.includes('x') && last_move.notation.notation.toLowerCase() != last_move.notation.notation && last_move.notation.fig=="B")  ? 1 : 0,
-			"b": (last_move.turn=="b" && !last_move.notation.notation.includes('x') && last_move.notation.notation.toLowerCase() != last_move.notation.notation && last_move.notation.fig=="B")  ? 1 : 0,
-			"N": (last_move.turn=="w" && !last_move.notation.notation.includes('x') && last_move.notation.notation.toLowerCase() != last_move.notation.notation && last_move.notation.fig=="N")  ? 1 : 0,
-			"n": (last_move.turn=="b" && !last_move.notation.notation.includes('x') && last_move.notation.notation.toLowerCase() != last_move.notation.notation && last_move.notation.fig=="N")  ? 1 : 0,
-			"R": (last_move.turn=="w" && !last_move.notation.notation.includes('x') && last_move.notation.notation.toLowerCase() != last_move.notation.notation && last_move.notation.fig=="R")  ? 1 : 0,
-			"r": (last_move.turn=="b" && !last_move.notation.notation.includes('x') && last_move.notation.notation.toLowerCase() != last_move.notation.notation && last_move.notation.fig=="R")  ? 1 : 0,
-			"Q": (last_move.turn=="w" && !last_move.notation.notation.includes('x') && last_move.notation.notation.toLowerCase() != last_move.notation.notation && last_move.notation.fig=="Q")  ? 1 : 0,
-			"q": (last_move.turn=="b" && !last_move.notation.notation.includes('x') && last_move.notation.notation.toLowerCase() != last_move.notation.notation && last_move.notation.fig=="Q")  ? 1 : 0,
-			"K": (last_move.turn=="w" && !last_move.notation.notation.includes('x') && last_move.notation.notation.toLowerCase() != last_move.notation.notation && last_move.notation.fig=="K")  ? 1 : 0,
-			"k": (last_move.turn=="b" && !last_move.notation.notation.includes('x') && last_move.notation.notation.toLowerCase() != last_move.notation.notation && last_move.notation.fig=="K")  ? 1 : 0,
-			"Px": (last_move.turn=="w" && last_move.notation.notation.includes('x') && last_move.notation.notation.toLowerCase() == last_move.notation.notation && last_move.notation.fig==null)  ? 1 : 0,
-			"px": (last_move.turn=="b" && last_move.notation.notation.includes('x') && last_move.notation.notation.toLowerCase() == last_move.notation.notation && last_move.notation.fig==null)  ? 1 : 0,
-			"Bx": (last_move.turn=="w" && last_move.notation.notation.includes('x') && last_move.notation.notation.toLowerCase() != last_move.notation.notation && last_move.notation.fig=="B")  ? 1 : 0,
-			"bx": (last_move.turn=="b" && last_move.notation.notation.includes('x') && last_move.notation.notation.toLowerCase() != last_move.notation.notation && last_move.notation.fig=="B")  ? 1 : 0,
-			"Nx": (last_move.turn=="w" && last_move.notation.notation.includes('x') && last_move.notation.notation.toLowerCase() != last_move.notation.notation && last_move.notation.fig=="N")  ? 1 : 0,
-			"nx": (last_move.turn=="b" && last_move.notation.notation.includes('x') && last_move.notation.notation.toLowerCase() != last_move.notation.notation && last_move.notation.fig=="N")  ? 1 : 0,
-			"Qx": (last_move.turn=="w" && last_move.notation.notation.includes('x') && last_move.notation.notation.toLowerCase() != last_move.notation.notation && last_move.notation.fig=="Q")  ? 1 : 0,
-			"qx": (last_move.turn=="b" && last_move.notation.notation.includes('x') && last_move.notation.notation.toLowerCase() != last_move.notation.notation && last_move.notation.fig=="Q")  ? 1 : 0,
-			"Rx": (last_move.turn=="w" && last_move.notation.notation.includes('x') && last_move.notation.notation.toLowerCase() != last_move.notation.notation && last_move.notation.fig=="R")  ? 1 : 0,
-			"rx": (last_move.turn=="b" && last_move.notation.notation.includes('x') && last_move.notation.notation.toLowerCase() != last_move.notation.notation && last_move.notation.fig=="R")  ? 1 : 0,
-			"Kx": (last_move.turn=="w" && last_move.notation.notation.includes('x') && last_move.notation.notation.toLowerCase() != last_move.notation.notation && last_move.notation.fig=="K")  ? 1 : 0,
-			"kx": (last_move.turn=="b" && last_move.notation.notation.includes('x') && last_move.notation.notation.toLowerCase() != last_move.notation.notation && last_move.notation.fig=="K")  ? 1 : 0,
-			"Bx || Nx": (last_move.turn=="w" && last_move.notation.notation.includes('x') && last_move.notation.notation.toLowerCase() != last_move.notation.notation && (last_move.notation.fig=="B" || last_move.notation.fig=="N") )  ? 1 : 0,
-			"bx || nx": (last_move.turn=="b" && last_move.notation.notation.includes('x') && last_move.notation.notation.toLowerCase() != last_move.notation.notation && (last_move.notation.fig=="B" || last_move.notation.fig=="N") )  ? 1 : 0,
-			"0-0 w": (last_move.turn=="w" && last_move.notation.notation=="O-O")  ? 1 : 0,
-			"0-0 b": (last_move.turn=="b" && last_move.notation.notation=="O-O")  ? 1 : 0,
-			"0-0-0 w": (last_move.turn=="w" && last_move.notation.notation=="O-O-O")  ? 1 : 0,
-			"0-0-0 b": (last_move.turn=="b" && last_move.notation.notation=="O-O-O")  ? 1 : 0
+			"Pawn move played {white}": (getColorOfMove(last_move)=="w" && !getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() == getNotationOfMove(last_move) && getFigureOfMove(last_move)==null)  ? 1 : 0,
+			"Pawn move played {black}": (getColorOfMove(last_move)=="b" && !getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() == getNotationOfMove(last_move) && getFigureOfMove(last_move)==null)  ? 1 : 0,
+			"Bishop move played {white}": (getColorOfMove(last_move)=="w" && !getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="B")  ? 1 : 0,
+			"Bishop move played {black}": (getColorOfMove(last_move)=="b" && !getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="B")  ? 1 : 0,
+			"Knight move played {white}": (getColorOfMove(last_move)=="w" && !getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="N")  ? 1 : 0,
+			"Knight move played {black}": (getColorOfMove(last_move)=="b" && !getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="N")  ? 1 : 0,
+			"Rook move played {white}": (getColorOfMove(last_move)=="w" && !getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="R")  ? 1 : 0,
+			"Rook move played {black}": (getColorOfMove(last_move)=="b" && !getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="R")  ? 1 : 0,
+			"Queen move played {white}": (getColorOfMove(last_move)=="w" && !getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="Q")  ? 1 : 0,
+			"Queen move played {black}": (getColorOfMove(last_move)=="b" && !getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="Q")  ? 1 : 0,
+			"King move played {white}": (getColorOfMove(last_move)=="w" && !getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="K")  ? 1 : 0,
+			"King move played {black}": (getColorOfMove(last_move)=="b" && !getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="K")  ? 1 : 0,
+			// ['unusual {high, low} number of {Pawn, Bishop, Knight, Queen, King, Rook} moves']
+			"Px move played {white}": (getColorOfMove(last_move)=="w" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() == getNotationOfMove(last_move) && getFigureOfMove(last_move)==null)  ? 1 : 0,
+			"px move played {black}": (getColorOfMove(last_move)=="b" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() == getNotationOfMove(last_move) && getFigureOfMove(last_move)==null)  ? 1 : 0,
+			"Bx move played {white}": (getColorOfMove(last_move)=="w" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="B")  ? 1 : 0,
+			"bx move played {black}": (getColorOfMove(last_move)=="b" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="B")  ? 1 : 0,
+			"Nx move played {white}": (getColorOfMove(last_move)=="w" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="N")  ? 1 : 0,
+			"nx move played {black}": (getColorOfMove(last_move)=="b" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="N")  ? 1 : 0,
+			"Qx move played {white}": (getColorOfMove(last_move)=="w" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="Q")  ? 1 : 0,
+			"qx move played {black}": (getColorOfMove(last_move)=="b" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="Q")  ? 1 : 0,
+			"Rx move played {white}": (getColorOfMove(last_move)=="w" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="R")  ? 1 : 0,
+			"rx move played {black}": (getColorOfMove(last_move)=="b" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="R")  ? 1 : 0,
+			"Kx move played {white}": (getColorOfMove(last_move)=="w" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="K")  ? 1 : 0,
+			"kx move played {black}": (getColorOfMove(last_move)=="b" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="K")  ? 1 : 0,
+			// ['unusual {high, low} number of {Pawns, Bishops, Knights, Queens, Kings, Rooks} captures']
+			"Bx or Nx move played {white}": (getColorOfMove(last_move)=="w" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && (getFigureOfMove(last_move)=="B" || getFigureOfMove(last_move)=="N") )  ? 1 : 0,
+			"bx or nx move played {black}": (getColorOfMove(last_move)=="b" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && (getFigureOfMove(last_move)=="B" || getFigureOfMove(last_move)=="N") )  ? 1 : 0,
+			// ['unusual {high, low} number of minor piece captures']
+			"0-0 move played {white}": (getColorOfMove(last_move)=="w" && getNotationOfMove(last_move)=="O-O")  ? 1 : 0,
+			"0-0 move played {black}": (getColorOfMove(last_move)=="b" && getNotationOfMove(last_move)=="O-O")  ? 1 : 0,
+			// ['{early, average, late} castling timing']
+			"0-0-0 move played {white}": (getColorOfMove(last_move)=="w" && getNotationOfMove(last_move)=="O-O-O")  ? 1 : 0,
+			"0-0-0 move played {black}": (getColorOfMove(last_move)=="b" && getNotationOfMove(last_move)=="O-O-O")  ? 1 : 0
+			// ['{early, average, late} queen side castling timing']
 	}
 }
 
 
-function getStatisticsForPosition(new_game,last_move) {
+export function getStatisticsForPosition(new_game,last_move) {
                 var fen = new_game.fen();
 
 				var material_ = material(fen);
@@ -220,6 +283,32 @@ function sum(ob1, ob2) {
         }  
       })
       return sum;
+}
+
+export function getDistanceVectorForStatistics(stats){
+	var stats1 = stats.playerStats;
+	var stats2 = stats.stats;
+	let vector = {}
+	Object.keys(stats1).forEach(key => {
+        if (stats2.hasOwnProperty(key)) {
+        	var diff = Math.abs(stats1[key] - stats2[key]);
+        	if(diff>0.1 && stats2!=Infinity){
+        	  vector[key] = [" ("+(stats1[key] > stats2[key] ? "+" : "-")+diff.toFixed(2)+") "+key,diff,stats1[key],stats2[key]];
+        	}
+        }  
+      })
+
+		// Create items array
+	var items = Object.keys(vector).map(function(key) {
+	  return vector[key];
+	});
+
+	// Sort the array based on the second element
+	items.sort(function(first, second) {
+	  return second[1] - first[1];
+	});
+
+	return	items.map(entry => entry[0]);
 }
 
 

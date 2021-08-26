@@ -22,3 +22,7 @@
 .container a {
   text-decoration: none;
 }
+
+.item, .item .sc-ion-label-ios-h {
+  white-space: normal;
+}

@@ -34,10 +34,11 @@ interface ContainerProps {
   setAvgPerf: () => void;
   medianPerf: boolean;
   setMedianPerf: () => void;
+  notificationOut: string;
 }
 
 
-const ChessMetaContent: React.FC<ContainerProps> = ({halfMoves,playerColor,movePerformance,live,evaluation,highlightAnalysis,setHighlightAnalysis,avgPerf,setAvgPerf,medianPerf,setMedianPerf}) => {
+const ChessMetaContent: React.FC<ContainerProps> = ({halfMoves,playerColor,movePerformance,live,evaluation,highlightAnalysis,setHighlightAnalysis,avgPerf,setAvgPerf,medianPerf,setMedianPerf,notificationOut}) => {
  
  	const game_stats = chess_meta[playerColor=="w" ? "white" : "black"];
 
@@ -48,7 +49,7 @@ const ChessMetaContent: React.FC<ContainerProps> = ({halfMoves,playerColor,moveP
   // find statistics that can put a probability on a question/statement
   // (eventually use NNs)
   // if there is a suddden change of the probability (0->1 or 1->0) then push the question/statement to the player.
-
+/*
   const notificationOut = ["The King of the opponent is on the same file (e) as the Knight of yours",
                            "You have a degree of freedom (D.O.F) of 4 to do anything.",
                            "I'm impressed! You are making a very interesting choice here. ",
@@ -57,6 +58,19 @@ const ChessMetaContent: React.FC<ContainerProps> = ({halfMoves,playerColor,moveP
                            "You have a good control of the center.",
                            "You have opposite side castles.",
                            "You made to many pawn moves."]
+*/
+
+  // notify about the most unusual statistics
+  // e.g unusual number of pawn moves
+  // e.g unusual early exchange of minor piece
+  // e.g unusual early castle
+  // e.g unusual late castle
+  // e.g 
+
+  // v0 = dist(vector position, vector position stats)
+  // v1
+  // return b1[i] = abs(v0[i]-v1[i]) if > 0
+  
 
 	return <div> 
 
