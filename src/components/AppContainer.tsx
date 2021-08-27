@@ -406,10 +406,11 @@ const highlightBoard = (movePerformance) => {
 
 const exportToLichess = async() => {
    const requestOptions = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ "pgn": player_pgn_db_ref.current[player_pgn_db_ref.current.length-1] })
-    };
+        method: 'POST', 
+        headers: { 
+        'Content-Type': 'application/x-www-form-urlencoded' },
+        body: "pgn="+player_pgn_db_ref.current[player_pgn_db_ref.current.length-1] 
+    }; 
     const response = await fetch('https://lichess.org/api/import', requestOptions);
     const data = await response.json();
     if(response.ok){
