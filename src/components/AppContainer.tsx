@@ -404,7 +404,7 @@ const highlightBoard = (movePerformance) => {
 
 }
 
-const exportToLichess = async() => {
+const getLichessUrlForImport = async() => {
    const requestOptions = {
         method: 'POST', 
         headers: { 
@@ -414,8 +414,17 @@ const exportToLichess = async() => {
     const response = await fetch('https://lichess.org/api/import', requestOptions);
     const data = await response.json();
     if(response.ok){
-      window.open(data.url, '_blank');
+      return data.url;
+    }else{
+      return "https://lichess.org";
     }
+}
+
+const exportToLichess = () => {
+  var windowReference = window.open();
+  getLichessUrlForImport().then(function(url) {
+     windowReference.location = url;
+  });
 }
  
  useEffect(() => { 
