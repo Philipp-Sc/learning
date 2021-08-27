@@ -18,15 +18,12 @@ It is written using Ionic, Capacitorjs and Expressjs.
 # Chess
 * **@self_play** Have the opponement play the same opening and eventually mirror your playing style based on your past games. Bobby Fisher has been known to play himself. Alpha Zero was trained using self play.
 * **@custom_book** Extend functionality: 1) Filter by Elo independent from current elo. 2) Allow the use of the engine pgn database as source. 3) Optional weighting of common opening moves. Still random but prefer common openings. 4) Allow user to provide pgn database.
-<<<<<<< HEAD
-* **@engine move** add square coloring to board for 1) Played engine move, 2) during calculation all top choices, 3) during calculation the current top move, 4) no visualization and hiding evaluation
+
 * **@gpt3 comments** have gpt3 generated comments about opening information, ideas. Possibly ask gpt3 questions about your game plan. Get back a classification of your plan. Newbie, Expert, Grandmaster,..
 
-=======
 * Add Statistics to **Latest win**, Number of moves, Blunders, Avg. centiepawn loss. 
 * Highlight the Statistical Measures (Degree of Freedom, Mobility, Expansion factor, Protected squares, Packing density) if possible on the board.
 * Improve the Visualization of the Statistical Measures, make it intuitive. (e.g Illustrations, Charts, Explainations)
->>>>>>> ea1f310cb215a5e7b89a02d26f37854c07e163b1
 
 # Language
 * ...
@@ -56,17 +53,17 @@ It is written using Ionic, Capacitorjs and Expressjs.
 
 
 * **@mistake_tolerance [0-1]** if you make a mistake or blunder that worsens your position (evaluated by the engine) so far bellow the given threshold the engine will take advantage and try to win. E.g a @mistake_tolerance 0.5 means if your position is about half a pawn worse then the engine will try to win by playing the top rated moves. 
-* **@depth [1-19]** engine search depth, the higher the depth the more accurate the evaluation. 
+* **@depth [1-19]** engine search depth, the higher the depth the more accurate the evaluation. It will give the engine more good moves to fallback to.
 * **@no_book / @ custom_book** use the pgn chess database for the first 5 opening moves, use this parameter to have more human like games.
 
 
 *Below the board:*
 
-* **@highlight analysis** if active the analysis is shown live on the board as the engine opponent evaluates the position.
+* **@analysis** if active the analysis is shown live on the board as the engine opponent evaluates the position.
 
-* **@highligh avg. perf.** if active the board is highlighted either in green or in red based on your past performance at the current move number.
-* **@highligh median. perf.** if active the board is highlighted either in green or in red based on your past performance at the current move number.
- (If **@highligh avg. perf.** and **@highligh median. perf.** are active the average of both is taken to determine the color.)
+* **@avg. perf.** if active the board is highlighted either in green or in red based on your past performance at the current move number.
+* **@median. perf.** if active the board is highlighted either in green or in red based on your past performance at the current move number.
+ (If **@avg. perf.** and **@median. perf.** are active the average of both is taken to determine the color.)
 
 *Actions (activate by tapping the labels or the pieces on the board!)*
 

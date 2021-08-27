@@ -30,15 +30,17 @@ interface ContainerProps {
   live: Evaluation;
   highlightAnalysis: boolean;
   setHighlightAnalysis: () => void;
+  highlightEngine: boolean;
+  setHighlightEngine: () => void;
   avgPerf: boolean;
   setAvgPerf: () => void;
   medianPerf: boolean;
   setMedianPerf: () => void;
-  notificationOut: string;
+  notificationOut: string[];
 }
 
 
-const ChessMetaContent: React.FC<ContainerProps> = ({halfMoves,playerColor,movePerformance,live,evaluation,highlightAnalysis,setHighlightAnalysis,avgPerf,setAvgPerf,medianPerf,setMedianPerf,notificationOut}) => {
+const ChessMetaContent: React.FC<ContainerProps> = ({halfMoves,playerColor,movePerformance,live,evaluation,highlightAnalysis,setHighlightAnalysis,highlightEngine,setHighlightEngine,avgPerf,setAvgPerf,medianPerf,setMedianPerf,notificationOut}) => {
  
  	const game_stats = chess_meta[playerColor=="w" ? "white" : "black"];
 
@@ -46,31 +48,18 @@ const ChessMetaContent: React.FC<ContainerProps> = ({halfMoves,playerColor,moveP
   const median_player_perf = (-1*movePerformance.median_eval).toFixed(2);
 
 
-  // find statistics that can put a probability on a question/statement
-  // (eventually use NNs)
-  // if there is a suddden change of the probability (0->1 or 1->0) then push the question/statement to the player.
-/*
-  const notificationOut = ["The King of the opponent is on the same file (e) as the Knight of yours",
-                           "You have a degree of freedom (D.O.F) of 4 to do anything.",
-                           "I'm impressed! You are making a very interesting choice here. ",
-                           "You got the bishop pair but you have no mobility",
-                           "You gained space on the queenside",
-                           "You have a good control of the center.",
-                           "You have opposite side castles.",
-                           "You made to many pawn moves."]
-*/
+   // Show functionality, as long as selected, update chess board with visualization of given parameter
+   // Add on touch/click on item, dropdown box with chart
 
-  // notify about the most unusual statistics
-  // e.g unusual number of pawn moves
-  // e.g unusual early exchange of minor piece
-  // e.g unusual early castle
-  // e.g unusual late castle
-  // e.g 
+   // Show "P move played", "B move Played",.. together as one notification
+   // "3rd most probable move played ( 10% B, 20% N, >>5% P<<,1%Q, 0% K)" showing the order of the probabilities
+   // Same Idea for Px,Nx,Bx,Kx,Qx
 
-  // v0 = dist(vector position, vector position stats)
-  // v1
-  // return b1[i] = abs(v0[i]-v1[i]) if > 0
-  
+   // --> make probabilities more usefull by combining them, with the move history
+   // at Move N how likely is it that there have been M Knight moves
+   
+   // FIX BUG WHERE Analysis is not updated for the second, third, ... game.
+   // this happens because somehow the last indices are still there, only after halfmove n+1 the analysis continues to show
 
 	return <div> 
 
@@ -80,7 +69,7 @@ const ChessMetaContent: React.FC<ContainerProps> = ({halfMoves,playerColor,moveP
               <IonLabel>{e}</IonLabel>
             </IonItem>
             <IonItemOptions side="end">
-              <IonItemOption onClick={() => {}}>Unread</IonItemOption>
+              <IonItemOption onClick={() => {}}>Show</IonItemOption>
             </IonItemOptions>
           </IonItemSliding>})}
           
@@ -90,7 +79,7 @@ const ChessMetaContent: React.FC<ContainerProps> = ({halfMoves,playerColor,moveP
 
        <IonBadge onClick={() => {setHighlightAnalysis(!highlightAnalysis)}}>{highlightAnalysis ? "@(+) " : "@"}analysis: {isNaN(live.evaluation) ? "No data available" : ((-1*live.evaluation)+" @depth "+live.depth)}</IonBadge>
        <br/>
-       <IonBadge>@engine move: {isNaN(evaluation.evaluation) ? "No data available" : (-1*evaluation.evaluation)+" @depth "+evaluation.depth}</IonBadge>
+       <IonBadge onClick={() => {setHighlightEngine(!highlightEngine)}}>{highlightEngine ? "@(+) " : "@"}engine move: {isNaN(evaluation.evaluation) ? "No data available" : (-1*evaluation.evaluation)+" @depth "+evaluation.depth}</IonBadge>
            <br/><br/>
        <IonBadge  onClick={() => {setAvgPerf(!avgPerf)}}>{avgPerf ? "@(+) " : "@"}avg. perf.: {isNaN(avg_player_perf) ? "No data available" : avg_player_perf}</IonBadge>
        <IonBadge  onClick={() => {setMedianPerf(!medianPerf)}}>{medianPerf ? "@(+) " : "@"}median perf.: {isNaN(median_player_perf) ? "No data available" : median_player_perf}</IonBadge>

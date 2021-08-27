@@ -201,40 +201,40 @@ function mobility(game, fen, last_move){
 
 function info_move(last_move){
 	return {
-			"Pawn move played {white}": (getColorOfMove(last_move)=="w" && !getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() == getNotationOfMove(last_move) && getFigureOfMove(last_move)==null)  ? 1 : 0,
-			"Pawn move played {black}": (getColorOfMove(last_move)=="b" && !getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() == getNotationOfMove(last_move) && getFigureOfMove(last_move)==null)  ? 1 : 0,
-			"Bishop move played {white}": (getColorOfMove(last_move)=="w" && !getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="B")  ? 1 : 0,
-			"Bishop move played {black}": (getColorOfMove(last_move)=="b" && !getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="B")  ? 1 : 0,
-			"Knight move played {white}": (getColorOfMove(last_move)=="w" && !getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="N")  ? 1 : 0,
-			"Knight move played {black}": (getColorOfMove(last_move)=="b" && !getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="N")  ? 1 : 0,
-			"Rook move played {white}": (getColorOfMove(last_move)=="w" && !getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="R")  ? 1 : 0,
-			"Rook move played {black}": (getColorOfMove(last_move)=="b" && !getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="R")  ? 1 : 0,
-			"Queen move played {white}": (getColorOfMove(last_move)=="w" && !getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="Q")  ? 1 : 0,
-			"Queen move played {black}": (getColorOfMove(last_move)=="b" && !getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="Q")  ? 1 : 0,
-			"King move played {white}": (getColorOfMove(last_move)=="w" && !getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="K")  ? 1 : 0,
-			"King move played {black}": (getColorOfMove(last_move)=="b" && !getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="K")  ? 1 : 0,
+			"{fig} Pawn {white}": (getColorOfMove(last_move)=="w" && !getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() == getNotationOfMove(last_move) && getFigureOfMove(last_move)==null)  ? 1 : 0,
+			"{fig} Pawn {black}": (getColorOfMove(last_move)=="b" && !getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() == getNotationOfMove(last_move) && getFigureOfMove(last_move)==null)  ? 1 : 0,
+			"{fig} Bishop {white}": (getColorOfMove(last_move)=="w" && !getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="B")  ? 1 : 0,
+			"{fig} Bishop {black}": (getColorOfMove(last_move)=="b" && !getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="B")  ? 1 : 0,
+			"{fig} Knight {white}": (getColorOfMove(last_move)=="w" && !getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="N")  ? 1 : 0,
+			"{fig} Knight {black}": (getColorOfMove(last_move)=="b" && !getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="N")  ? 1 : 0,
+			"{fig} Rook {white}": (getColorOfMove(last_move)=="w" && !getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="R")  ? 1 : 0,
+			"{fig} Rook {black}": (getColorOfMove(last_move)=="b" && !getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="R")  ? 1 : 0,
+			"{fig} Queen {white}": (getColorOfMove(last_move)=="w" && !getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="Q")  ? 1 : 0,
+			"{fig} Queen {black}": (getColorOfMove(last_move)=="b" && !getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="Q")  ? 1 : 0,
+			"{fig} King {white}": (getColorOfMove(last_move)=="w" && !getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="K")  ? 1 : 0,
+			"{fig} King {black}": (getColorOfMove(last_move)=="b" && !getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="K")  ? 1 : 0,
 			// ['unusual {high, low} number of {Pawn, Bishop, Knight, Queen, King, Rook} moves']
-			"Px move played {white}": (getColorOfMove(last_move)=="w" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() == getNotationOfMove(last_move) && getFigureOfMove(last_move)==null)  ? 1 : 0,
-			"px move played {black}": (getColorOfMove(last_move)=="b" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() == getNotationOfMove(last_move) && getFigureOfMove(last_move)==null)  ? 1 : 0,
-			"Bx move played {white}": (getColorOfMove(last_move)=="w" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="B")  ? 1 : 0,
-			"bx move played {black}": (getColorOfMove(last_move)=="b" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="B")  ? 1 : 0,
-			"Nx move played {white}": (getColorOfMove(last_move)=="w" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="N")  ? 1 : 0,
-			"nx move played {black}": (getColorOfMove(last_move)=="b" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="N")  ? 1 : 0,
-			"Qx move played {white}": (getColorOfMove(last_move)=="w" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="Q")  ? 1 : 0,
-			"qx move played {black}": (getColorOfMove(last_move)=="b" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="Q")  ? 1 : 0,
-			"Rx move played {white}": (getColorOfMove(last_move)=="w" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="R")  ? 1 : 0,
-			"rx move played {black}": (getColorOfMove(last_move)=="b" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="R")  ? 1 : 0,
-			"Kx move played {white}": (getColorOfMove(last_move)=="w" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="K")  ? 1 : 0,
-			"kx move played {black}": (getColorOfMove(last_move)=="b" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="K")  ? 1 : 0,
+			"{capture} Px {white}": (getColorOfMove(last_move)=="w" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() == getNotationOfMove(last_move) && getFigureOfMove(last_move)==null)  ? 1 : 0,
+			"{capture} px {black}": (getColorOfMove(last_move)=="b" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() == getNotationOfMove(last_move) && getFigureOfMove(last_move)==null)  ? 1 : 0,
+			"{capture} Bx {white}": (getColorOfMove(last_move)=="w" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="B")  ? 1 : 0,
+			"{capture} bx {black}": (getColorOfMove(last_move)=="b" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="B")  ? 1 : 0,
+			"{capture} Nx {white}": (getColorOfMove(last_move)=="w" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="N")  ? 1 : 0,
+			"{capture} nx {black}": (getColorOfMove(last_move)=="b" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="N")  ? 1 : 0,
+			"{capture} Qx {white}": (getColorOfMove(last_move)=="w" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="Q")  ? 1 : 0,
+			"{capture} qx {black}": (getColorOfMove(last_move)=="b" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="Q")  ? 1 : 0,
+			"{capture} Rx {white}": (getColorOfMove(last_move)=="w" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="R")  ? 1 : 0,
+			"{capture} rx {black}": (getColorOfMove(last_move)=="b" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="R")  ? 1 : 0,
+			"{capture} Kx {white}": (getColorOfMove(last_move)=="w" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="K")  ? 1 : 0,
+			"{capture} kx {black}": (getColorOfMove(last_move)=="b" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && getFigureOfMove(last_move)=="K")  ? 1 : 0,
 			// ['unusual {high, low} number of {Pawns, Bishops, Knights, Queens, Kings, Rooks} captures']
-			"Bx or Nx move played {white}": (getColorOfMove(last_move)=="w" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && (getFigureOfMove(last_move)=="B" || getFigureOfMove(last_move)=="N") )  ? 1 : 0,
-			"bx or nx move played {black}": (getColorOfMove(last_move)=="b" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && (getFigureOfMove(last_move)=="B" || getFigureOfMove(last_move)=="N") )  ? 1 : 0,
+			"{capture} Bx or Nx {white}": (getColorOfMove(last_move)=="w" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && (getFigureOfMove(last_move)=="B" || getFigureOfMove(last_move)=="N") )  ? 1 : 0,
+			"{capture} bx or nx {black}": (getColorOfMove(last_move)=="b" && getNotationOfMove(last_move).includes('x') && getNotationOfMove(last_move).toLowerCase() != getNotationOfMove(last_move) && (getFigureOfMove(last_move)=="B" || getFigureOfMove(last_move)=="N") )  ? 1 : 0,
 			// ['unusual {high, low} number of minor piece captures']
-			"0-0 move played {white}": (getColorOfMove(last_move)=="w" && getNotationOfMove(last_move)=="O-O")  ? 1 : 0,
-			"0-0 move played {black}": (getColorOfMove(last_move)=="b" && getNotationOfMove(last_move)=="O-O")  ? 1 : 0,
+			"{castle} 0-0 {white}": (getColorOfMove(last_move)=="w" && getNotationOfMove(last_move)=="O-O")  ? 1 : 0,
+			"{castle} 0-0 {black}": (getColorOfMove(last_move)=="b" && getNotationOfMove(last_move)=="O-O")  ? 1 : 0,
 			// ['{early, average, late} castling timing']
-			"0-0-0 move played {white}": (getColorOfMove(last_move)=="w" && getNotationOfMove(last_move)=="O-O-O")  ? 1 : 0,
-			"0-0-0 move played {black}": (getColorOfMove(last_move)=="b" && getNotationOfMove(last_move)=="O-O-O")  ? 1 : 0
+			"{castle} 0-0-0 {white}": (getColorOfMove(last_move)=="w" && getNotationOfMove(last_move)=="O-O-O")  ? 1 : 0,
+			"{castle} 0-0-0 {black}": (getColorOfMove(last_move)=="b" && getNotationOfMove(last_move)=="O-O-O")  ? 1 : 0
 			// ['{early, average, late} queen side castling timing']
 	}
 }
@@ -279,8 +279,12 @@ export function getDistanceVectorForStatistics(stats){
 	Object.keys(stats1).forEach(key => {
         if (stats2.hasOwnProperty(key)) {
         	var diff = Math.abs(stats1[key] - stats2[key]);
-        	if(diff>0.1 && stats2!=Infinity){
-        	  vector[key] = [" ("+(stats1[key] > stats2[key] ? "+" : "-")+diff.toFixed(2)+") "+key,diff,stats1[key],stats2[key]];
+        	if(diff>0.1 && stats2!=Infinity){ 
+        		if(key.includes("{fig}") || key.includes("{capture}") || key.includes("{castle}")){
+        			vector[key] = [" ("+(stats1[key] > stats2[key] ? ""+(100*Math.abs(diff-1)).toFixed(1)+"%) " : ""+(100*diff).toFixed(1)+"%) ")+key,diff,stats1[key],stats2[key]];
+        		}else{
+        	  	vector[key] = [" ("+(stats1[key] > stats2[key] ? "+" : "-")+diff.toFixed(2)+") "+key,diff,stats1[key],stats2[key]];
+        		}
         	}
         }  
       })

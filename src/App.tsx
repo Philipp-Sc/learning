@@ -76,7 +76,7 @@ const App: React.FC = () => {
           threshold: 0,
           gestureName: 'my-gesture',
           gesturePriority: 40.5, // priority of swipe to go back is 40 
-          onMove: ev => console.log(ev)
+ //         onMove: ev => console.log(ev)
         });
   gesture.enable(true);
  

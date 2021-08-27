@@ -101,6 +101,7 @@ const AppContainer: React.FC = () => {
   const refIsDraggable = useRef(isDraggable);
 
   const [highlightAnalysis,setHighlightAnalysis] = useState(true);
+  const [highlightEngine,setHighlightEngine] = useState(true);
   const [avgPerf,setAvgPerf] = useState(true);
   const [medianPerf,setMedianPerf] = useState(true);
 
@@ -159,36 +160,8 @@ const AppContainer: React.FC = () => {
         setLatestWin("@profile "+elo+" @depth "+depth);
       }
       var result = EloRating.calculate(playerElo, playerElo, playerWin==1,50);
-      setPlayerElo(result.playerRating)
-      if((chess.in_checkmate() && chess.turn()==playerColor) || resign){   
-        if(min_elo==refElo.current){
-          if(1==refDepth.current){
-          }else{
-            setElo(max_elo);
-            refElo.current=max_elo;
-            setDepth(depth-1);
-            refDepth.current=refDepth.current-1;
-          }
-        }else{
-          setElo(elo-100);
-          refElo.current=refElo.current-100;
-        } 
-      }else if(!chess.in_draw()){    
-        if(max_elo==refElo.current){
-          if(max_depth==refDepth.current){
-          }else{
-            setElo(min_elo);
-            refElo.current=min_elo;
-            setDepth(depth+1);
-            refDepth.current=refDepth.current+1;
-          }
-        }else{
-          setElo(elo+100);
-          refElo.current=refElo.current+100
-        } 
-      }
+      setPlayerElo(result.playerRating) 
     } 
-
   }
 
   const handleMove = (move: ShortMove) => {
@@ -205,6 +178,20 @@ const AppContainer: React.FC = () => {
       //logic here !
       var notification = chess_stats.getDistanceVectorForStatistics({'playerStats':window.my_stats_now,'stats': window.stats_opp})
       .filter(e => e.includes(playerColor=="w" ? "{white}" : "{black}")).map(e => e.replace(playerColor=="w" ? "{white}" : "{black}",""));
+      notification = notification.map(e => {
+        if(e.includes("{fig}")){
+          return "Probabilities were: \n"+notification.filter(e => e.includes("{fig}")).map(e => e.replace("{fig}","")).join("\n")
+        }
+        if(e.includes("{capture}")){
+          return "Probabilities were: \n"+notification.filter(e => e.includes("{capture}")).map(e => e.replace("{capture}","")).join("\n")
+        }
+        if(e.includes("{castle}")){
+          return "Probabilities were: \n"+notification.filter(e => e.includes("{castle}")).map(e => e.replace("{castle}","")).join("\n")
+        }
+        return e.replace("(excl.","\n(excl.")
+      })
+      notification = Array.from(new Set(notification)); 
+
       setNotificationOut(notification);
       refNotificationOut.current=notification;
 
@@ -303,14 +290,14 @@ const AppContainer: React.FC = () => {
     setStockfishInfoOutEvaluation(stockfishInfoOutDefault)
     stockfishInfoOutEvaluationRef.current = stockfishInfoOutDefault; 
 
-    const stockfishOutList : StockfishInfoOut[]  = [];
-    setStockfishInfoOutHistory(stockfishOutList);
-    refStockfishInfoOutHistory.current = stockfishOutList; 
+    var temp0 : StockfishInfoOut[]  = [];
+    setStockfishInfoOutHistory(temp0);
+    refStockfishInfoOutHistory.current = temp0; 
 
 
-    const default_movePerformance : { average_eval: number, median_eval:number} = { average_eval: NaN,median_eval: NaN};
-    setMovePerformance(default_movePerformance);
-    refMovePerformance.current = default_movePerformance;
+    var temp1 = { average_eval: NaN,median_eval: NaN};
+    setMovePerformance(temp1);
+    refMovePerformance.current = temp1;
 
     setMoveTimestamp(new Date().getTime());
     };    
@@ -384,6 +371,18 @@ const highlightSquares = (stockfishInfoOutHistory, chess) => {
           squares[move.to].backgroundColor = 'rgba('+(a*-1>=0 ? 0 : 255)+','+(a*-1>=0 ? 255 : 0)+',0,'+(Math.min(1,Math.abs(a)))+')'
         }
       } 
+
+      if(highlightEngine && stockfishInfoOutHistory.length>=1){
+         stockfishInfoOutHistory.filter(e => e.move==refHalfMoves.current).forEach(e => {
+                  var a = (e || {cp: NaN}).cp/100;
+                  var game = new Chess(chess.fen());
+                  game.move(e.pv, { sloppy: true });
+                  var move = game.history({ verbose: true }).reverse()[0];
+                  if(move){ 
+                  squares[move.to].backgroundColor = 'rgba(0,0,255,'+(Math.min(1,Math.abs(0.5+a)))+')'
+                  }
+                })
+      }
       return squares;
 }
 
@@ -403,6 +402,19 @@ const highlightBoard = (movePerformance) => {
           boxShadow: `0 10px 30px `+'rgba('+(a*-1>=0 ? 0 : 255)+','+(a*-1>=0 ? 255 : 0)+',0,'+(Math.min(1,Math.abs(a)))+')'
         }
 
+}
+
+const exportToLichess = async() => {
+   const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ "pgn": player_pgn_db_ref.current[player_pgn_db_ref.current.length-1] })
+    };
+    const response = await fetch('https://lichess.org/api/import', requestOptions);
+    const data = await response.json();
+    if(response.ok){
+      window.open(data.url, '_blank');
+    }
 }
  
  useEffect(() => { 
@@ -605,15 +617,16 @@ const highlightBoard = (movePerformance) => {
           evaluation={{evaluation: stockfishInfoOutEvaluationRef.current.cp/100,depth: stockfishInfoOutEvaluationRef.current.depth}}
           highlightAnalysis={highlightAnalysis}
           setHighlightAnalysis={setHighlightAnalysis}
+          highlightEngine={highlightEngine}
+          setHighlightEngine={setHighlightEngine}
           avgPerf={avgPerf}
           setAvgPerf={setAvgPerf}
           medianPerf={medianPerf}
           setMedianPerf={setMedianPerf}
           notificationOut={refNotificationOut.current}
       />
-
-      <IonBadge>Import PGN</IonBadge>
-      <IonBadge>Export PGN</IonBadge><br/><br/><br/><br/><br/><br/>
+ 
+      <IonBadge onClick={() => {exportToLichess()}}>Export Last Game To Lichess</IonBadge><br/><br/><br/><br/><br/><br/>
     </div>
   );
 }; 
