@@ -379,3 +379,33 @@ export async function getSkillProfile(elo,depth) {
        return Array(269).fill(0).map((e,i)=> processing(games)(i)).map(processing2); 
      })
 }
+
+export function getNotification(chess, playerColor, halfMoves){
+
+	 if(halfMoves>0){ 
+          var my_stats_now = getStatisticsForPosition(chess,chess.history({verbose:true}).reverse()[0]);
+          var stats_opp = chess_meta[playerColor=="w" ? "white" : "black"][halfMoves];
+          delete stats_opp["game count"];
+          delete stats_opp["index"];
+          delete stats_opp["Material"]; 
+
+          var notification = getDistanceVectorForStatistics({'playerStats':my_stats_now,'stats': stats_opp})
+          .filter(e => e.includes(playerColor=="w" ? "{white}" : "{black}")).map(e => e.replace(playerColor=="w" ? "{white}" : "{black}",""));
+          notification = notification.map(e => {
+            if(e.includes("{fig}")){
+              return "Probabilities were: \n"+notification.filter(e => e.includes("{fig}")).map(e => e.replace("{fig}","")).join("\n")
+            }
+            if(e.includes("{capture}")){
+              return "Probabilities were: \n"+notification.filter(e => e.includes("{capture}")).map(e => e.replace("{capture}","")).join("\n")
+            }
+            if(e.includes("{castle}")){
+              return "Probabilities were: \n"+notification.filter(e => e.includes("{castle}")).map(e => e.replace("{castle}","")).join("\n")
+            }
+            return e.replace("(excl.","\n(excl.")
+          })
+          return Array.from(new Set(notification)); 
+ 
+        }else{
+          return [];
+        }
+}

@@ -87,6 +87,7 @@ const AppContainer: React.FC = () => {
 
   const [stockfishInfoOutEvaluation, setStockfishInfoOutEvaluation] = useState(stockfishInfoOutDefault);
   const stockfishInfoOutEvaluationRef = useRef(stockfishInfoOutEvaluation);
+  // TODO change into list, to have a history here as well. Will allow us to go back
 
   const [stockfishOutHistory, setStockfishInfoOutHistory] = useState(stockfishOutList);
   const refStockfishInfoOutHistory = useRef(stockfishOutHistory); 
@@ -159,6 +160,40 @@ const AppContainer: React.FC = () => {
 // put into objects. to reduce size of passing!
 
 // app chess logic
+
+  const takeBackMove = () => {
+      if(refHalfMoves.current<=0){
+        return;
+      } 
+      if(refEngineOn.current==false || (refEngineOn.current && refEngineOnPrevMove.current!=refHalfMoves.current)){ 
+        if(refEngineOn.current && refEngineOnPrevMove.current!=refHalfMoves.current){
+          // @ts-ignore
+          window.stockfish.postMessage("stop");
+        }
+        chess.undo();
+        chess.undo();
+
+        refFen.current=chess.fen();
+        setFen(refFen.current);   
+
+        refHalfMoves.current = refHalfMoves.current - 2;
+        setHalfMoves(refHalfMoves.current)
+
+        refNotificationOut.current=chess_stats.getNotification(chess,playerColor,refHalfMoves.current);;
+        setNotificationOut(refNotificationOut.current);
+
+        refMovePerformance.current = chess_meta.historicPerformanceAtMoveNumber(refHalfMoves.current,{pgn_db: player_pgn_db_ref.current,pgn_analysis: player_pgn_analysis_ref.current});
+        setMovePerformance(refMovePerformance.current);
+
+      }else { 
+      if(refSecToWait.current > 0){
+        refSecToWait.current = 0;
+        setSecToWait(refSecToWait.current);
+      }
+      setTimeout(takeBackMove,300)
+    }
+  }
+
   const game_over = (resign=false) => {
     setGameCount(gameCount+1);
     if(chess.game_over() || resign){
@@ -174,34 +209,11 @@ const AppContainer: React.FC = () => {
 
   const handleMove = (move: ShortMove) => {
     if (chess.move(move)) {
-      setFen(chess.fen());   
-      refFen.current=chess.fen();
+        refFen.current=chess.fen();
+        setFen(refFen.current);   
 
-
-      window.my_stats_now = chess_stats.getStatisticsForPosition(chess,chess.history({verbose:true}).reverse()[0]);
-      window.stats_opp = chess_meta[playerColor=="w" ? "white" : "black"][halfMoves];
-      delete window.stats_opp["game count"];
-      delete window.stats_opp["index"];
-      delete window.stats_opp["Material"];
-      //logic here !
-      var notification = chess_stats.getDistanceVectorForStatistics({'playerStats':window.my_stats_now,'stats': window.stats_opp})
-      .filter(e => e.includes(playerColor=="w" ? "{white}" : "{black}")).map(e => e.replace(playerColor=="w" ? "{white}" : "{black}",""));
-      notification = notification.map(e => {
-        if(e.includes("{fig}")){
-          return "Probabilities were: \n"+notification.filter(e => e.includes("{fig}")).map(e => e.replace("{fig}","")).join("\n")
-        }
-        if(e.includes("{capture}")){
-          return "Probabilities were: \n"+notification.filter(e => e.includes("{capture}")).map(e => e.replace("{capture}","")).join("\n")
-        }
-        if(e.includes("{castle}")){
-          return "Probabilities were: \n"+notification.filter(e => e.includes("{castle}")).map(e => e.replace("{castle}","")).join("\n")
-        }
-        return e.replace("(excl.","\n(excl.")
-      })
-      notification = Array.from(new Set(notification)); 
-
-      refNotificationOut.current=notification;
-      setNotificationOut(notification);
+      refNotificationOut.current=chess_stats.getNotification(chess,playerColor,refHalfMoves.current);;
+      setNotificationOut(refNotificationOut.current);
 
       document.dispatchEvent(new Event('move_executed'))   
       engine_turn();
@@ -382,14 +394,12 @@ const AppContainer: React.FC = () => {
           if(refDepth.current==info.depth){ // only for the engine player @depth
              position_info_list_at_depth[info.multipv-1] = info;
           }  
-
           if(info.multipv-1==0){
             // get the best move
             refStockfishInfoOutHistory.current[info.move-1]=info; // -1 because the evaluation revers to the prev position
             // tell react to trigger a re-render on all components that use this useState. 
             setStockfishInfoOutHistory([...refStockfishInfoOutHistory.current]); 
           }
-          
 
           if(refMoveReady.current==false && position_info_list_at_depth.filter(e => e.move==refHalfMoves.current).length==refMultipv.current){
             if(refDebug.current) console.log("move_ready event")
@@ -557,6 +567,7 @@ const AppContainer: React.FC = () => {
 
       <IonBadge onClick={() => {setSecToWait(0);refSecToWait.current=0;}} >Force move!</IonBadge>
       <IonBadge onClick={() => {if(refSecToWait.current==0){setPlayerColor(color => color=='w' ? 'b' : 'w');if(playerColor=='w' || refHalfMoves.current>0){engine_turn();}}}}>Switch sides!</IonBadge>
+      <IonBadge onClick={() => takeBackMove()}>Take Back Move!</IonBadge>
       <br/><br/>
 
       <ChessMetaContent 
@@ -564,8 +575,8 @@ const AppContainer: React.FC = () => {
           playerColor={playerColor} 
           movePerformance={refMovePerformance.current}
           live={{ 
-            evaluation: (refStockfishInfoOutHistory.current[refStockfishInfoOutHistory.current.length-1] || {cp: NaN}).cp/100,
-            depth: (refStockfishInfoOutHistory.current[refStockfishInfoOutHistory.current.length-1] || {depth:NaN}).depth}}
+            evaluation: (refStockfishInfoOutHistory.current.filter(e => e.move<=refHalfMoves.current)[refStockfishInfoOutHistory.current.filter(e => e.move<=refHalfMoves.current).length-1] || {cp: NaN}).cp/100,
+            depth: (refStockfishInfoOutHistory.current.filter(e => e.move<=refHalfMoves.current)[refStockfishInfoOutHistory.current.filter(e => e.move<=refHalfMoves.current).length-1] || {depth:NaN}).depth}}
           evaluation={{evaluation: stockfishInfoOutEvaluationRef.current.cp/100,depth: stockfishInfoOutEvaluationRef.current.depth}}
           highlightAnalysis={highlightAnalysis}
           setHighlightAnalysis={setHighlightAnalysis}
