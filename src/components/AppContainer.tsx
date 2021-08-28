@@ -12,6 +12,10 @@ import * as chess_meta from "../js/chess-meta.js"
 import * as chess_stats from "../js/chess-stats.js"
 import * as chess_engine from "../js/chess-engine.js" 
 import * as chess_trainer from "../js/chess-trainer.js" 
+import * as lichess_api from "../js/lichess-api.js" 
+import * as chess_board_utils from "../js/chess-board-utils.js" 
+import {AdjustingInterval} from "../js/utilities.js"
+
 
 
 const Chess = require("chess.js");
@@ -151,6 +155,8 @@ const AppContainer: React.FC = () => {
   const [showActionSheet, setShowActionSheet] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalIndex, setModalIndex] = useState<number>(0);
+
+// put into objects. to reduce size of passing!
 
 // app chess logic
   const game_over = (resign=false) => {
@@ -353,89 +359,9 @@ const AppContainer: React.FC = () => {
       setSquareClicked(square);
     }
   }
-
-const highlightSquares = (stockfishInfoOutHistory, chess) => {
-      var board = {
-        columns: ["a", "b", "c", "d", "e", "f", "g", "h"],
-        rows: [8, 7, 6, 5, 4, 3, 2, 1]
-      };
-      var allSquares = board.columns.reduce(
-        (prev, next) => [...prev, ...board.rows.map(x => next + x)],
-        []
-      );
-      var squares = allSquares.map((e) => {var o = {};var v={backgroundColor: undefined}; o[e]=v; return o}).reduce(function(result, item) {
-        var key = Object.keys(item)[0]; 
-        result[key] = item[key];
-        return result;
-      }, {});
- 
-      if(highlightAnalysis && stockfishInfoOutHistory.length>=1){
-        var a = (stockfishInfoOutHistory[stockfishInfoOutHistory.length-1] || {cp: NaN}).cp/100;
-        var move = chess.history({ verbose: true })[stockfishInfoOutHistory.length-1];
-        if(move){ 
-          squares[move.to].backgroundColor = 'rgba('+(a*-1>=0 ? 0 : 255)+','+(a*-1>=0 ? 255 : 0)+',0,'+(Math.min(1,Math.abs(a)))+')'
-        }
-      } 
-
-      if(highlightEngine && stockfishInfoOutHistory.length>=1){
-         stockfishInfoOutHistory.filter(e => e.move==refHalfMoves.current).forEach(e => {
-                  var a = (e || {cp: NaN}).cp/100;
-                  var game = new Chess(chess.fen());
-                  game.move(e.pv, { sloppy: true });
-                  var move = game.history({ verbose: true }).reverse()[0];
-                  if(move){ 
-                  squares[move.to].backgroundColor = 'rgba(0,0,255,'+(Math.min(1,Math.abs(0.5+a)))+')'
-                  }
-                })
-      }
-      return squares;
-}
-
-const highlightBoard = (movePerformance) => {
-
-  var a = avgPerf ? movePerformance.average_eval :  movePerformance.median_eval;
-
-  if(medianPerf && avgPerf){
-    a = (a+movePerformance.median_eval)/2
-  }else if(!medianPerf && !avgPerf){
-    a = 0;
-  }
-
-  return {
-          marginBottom: '30px',
-          borderRadius: '5px',
-          boxShadow: `0 10px 30px `+'rgba('+(a*-1>=0 ? 0 : 255)+','+(a*-1>=0 ? 255 : 0)+',0,'+(Math.min(1,Math.abs(a)))+')'
-        }
-
-}
-
-const getLichessUrlForImport = async() => {
-   const requestOptions = {
-        method: 'POST', 
-        headers: { 
-        'Content-Type': 'application/x-www-form-urlencoded' },
-        body: "pgn="+player_pgn_db_ref.current[player_pgn_db_ref.current.length-1] 
-    }; 
-    const response = await fetch('https://lichess.org/api/import', requestOptions);
-    const data = await response.json();
-    if(response.ok){
-      return data.url;
-    }else{
-      return "https://lichess.org";
-    }
-}
-
-const exportToLichess = () => {
-  var windowReference = window.open();
-  getLichessUrlForImport().then(function(url) {
-     windowReference.location = url;
-  });
-}
  
  useEffect(() => { 
-
     window.addEventListener('resize',() => {setTimeout(() => {setBoardWidth(window.innerWidth); refBoardWidth.current=window.innerWidth;},500)});
-
     document.addEventListener("transition_engine_to_next_position", transition_engine_to_next_position.bind(null,false));
     document.addEventListener("move_ready", move_ready);
     document.addEventListener("move_executed", move_executed);
@@ -479,17 +405,14 @@ const exportToLichess = () => {
         setEngineOn(false);
       }
     }
-
     chess_engine.startEngine(messageListener);
-
     }, []);  
 
   useEffect(() => {   
     if(pieceUpdated){
       setShowActionSheet(true);
       setPieceUpdated(false);
-    } 
-    // set popup
+    }  
     }, [pieceUpdated]);  
 
   useEffect(() => { 
@@ -500,7 +423,17 @@ const exportToLichess = () => {
  
   useEffect(() => {  
     if(refSecToWait.current>0){
-      setTimeout(() => {setSecToWait(Math.max(0,refSecToWait.current-1));refSecToWait.current=Math.max(0,refSecToWait.current-1);},1000);
+      if(window.ticker){
+        // continue
+      }else{
+        // start
+        window.ticker = new AdjustingInterval(() => {refSecToWait.current=Math.max(0,refSecToWait.current-1);setSecToWait(refSecToWait.current);},1000)
+        window.ticker.start();
+      }
+    }else if(refSecToWait.current<=0 && window.ticker){
+      // stop
+      window.ticker.stop();
+      window.ticker=undefined;
     }
     }, [secToWait]);  
  
@@ -573,8 +506,8 @@ const exportToLichess = () => {
       </div>
 
       <Chessboard
-        squareStyles={highlightSquares(refStockfishInfoOutHistory.current,chess)}
-        boardStyle={highlightBoard(refMovePerformance.current)}
+        squareStyles={chess_board_utils.highlightSquares(refStockfishInfoOutHistory.current,chess, highlightAnalysis, highlightEngine, refHalfMoves.current)}
+        boardStyle={chess_board_utils.highlightBoard(refMovePerformance.current, avgPerf, medianPerf)}
         showNotation={true}
         width={refBoardWidth.current} 
         position={refFen.current}
@@ -648,7 +581,7 @@ const exportToLichess = () => {
           depth={depth}
       />
  
-      <IonBadge onClick={() => {exportToLichess()}}>Export Last Game To Lichess</IonBadge><br/><br/><br/><br/><br/><br/>
+      <IonBadge onClick={() => {lichess_api.exportToLichess(player_pgn_db_ref.current)}}>Export Last Game To Lichess</IonBadge><br/><br/><br/><br/><br/><br/>
       <IonBadge onClick={() => {refDebug.current=!refDebug.current;setDebug(refDepth.current)}}>{refDebug.current ? "@(+)" : "@"}debug</IonBadge>
     </div>
   );
