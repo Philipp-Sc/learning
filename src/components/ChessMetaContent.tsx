@@ -37,10 +37,13 @@ interface ContainerProps {
   medianPerf: boolean;
   setMedianPerf: () => void;
   notificationOut: string[];
+  liveRatingDepth: boolean;
+  setLiveRatingDepth: () => void;
+  depth: number;
 }
 
 
-const ChessMetaContent: React.FC<ContainerProps> = ({halfMoves,playerColor,movePerformance,live,evaluation,highlightAnalysis,setHighlightAnalysis,highlightEngine,setHighlightEngine,avgPerf,setAvgPerf,medianPerf,setMedianPerf,notificationOut}) => {
+const ChessMetaContent: React.FC<ContainerProps> = ({halfMoves,playerColor,movePerformance,live,evaluation,highlightAnalysis,setHighlightAnalysis,highlightEngine,setHighlightEngine,avgPerf,setAvgPerf,medianPerf,setMedianPerf,notificationOut,liveRatingDepth,setLiveRatingDepth,depth}) => {
  
  	const game_stats = chess_meta[playerColor=="w" ? "white" : "black"];
 
@@ -78,6 +81,7 @@ const ChessMetaContent: React.FC<ContainerProps> = ({halfMoves,playerColor,moveP
     <br/><br/>
 
        <IonBadge onClick={() => {setHighlightAnalysis(!highlightAnalysis)}}>{highlightAnalysis ? "@(+) " : "@"}analysis: {isNaN(live.evaluation) ? "No data available" : ((-1*live.evaluation)+" @depth "+live.depth)}</IonBadge>
+       <IonBadge onClick={() => {if(liveRatingDepth>=40){setLiveRatingDepth(depth)}else{setLiveRatingDepth(liveRatingDepth+1)}}}>@max depth {Math.max(depth,liveRatingDepth)}</IonBadge>
        <br/>
        <IonBadge onClick={() => {setHighlightEngine(!highlightEngine)}}>{highlightEngine ? "@(+) " : "@"}engine move: {isNaN(evaluation.evaluation) ? "No data available" : (-1*evaluation.evaluation)+" @depth "+evaluation.depth}</IonBadge>
            <br/><br/>
