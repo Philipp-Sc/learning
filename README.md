@@ -20,10 +20,13 @@ It is written using Ionic, Capacitorjs and Expressjs.
 * **@custom_book** Extend functionality: 1) Filter by Elo independent from current elo. 2) Allow the use of the engine pgn database as source. 3) Optional weighting of common opening moves. Still random but prefer common openings. 4) Allow user to provide pgn database.
 
 * **@gpt3 comments** have gpt3 generated comments about opening information, ideas. Possibly ask gpt3 questions about your game plan. Get back a classification of your plan. Newbie, Expert, Grandmaster,..
-
-* Add Statistics to **Latest win**, Number of moves, Blunders, Avg. centiepawn loss. 
+ 
 * Highlight the Statistical Measures (Degree of Freedom, Mobility, Expansion factor, Protected squares, Packing density) if possible on the board.
 * Improve the Visualization of the Statistical Measures, make it intuitive. (e.g Illustrations, Charts, Explainations)
+
+* **@training** 
+* a) Based on game history let the opponement go for positions where you made mistakes in the past.
+* b) Predicting your blunder probability ahead of time.
 
 # Language
 * ...
