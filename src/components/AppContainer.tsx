@@ -479,7 +479,10 @@ const AppContainer: React.FC = () => {
       // using pre computed skill profile
       skill_profile = chess_meta.skill_profiles[refElo.current] 
 
-      if(create_aggregated_data_development_option){
+      if(create_aggregated_data_development_option || true){
+
+        chess_stats.getFeatureImportance("w")
+        return;
         // create skill profile 
         // skill_profile = await chess_stats.getSkillProfile(refElo.current,depth_for_database)
         // if(refDebug.current) console.log(JSON.stringify(skill_profile)) 

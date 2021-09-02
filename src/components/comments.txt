@@ -1,20 +1,40 @@
-
 /*
- <IonBadge>White</IonBadge>
-       <IonBadge>({parseFloat(game_stats[Math.max(refHalfMoves.current-1,0)]["Expansion factor w"]).toFixed(2)})</IonBadge>
-       <IonBadge>Black</IonBadge>
-       <IonBadge>({parseFloat(game_stats[Math.max(refHalfMoves.current-1,0)]["Expansion factor b"]).toFixed(2)})</IonBadge>
-      <IonBadge>White</IonBadge>
-       <IonBadge>({parseFloat(game_stats[Math.max(refHalfMoves.current-1,0)]["Expansion factor Queen Side w"]).toFixed(2)})</IonBadge>
-       <IonBadge>Black</IonBadge>
-       <IonBadge>({parseFloat(game_stats[Math.max(refHalfMoves.current-1,0)]["Expansion factor Queen Side b"]).toFixed(2)})</IonBadge>
-       <IonBadge>White</IonBadge>
-       <IonBadge>({parseFloat(game_stats[Math.max(refHalfMoves.current-1,0)]["Expansion factor King Side w"]).toFixed(2)})</IonBadge>
-       <IonBadge>Black</IonBadge>
-       <IonBadge>({parseFloat(game_stats[Math.max(refHalfMoves.current-1,0)]["Expansion factor King Side b"]).toFixed(2)})</IonBadge>
-       
+
+add avg rating point gained to evaluation display
+add avg time spent on move
+
+- Open File x
+- Half Open File x
+- Isolated Pawn x
+- Double pawn x
+- King Side Pawn Majority x
+- Queen Side Pawn Majority x
+- Furthest advanced pawn
+- Least advanced pawn
+- Average pawn advancement
+- Median pawn advancement
+- Backward pawn
+- Fianchetto
+- Pinned Pieces 
+- Outposts
+- Center influence
+- Over protection
+- King safety
+
+https://www.chessprogramming.org/Evaluation
+
+
+- Add all the features
+- possibly investigate random forest
+- Do PCR Analysis on the feature, take explain 90%
+- (cleans the feature vector)
+
+
+- Make a regression analysis with all stats and the evaluation. To find out the most relevant features.
+
+
 */
-//       <IonBadge>#Open File > 0: {}</IonBadge>
+ 
     // load  engine database. for every game transform it to a list of FENs
     // also transform pgn to a list of moves that show which piece is captured by which
     // count P or p
@@ -48,3 +68,49 @@
 
     
 /*<IonBadge>Elo: {playerElo}</IonBadge>*/
+
+
+
+async function createAutoencoder(latent_features,inputSize){
+    const model = tf.sequential();
+  
+    // To simulate PCA we use 1 hidden layer with a linear (relu) activation
+    const encoder = tf.layers.dense({
+      units: latent_features, 
+      batchInputShape:[null,inputSize],          //We will input N samples X 4 columns
+      activation: 'relu',
+      kernelInitializer:"randomNormal",  //Randomize to avoid degenerate cases
+      biasInitializer:"ones"});
+    const decoder = tf.layers.dense({units: inputSize, activation: 'relu'});
+
+    model.add(encoder);
+    model.add(decoder); 
+    await model.compile({optimizer: 'sgd', loss: 'meanSquaredError'});
+    
+    return  {
+      'model':model,
+      'encoder':encoder,
+      'decoder':decoder
+    }
+}
+
+async function trainAutoencoder(inputData,autoencoder) {
+    const xs = tf.tensor2d(inputData);
+    let h = await autoencoder.model.fit(xs, xs, {epochs: 5,batchSize:15,shuffle:true,validationSpit:0.1,
+        callbacks: tfvis.show.fitCallbacks(
+      { name: 'Training Autoencoder Performance' },
+      ['loss', 'mse'],
+      { height: 300, callbacks: ['onEpochEnd'] }
+    )});
+    xs.dispose();
+    return h;
+}
+
+function getEuclidianDistance(arr1, arr2) {
+        // calculate euclidian distance between two arrays
+        let distTensor = tf.tidy(() => {
+            const distance = tf.squaredDifference(arr1, arr2).sum().sqrt();
+            return distance.dataSync()
+        })
+        return distTensor[0];
+}// use this to only provide novel vectors to train.
