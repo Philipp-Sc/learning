@@ -3,6 +3,10 @@ import * as tf from '@tensorflow/tfjs'
 import * as tfvis from '@tensorflow/tfjs-vis' 
 import * as chess_meta from "../js/chess-meta.js"
 import * as d3 from "d3";
+import {average, median, arraysEqual, sum, arrayMin, arrayMax, normalize, sortJsObject} from "./utilities.js"
+
+
+const importance = require('importance')
 
 const Chess = require("chess.js"); 
 
@@ -45,8 +49,13 @@ const infoMoveKeys = [
 			"{castle} 0-0 {white}",
 			"{castle} 0-0 {black}", 
 			"{castle} 0-0-0 {white}",
-			"{castle} 0-0-0 {black}"
+			"{castle} 0-0-0 {black}",
+			"move to file (A,B,C,D,E,F,G,H)",
+			"move to rank (1,2,3,4,5,6,7,8)"
 			]
+ 			// possibly add:
+			// move from file (A,B,C,D,E,F,G,H) 
+			// move from rank (1,2,3,4,5,6,7,8)
 
 const pawnKeys = [
     "Open Files",
@@ -88,7 +97,17 @@ const pawnKeys = [
 		"Isolated Pawns {white}",
 		"Isolated Pawns {black}",
 		"King Side Pawn Majority {white}",
-		"Queen Side Pawn Majority {white}"];
+		"Queen Side Pawn Majority {white}",
+		"Furthest advanced pawn {white}",
+		"Furthest advanced pawn {black}",
+		"Least advanced pawn {white}",
+		"Least advanced pawn {black}",
+		"Avg advanced pawn {white}",
+		"Avg advanced pawn {black}",
+		"Fianchetto King Side {white}",
+		"Fianchetto King Side {black}",
+		"Fianchetto Queen Side {white}",
+		"Fianchetto Queen Side {black}",];
 
 const materialKeys = [	 
         "Total Material", 
@@ -128,6 +147,10 @@ const packageDensityKeys = [
        "Packing density (excl. pieces as defenders, protected pawns) {black}"
        ]
 
+       // attacked occupied squares defended
+       // attacked occupied squares
+       // center squares protected
+
 const expansionFactorKeys = [	
       "Expansion Factor Queen Side", 
 			"Expansion Factor King Side", 
@@ -140,9 +163,7 @@ const expansionFactorKeys = [
    		"Expansion Factor {black}" 
   ]
 
-var allKeys = [
-         "index",
-   			 "game count",
+var allKeys = [ 
    			 "cp",
    			 "halfmove",
    			 "last move by",
@@ -281,7 +302,17 @@ function pawnFeatures(fen,onlyVector) {
 		[0,1,2,3,4,5,6,7].map(e => isIsolatedPawn(each,each_all,e,"white")).reduce( ( p, c ) => p + c, 0 ),
 		[0,1,2,3,4,5,6,7].map(e => isIsolatedPawn(each,each_all,e,"black")).reduce( ( p, c ) => p + c, 0 ),
 		[4,5,6,7].map(e => Array.from(each[e]).includes("P") ? 1 : 0).reduce( ( p, c ) => p + c, 0) > [0,1,2,3].map(e => Array.from(each[e]).includes("P") ? 1 : 0).reduce( ( p, c ) => p + c, 0) ? 1 : 0,
-		[4,5,6,7].map(e => Array.from(each[e]).includes("P") ? 1 : 0).reduce( ( p, c ) => p + c, 0) > [0,1,2,3].map(e => Array.from(each[e]).includes("P") ? 1 : 0).reduce( ( p, c ) => p + c, 0) ? 0 : 1
+		[4,5,6,7].map(e => Array.from(each[e]).includes("P") ? 1 : 0).reduce( ( p, c ) => p + c, 0) > [0,1,2,3].map(e => Array.from(each[e]).includes("P") ? 1 : 0).reduce( ( p, c ) => p + c, 0) ? 0 : 1,
+		Math.min(...each_all.map(e => Math.min(...e.map((ee,i) => ee=="P" ? i : 8)))),
+		Math.max(...each_all.map(e => Math.max(...e.map((ee,i) => ee=="p" ? i : -1)))),
+		Math.max(...each_all.map(e => Math.max(...e.map((ee,i) => ee=="P" ? i : -1)))),
+		Math.min(...each_all.map(e => Math.min(...e.map((ee,i) => ee=="p" ? i : 8)))),
+		average(each_all.map(e => average(e.map((ee,i) => ee=="P" ? i : -1).filter(e => e!=-1))).filter(e => !isNaN(e))) || -1,
+		average(each_all.map(e => average(e.map((ee,i) => ee=="p" ? i : -1).filter(e => e!=-1))).filter(e => !isNaN(e))) || -1,
+		[each_all[5][1],each_all[6][2],each_all[7][1]].map(e => e=="P" ? 1 : 0).reduce( ( p, c ) => p + c, 0 ),// pawns on F2,G3,H2
+		[each_all[0][1],each_all[1][2],each_all[2][1]].map(e => e=="P" ? 1 : 0).reduce( ( p, c ) => p + c, 0 ),// pawns on A2,B3,C2
+		[each_all[5][6],each_all[6][5],each_all[7][6]].map(e => e=="p" ? 1 : 0).reduce( ( p, c ) => p + c, 0 ),// pawns on F7,G6,H7
+		[each_all[0][6],each_all[1][5],each_all[2][6]].map(e => e=="p" ? 1 : 0).reduce( ( p, c ) => p + c, 0 ) // pawns on A7,B6,C7
 		];
 	
 	if(onlyVector) return vector;
@@ -371,10 +402,10 @@ function package_density(fen,onlyVector){
 	 return dict; 
 }
 
-function expansion_factor(fen,onlyVector){
+function expansion_factor(fen,onlyVector){ 
 	var fen_ = fen.split(" ")[0];
 	var temp8 = fen_.replace(/[0-9]/g, "").split("/").map(e => {return {w: e.split("").filter(e => e.toLowerCase()!=e).join(""),b: e.split("").filter(e => e.toLowerCase()==e).join("")}}).map((e,i) => [(i+1)*e.w.split("").length,(7-i+1)*e.b.split("").length,e.w.split("").length,e.b.split("").length]).reduce((a,b) => [a[0]+b[0],a[1]+b[1],a[2]+b[2],a[3]+b[3]],[0,0,0,0])
-    var temp9 = fen_.replaceAll("8","eeeeeeee").replaceAll("7","eeeeeee").replaceAll("6","eeeeee").replaceAll("5","eeeee").replaceAll("4","eeee").replaceAll("3","eee").replaceAll("2","ee").replaceAll("1","e").split("/").map(e => {return {w: [e.slice(0,4),e.slice(4,8)],b: [e.slice(0,4),e.slice(4,8)]}}).map((e,i) => [e.w[0].split("").filter(e => e.toLowerCase()!=e).filter(e => e!="e").length*(i+1),e.w[0].split("").filter(e => e.toLowerCase()!=e).filter(e => e!="e").length,e.w[1].split("").filter(e => e.toLowerCase()!=e).filter(e => e!="e").length*(i+1),e.w[1].split("").filter(e => e.toLowerCase()!=e).filter(e => e!="e").length,e.b[0].split("").filter(e => e.toLowerCase()==e).filter(e => e!="e").length*(7-i+1),e.b[0].split("").filter(e => e.toLowerCase()==e).filter(e => e!="e").length,e.b[1].split("").filter(e => e.toLowerCase()==e).filter(e => e!="e").length*(7-i+1),e.b[1].split("").filter(e => e.toLowerCase()==e).filter(e => e!="e").length]).reduce((a,b) => [a[0]+b[0],a[1]+b[1],a[2]+b[2],a[3]+b[3],a[4]+b[4],a[5]+b[5],a[6]+b[6],a[7]+b[7]],[0,0,0,0,0,0,0,0]);
+    var temp9 = expandFen(fen).join("").split("/").map(e => {return {w: [e.slice(0,4),e.slice(4,8)],b: [e.slice(0,4),e.slice(4,8)]}}).map((e,i) => [e.w[0].split("").filter(e => e.toLowerCase()!=e).filter(e => e!="e").length*(i+1),e.w[0].split("").filter(e => e.toLowerCase()!=e).filter(e => e!="e").length,e.w[1].split("").filter(e => e.toLowerCase()!=e).filter(e => e!="e").length*(i+1),e.w[1].split("").filter(e => e.toLowerCase()!=e).filter(e => e!="e").length,e.b[0].split("").filter(e => e.toLowerCase()==e).filter(e => e!="e").length*(7-i+1),e.b[0].split("").filter(e => e.toLowerCase()==e).filter(e => e!="e").length,e.b[1].split("").filter(e => e.toLowerCase()==e).filter(e => e!="e").length*(7-i+1),e.b[1].split("").filter(e => e.toLowerCase()==e).filter(e => e!="e").length]).reduce((a,b) => [a[0]+b[0],a[1]+b[1],a[2]+b[2],a[3]+b[3],a[4]+b[4],a[5]+b[5],a[6]+b[6],a[7]+b[7]],[0,0,0,0,0,0,0,0]);
     // white and black mixxed because of array 0,4 -> black 5-7 -> white
     var temp10 = [(temp9[0]/temp9[1]),(temp9[4]/temp9[5]),(temp9[2]/temp9[3]),(temp9[6]/temp9[7]),(temp8[0]/temp8[2]),(temp8[1]/temp8[3])].map(e => isNaN(e) ? 0 : e==Infinity? 0 : e)
     var temp11 = [temp10[1]/temp10[0],temp10[3]/temp10[2],temp10[5]/temp10[4]].map(e => isNaN(e) ? 0 : e==Infinity? 0 : e)
@@ -410,10 +441,47 @@ function getColorOfMove(last_move){
 function getNotationOfMove(last_move){
 	if(last_move.notation){
 		return last_move.notation.notation;
+		/* {
+	    "moveNumber": 1,
+	    "notation": {
+	        "fig": null,
+	        "strike": null,
+	        "col": "d",
+	        "row": "4",
+	        "check": null,
+	        "promotion": null,
+	        "notation": "d4"
+	    },
+	    "commentAfter": "+0.00/1 0s",
+	    "variations": [],
+	    "nag": null,
+	    "commentDiag": {
+	        "comment": "+0.00/1 0s"
+	    },
+	    "turn": "w"
+		}*/
 	}else{
-		return last_move.san;
+		return last_move.san; //  { color: 'b', from: 'e5', to: 'f4', flags: 'c', piece: 'p', captured: 'p', san: 'exf4' }
 	}
 }
+
+function getRowOfMoveTo(last_move){
+	if(last_move.notation){
+		return parseInt(last_move.notation.row);
+	}else{
+		return parseInt(last_move.to.split("")[1]);
+	}
+}
+
+function getColOfMoveTo(last_move){
+	var cols = ["a","b","c","d","e","f","g","h"]
+	if(last_move.notation){
+		return cols.indexOf(last_move.notation.col);
+	}else{
+		return cols.indexOf(last_move.to.split("")[0]);
+	}
+}
+
 
 function getFigureOfMove(last_move){
 	if(last_move.notation){
@@ -498,7 +566,10 @@ function info_move(last_move,onlyVector){
       (color_of_move_b && notation_of_move=="O-O")  ? 1 : 0,
      // ['{early, average, late} castling timing']
       (color_of_move_w && notation_of_move=="O-O-O")  ? 1 : 0,
-      (color_of_move_b && notation_of_move=="O-O-O")  ? 1 : 0 
+      (color_of_move_b && notation_of_move=="O-O-O")  ? 1 : 0,
+      getColOfMoveTo(last_move),
+      getRowOfMoveTo(last_move),
+
                      
 			 ]
 
@@ -529,12 +600,10 @@ function getStatisticsForPosition(new_game,last_move,onlyVector) {
 				var pawn_features_ = pawnFeatures(fen,onlyVector);
 
 				if(onlyVector){
-					return [0,1,last_move.commentAfter,new_game.history().length,getColorOfMove(last_move)=="w" ? 1 : 0,...material_,...package_density_,...expansion_factor_,...mobility_,...info_move_,...pawn_features_]
+					return [last_move.commentAfter,new_game.history().length,getColorOfMove(last_move)=="w" ? 1 : 0,...material_,...package_density_,...expansion_factor_,...mobility_,...info_move_,...pawn_features_]
 				}
 
         var statistics =  {
-         "index": 0, 
-   			 "game count": 1,
    			 "cp": last_move.commentAfter,
    			 "halfmove": new_game.history().length,
    			 "last move by": getColorOfMove(last_move)=="w" ? 1 : 0,
@@ -548,16 +617,6 @@ function getStatisticsForPosition(new_game,last_move,onlyVector) {
         return statistics;
             }
 
-function sum(ob1, ob2) {
-      let sum = {};
-
-      Object.keys(ob1).forEach(key => {
-        if (ob2.hasOwnProperty(key)) {
-          sum[key] = ob1[key] + ob2[key]
-        }  
-      })
-      return sum;
-}
 
 export function getDistanceVectorForStatistics(stats){
 	var stats1 = stats.playerStats;
@@ -594,10 +653,14 @@ function createModel(inputSize,outputSize) {
   const model = tf.sequential();
 
   // Add a single input layer
-  model.add(tf.layers.dense({inputShape: [inputSize], units: 1024, useBias: true, activation: 'relu'}));
+  model.add(tf.layers.dense({inputShape: [inputSize], units: 256, useBias: true, activation: 'relu'})); 
+
+  // 1024 good results
+  // 512 good results 
+  // 256
 
   // Add an hidden layer
-  model.add(tf.layers.dense({units: 512, useBias: false, activation: 'relu'}));  
+  model.add(tf.layers.dense({units: 256, useBias: false, activation: 'relu'}));  
   // model.add(tf.layers.dense({units: 50, activation: 'sigmoid'}));
   // activation ('elu'|'hardSigmoid'|'linear'|'relu'|'relu6'| 'selu'|'sigmoid'|'softmax'|'softplus'|'softsign'|'tanh'|'swish'|'mish')
 
@@ -606,27 +669,6 @@ function createModel(inputSize,outputSize) {
   model.add(tf.layers.dense({units: outputSize, useBias: false}));
 
   return model;
-}
-
-
-function normalize(min, max) {
-    var delta = max - min;
-    return function (val) {
-        var res = (val - min) / delta;
-        return !isFinite(res) || isNaN(res) ? 0 : res;
-    };
-}
-
-function arrayMin(arr) {
-  return arr.reduce(function (p, v) {
-    return ( p < v ? p : v );
-  });
-}
-
-function arrayMax(arr) {
-  return arr.reduce(function (p, v) {
-    return ( p > v ? p : v );
-  });
 }
 
 function normalizeVector(data,inputMinMax_,labelMinMax_) {
@@ -677,7 +719,7 @@ function normalizeVector(data,inputMinMax_,labelMinMax_) {
  * the data and _normalizing_ the data
  * MPG on the y-axis.
  */
-function convertToTensor(data) {
+function convertToTensor(data,inputMinMax_,labelMinMax_) {
   // Wrapping these calculations in a tidy will dispose any
   // intermediate tensors.
 
@@ -685,7 +727,7 @@ function convertToTensor(data) {
     // Step 1. Shuffle the data
     tf.util.shuffle(data);
 
-    const res = normalizeVector(data,undefined,undefined);
+    const res = normalizeVector(data,inputMinMax_,labelMinMax_);
     const inputs = res.inputs;
     const labels = res.labels;
     //console.log(inputs);
@@ -729,27 +771,13 @@ async function trainModel(model, inputs, labels) {
   });
 }
 
-function arraysEqual(a, b) {
-  if (a === b) return true;
-  if (a == null || b == null) return false;
-  if (a.length !== b.length) return false;
-
-  // If you don't care about the order of the elements inside
-  // the array, you should sort both arrays here.
-  // Please note that calling sort on an array will modify that array.
-  // you might want to clone your array first.
-
-  for (var i = 0; i < a.length; ++i) {
-    if (a[i] !== b[i]) return false;
-  }
-  return true;
-}
 
 export async function getFeatureImportance(playerColor) {
 
 	chess_meta.chessGames("engine").then(humanGames => humanGames.get).then(async(games) => {
 		      //console.log(games.length) // 1839
-					//var games = games.filter((e,iii) => iii<=5);
+					var games = games.filter((e,iii) => iii<=100);
+//					console.log(games);
 					games.forEach((game,ii) => {
 						 game.moves.forEach((move,i) => {
 						 	if(move.commentAfter){
@@ -796,12 +824,6 @@ export async function getFeatureImportance(playerColor) {
 
 					//console.log(bins);
 
-					const median = arr => {
-            const mid = Math.floor(arr.length / 2),
-              nums = [...arr].sort((a, b) => a - b);
-            return arr.length % 2 !== 0 ? nums[mid] : (nums[mid - 1] + nums[mid]) / 2;
-          };
-
 					var mean_most_common_least_common_count = median(bins.map(e => e[1]));
 
 					var selectVectors = [];
@@ -817,12 +839,12 @@ export async function getFeatureImportance(playerColor) {
 
 					vectors = selectVectors;
 
-					/* Create the model
+					/* Create the model or load model
 					 */
 
 
-	        const model = createModel(vectors[0].data.length,1);
-	        //const model = await tf.loadLayersModel('localstorage://my-model');
+	        //const model = createModel(vectors[0].data.length,1);
+	        const model = await tf.loadLayersModel('localstorage://my-model');
 
 					tfvis.show.modelSummary({name: 'Model Summary'}, model);
 
@@ -830,8 +852,16 @@ export async function getFeatureImportance(playerColor) {
 					/* Prepare training data
 					 */
 
+
+          var temp = {"input":undefined,"label":undefined};
+ 					temp = JSON.parse(window.localStorage.getItem("normalizeVector"))
+ 					console.log("loaded normalizeVector from localstorage");
+ 					// load or create min max on the run
+
+
+
 					// Convert the data to a form we can use for training.
-					const tensorData = convertToTensor(vectors);
+					const tensorData = convertToTensor(vectors,temp.input,temp.label);
 					const {inputs, labels} = tensorData;
 
 
@@ -842,21 +872,52 @@ export async function getFeatureImportance(playerColor) {
 
 
 					// Train the model
-					var res = await trainModel(model, inputs, labels);
+/*					var res = await trainModel(model, inputs, labels);
 					console.log('Done Training');
 
-					//await model.save('localstorage://my-model');
+					await model.save('localstorage://my-model');
+					console.log("model saved: my-model")
 					//await model.save('downloads://my-model');
-
-          // Load the model
-					//const model = await tf.loadLayersModel('localstorage://my-model-2');
-
-
-					/* Prepare test data
+*/
+           
+					/* Prepare test data or use training data as testing data
 					 */
 
-					// todo: use saved minMax values
-					var temp = JSON.parse(window.localStorage.getItem("normalizeVector"))
+        	var res = normalizeVector(vectors,temp.input,temp.label);
+
+        	console.log(res)
+
+        	var myModel = {predict: (test) => {
+        		var p = model.predict(tf.tensor2d(test, [test.length, test[0].length]));
+        		return p.dataSync();
+        	}}
+
+					// Get feature importance
+					const imp = importance(myModel, res.inputs, res.labels, {
+					  kind: 'mse',
+					  n: 50,
+					  means: true,
+					  verbose: true
+					})
+					var importance_list = (imp.map((e,i) => {return {key:allKeys[1+i],value:e}}))
+          importance_list = sortJsObject(importance_list);
+					console.log(importance_list)
+
+
+          /* Prepare custom testing data
+					var my_test_game = new Chess();
+					my_test_game.load_pgn("1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. a3 {giuoco piano} *");
+	
+					var vectors = getStatisticsForPositionVector(my_test_game,my_test_game.history({verbose:true}).reverse()[0])
+
+					console.log(vectors)
+          vectors = [vectors].map(e => {
+	        	var target = e[allKeys.indexOf("cp")]; 
+	        	e.splice(allKeys.indexOf("cp"), 1);
+	        	return {"data": e, "label":target}
+	        })
+					console.log(vectors)
+
         	var res = normalizeVector(vectors,temp.input,temp.label);
 
 
@@ -866,7 +927,7 @@ export async function getFeatureImportance(playerColor) {
 				  console.log("first pred, then label")
 				  console.log(preds.dataSync());
 				  console.log(res.labels); 
-
+*/
 
 				return;
 
@@ -896,7 +957,12 @@ export async function getGameStatistics(playerColor) {
 
 	        var games_FEN = games
 	              .filter(e => playerColor=='w' ? (e.tags.Result=="1-0" || e.tags.Result=="1/2-1/2") : (e.tags.Result=="0-1" || e.tags.Result=="1/2-1/2"))
-	              .map(game => getMovesAsFENs(game, getStatisticsForPositionDict))
+	              .map(game => getMovesAsFENs(game, getStatisticsForPositionDict).map(f => {
+	              	return Object.assign({}, { 
+																		         "index": 0, 
+																		   			 "game count": 1
+																		        }, f);
+	              }))
 	        var result = [];
 
 	        var zero; 
@@ -942,14 +1008,8 @@ export async function getSkillProfile(elo,depth) {
         } 
        return  evaluations;
        }
-       const processing2 = (evaluations) => {
-          const average = arr => arr.reduce( ( p, c ) => p + c, 0 ) / arr.length;
-          const median = arr => {
-            const mid = Math.floor(arr.length / 2),
-              nums = [...arr].sort((a, b) => a - b);
-            return arr.length % 2 !== 0 ? nums[mid] : (nums[mid - 1] + nums[mid]) / 2;
-          };
-          return {"avg" : average(evaluations),
+       const processing2 = (evaluations) => {  
+       	return {"avg" : average(evaluations),
                   "median" : median(evaluations),
                   "dist" : evaluations
                   };

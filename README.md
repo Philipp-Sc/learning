@@ -18,11 +18,13 @@ It is written using Ionic, Capacitorjs and Expressjs.
 # Chess
 * **@self_play** Have the opponement play the same opening and eventually mirror your playing style based on your past games. Bobby Fisher has been known to play himself. Alpha Zero was trained using self play.
 * **@custom_book** Extend functionality: 1) Filter by Elo independent from current elo. 2) Allow the use of the engine pgn database as source. 3) Optional weighting of common opening moves. Still random but prefer common openings. 4) Allow user to provide pgn database.
-
-* **@gpt3 comments** have gpt3 generated comments about opening information, ideas. Possibly ask gpt3 questions about your game plan. Get back a classification of your plan. Newbie, Expert, Grandmaster,..
  
 * Highlight the Statistical Measures (Degree of Freedom, Mobility, Expansion factor, Protected squares, Packing density) if possible on the board.
 * Improve the Visualization of the Statistical Measures, make it intuitive. (e.g Illustrations, Charts, Explainations)
+* **notification** show and highlight most important principles relevant in the current position
+* 1. two feature vectors predict evaluation (before and after move), reverse engineer the importance of feature(s) that changed
+* 2. list features that are relevant in the position
+* PERMUTATION IMPORTANCE for global ordering of features
 
 * **@training** 
 * a) Based on game history let the opponement go for positions where you made mistakes in the past.

@@ -9,17 +9,47 @@ add avg time spent on move
 - Double pawn x
 - King Side Pawn Majority x
 - Queen Side Pawn Majority x
-- Furthest advanced pawn
-- Least advanced pawn
-- Average pawn advancement
-- Median pawn advancement
-- Backward pawn
-- Fianchetto
-- Pinned Pieces 
-- Outposts
+- Furthest advanced pawn x
+- Least advanced pawn x
+- Average pawn advancement x
+- Fianchetto x
+
+- Space area. Number of safe squares available for minor pieces on the central four files on ranks 2 to 4. Safe squares one, two or three squares behind a friendly pawn are counted twice.
+
+- Outposts: Number of Squares that can never be attacked by a opponments pawn and that is free and protected by my own pawns
+- Backward pawn: Number of squares occupied by a pawn that can never be protected by another pawn
+- Longest Diagonal Pawn chain (Left To Right, Right to Left)
+- connected passed pawns
+- connected pawns
+- passed pawns
+- https://en.wikipedia.org/wiki/Pawn_structure Index
+- potential for each index a distance metric. (N moves till pawn_structure i)
+
 - Center influence
+- Space
 - Over protection
 - King safety
+
+- Attack
+Pinned direction
+Knight attack
+Bishop xray attack
+Rook xray attack
+Queen attack
+Pawn attack
+King attack
+Attack
+Queen attack diagonal
+Pinned
+
+
+
+- is middel game
+- is endgame
+- TYPE OF POSITION
+- Tal:  Attack position/algorithm
+- Capablanca: Strategical algorithm (for quiescent positions)
+- Petrosian: Defense position/algorithm (the "reversed colors" Tal)
 
 https://www.chessprogramming.org/Evaluation
 
