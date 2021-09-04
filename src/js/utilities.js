@@ -1,11 +1,20 @@
 
-export const average = (arr) => arr.reduce( ( p, c ) => p + c, 0 ) / arr.length;
+export const reduce_sum = (arr) => arr.reduce((p,c) =>  p + c, 0);
+
+export const average = (arr) => reduce_sum(arr) / arr.length;
 export const median = (arr) => {
     const mid = Math.floor(arr.length / 2),
       nums = [...arr].sort((a, b) => a - b);
     return arr.length % 2 !== 0 ? nums[mid] : (nums[mid - 1] + nums[mid]) / 2;
   };
 
+export const sum_array = (a,b) => {
+                var res = [];
+                for(var i=0;i<a.length || i<b.length;i++){
+                    res.push(a[i]+b[i])
+                }
+                return res;
+            }
 
 /**
  * Self-adjusting interval to account for drifting

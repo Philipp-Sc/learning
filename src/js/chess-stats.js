@@ -6,616 +6,40 @@ import * as d3 from "d3";
 import {average, median, arraysEqual, sum, arrayMin, arrayMax, normalize, sortJsObject} from "./utilities.js"
 
 
+import * as evaluation from "../js/eval/evaluation.js"
+  
 const importance = require('importance')
 
 const Chess = require("chess.js"); 
 
-const mobilityKeys = [
-	"Opponement Mobility (All)",
-  "Opponement Mobility (Pieces)",
-  "Opponement Mobility (Pawns)",
-	"Opponement Mobility (Pieces) per Minor Piece",
-	"Opponement Mobility (Pieces) per Major Piece",
-  "Opponement Mobility (Pawns) per Pawn"
-]
+var newGame = new Chess();
 
-const infoMoveKeys = [
-		  "{fig} Pawn {white}",
-			"{fig} Pawn {black}",
-			"{fig} Bishop {white}",
-			"{fig} Bishop {black}",
-			"{fig} Knight {white}",
-			"{fig} Knight {black}",
-			"{fig} Rook {white}",
-			"{fig} Rook {black}",
-			"{fig} Queen {white}",
-			"{fig} Queen {black}",
-			"{fig} King {white}",
-			"{fig} King {black}", 
-			"{capture} Px {white}",
-			"{capture} px {black}",
-			"{capture} Bx {white}",
-			"{capture} bx {black}",
-			"{capture} Nx {white}",
-			"{capture} nx {black}",
-			"{capture} Qx {white}",
-			"{capture} qx {black}",
-			"{capture} Rx {white}",
-			"{capture} rx {black}",
-			"{capture} Kx {white}",
-			"{capture} kx {black}", 
-			"{capture} Bx or Nx {white}",
-			"{capture} bx or nx {black}", 
-			"{castle} 0-0 {white}",
-			"{castle} 0-0 {black}", 
-			"{castle} 0-0-0 {white}",
-			"{castle} 0-0-0 {black}",
-			"move to file (A,B,C,D,E,F,G,H)",
-			"move to rank (1,2,3,4,5,6,7,8)"
-			]
- 			// possibly add:
-			// move from file (A,B,C,D,E,F,G,H) 
-			// move from rank (1,2,3,4,5,6,7,8)
-
-const pawnKeys = [
-    "Open Files",
-		"Open A File",
-		"Open B File",
-		"Open C File",
-		"Open D File",
-		"Open E File",
-		"Open F File",
-		"Open G File",
-		"Open H File",
-		"Half-Open Files",
-		"Half-Open A File",
-		"Half-Open B File",
-		"Half-Open C File",
-		"Half-Open D File",
-		"Half-Open E File",
-		"Half-Open F File",
-		"Half-Open G File",
-		"Half-Open H File",
-		"Half-Open A File {white}",
-		"Half-Open B File {white}",
-		"Half-Open C File {white}",
-		"Half-Open D File {white}",
-		"Half-Open E File {white}",
-		"Half-Open F File {white}",
-		"Half-Open G File {white}",
-		"Half-Open H File {white}",
-		"Half-Open A File {black}",
-		"Half-Open B File {black}",
-		"Half-Open C File {black}",
-		"Half-Open D File {black}",
-		"Half-Open E File {black}",
-		"Half-Open F File {black}",
-		"Half-Open G File {black}",
-		"Half-Open H File {black}",
-		"Double Pawns {white}",
-		"Double Pawns {black}",
-		"Isolated Pawns {white}",
-		"Isolated Pawns {black}",
-		"King Side Pawn Majority {white}",
-		"Queen Side Pawn Majority {white}",
-		"Furthest advanced pawn {white}",
-		"Furthest advanced pawn {black}",
-		"Least advanced pawn {white}",
-		"Least advanced pawn {black}",
-		"Avg advanced pawn {white}",
-		"Avg advanced pawn {black}",
-		"Fianchetto King Side {white}",
-		"Fianchetto King Side {black}",
-		"Fianchetto Queen Side {white}",
-		"Fianchetto Queen Side {black}",];
-
-const materialKeys = [	 
-        "Total Material", 
-        "Material {white}", 
-        "Material {black}", 
-        "P count {white}",
-        "p count {black}",
-        "N count {white}",
-        "n count {black}",
-        "B count {white}",
-        "b count {black}",
-        "R count {white}",
-        "r count {black}",
-        "Q count {white}",
-        "q count {black}",
-        "B > n {white}",
-        "N > b {white}",
-        "B == N {white}",
-        "P == p {white}",
-        "b > N {black}",
-        "n > B {black}",
-        "b == n {black}",
-        "p == P {black}"];
-
-const packageDensityKeys = [ 
-       "Protected-squares ratio (excl. pieces as defenders, protected pawns, overprotection)",
-			 "Protected-squares per pawn ratio (excl. pieces as defenders, protected pawns, overprotection)",
-			 "Over-protected-squares ratio (excl. pieces as defenders, protected pawns)",
-       "Packing density ratio (excl. pieces as defenders, prodected pawns)",
-       "Protected-squares (excl. pieces as defenders, protected pawns, overprotection) {white}",
-       "Protected-squares per pawn (excl. pieces as defenders, protected pawns, overprotection) {white}",
-       "Over-protected-squares (excl. pieces as defenders, protected pawns) {white}",
-       "Packing density (excl. pieces as defenders, prodected pawns) {white}",
-       "Protected-squares (excl. pieces as defenders, protected pawns, overprotection) {black}",
-       "Protected-squares per pawn (excl. pieces as defenders, protected pawns, overprotection) {black}",
-       "Over-protected squares (excl. pieces as defenders, protected pawns) {black}",
-       "Packing density (excl. pieces as defenders, protected pawns) {black}"
-       ]
-
-       // attacked occupied squares defended
-       // attacked occupied squares
-       // center squares protected
-
-const expansionFactorKeys = [	
-      "Expansion Factor Queen Side", 
-			"Expansion Factor King Side", 
-			"Expansion Factor King Side {white}", 
-			"Expansion Factor King Side {black}", 
-			"Expansion Factor Queen Side {white}", 
-			"Expansion Factor Queen Side {black}", 
-			"Expansion Factor", 
-			"Expansion Factor {white}", 
-   		"Expansion Factor {black}" 
-  ]
-
-var allKeys = [ 
-   			 "cp",
-   			 "halfmove",
-   			 "last move by",
-   			 ...materialKeys,
-   			 ...packageDensityKeys,
-   			 ...expansionFactorKeys,
-   			 ...mobilityKeys,
-   			 ...infoMoveKeys,
-   			 ...pawnKeys
-        ];
 
 function getMovesAsFENs(game, process){ 
+	return sampleMovesAsFENs(game,process,0,0,512,-10,10,0);
+}
+
+function sampleMovesAsFENs(game, process,skipProbability, start, end, minCP, maxCP,cpZeroProbability){ 
 	console.log("...")
-	var newGame = new Chess();
+	newGame.reset();
 	var fens : string[] = [];
 	for (var i = 0; i < game.moves.length; i++) {
 		if(game.moves[i] && game.moves[i].notation && game.moves[i].notation.notation){
 			newGame.move(game.moves[i].notation.notation);
-			fens.push(process(newGame,game.moves[i]));
+			if(i>=start && i<=end && game.moves[i].commentAfter>=minCP && game.moves[i].commentAfter<=maxCP && Math.random()>skipProbability){
+				if(game.moves[i].commentAfter==0){
+					if(Math.random()>cpZeroProbability){
+						fens.push(process(newGame,game.moves[i]));
+					}
+				}else{
+					fens.push(process(newGame,game.moves[i]));
+
+				}
+			}
 		}
 	}
 	return fens;
 }
-
-function filterPieces(playerColor,e){
-	if(playerColor=="white"){
-		return e=='P' || e=='B' || e=='N' || e=='R' || e=='Q';
-	}else if(playerColor=="black"){
-		return e=='p' || e=='b' || e=='n' || e=='r' || e=='q';
-	}else{
-		return e=='p' || e=='b' || e=='n' || e=='r' || e=='q' || e=='P' || e=='B' || e=='N' || e=='R' || e=='Q';
-	}
-}
-
-function countMaterial(fen){
-	return fen.map(e => e.toLowerCase()).map(e => e=='p' ? 1 : e).map(e => e=='b' ? 3 : e).map(e => e=='n' ? 3 : e).map(e => e=='r' ? 5 : e).map(e => e=='q' ? 9 : e).reduce((a, b) => a + b, 0);
-}
-
-function expandFen(fen) {
-   //"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" 
-	 var res = fen.split(" ")[0].replaceAll("8","eeeeeeee").replaceAll("7","eeeeeee").replaceAll("6","eeeeee").replaceAll("5","eeeee").replaceAll("4","eeee").replaceAll("3","eee").replaceAll("2","ee").replaceAll("1","e").split("")
-   // .join("") -> "rnbqkbnr/pppppppp/eeeeeeee/eeeeeeee/eeeeeeee/eeeeeeee/PPPPPPPP/RNBQKBNR"
-   return res;
-}
-function zipFen(fen) {
-	 var res = fen.replaceAll("eeeeeeee","8").replaceAll("eeeeeee","7").replaceAll("eeeeee","6").replaceAll("eeeee","5").replaceAll("eeee","4").replaceAll("eee","3").replaceAll("ee","2").replaceAll("e","1");
-	 return res;
-}
-
-function fenToBoard(fen,onlyPawns){
-	var expFen = expandFen(fen);
-	var res = expFen.map(e => (onlyPawns ? e.toLowerCase()=="p" : filterPieces("both",e) || e.toLowerCase()=="k") || e=="/" ? e :"e").join("").split("/").map(e => {return {w:e.split("").map((e,i) => e.toLowerCase()!=e ? e :"e"),b:e.split("").map(e => e.toLowerCase()==e ? e :"e")};})
-  return {"white":res.map(e => e.w), "black":res.map(e => e.b)}
-}
-
-function fenToOneBoard(fen,onlyPawns){
-	var res = fenToBoard(fen,onlyPawns);
-	const zip = (a, b) => a.map((k, i) => k=="e" ? b[i] : k);
-	return res.white.map((e,i) => zip(e, res.black[i]))
-	/*
-		 (8) [Array(8), Array(8), Array(8), Array(8), Array(8), Array(8), Array(8), Array(8)]
-	0: (8) ["r", "n", "b", "q", "k", "b", "n", "r"]
-	1: (8) ["p", "p", "p", "p", "p", "p", "p", "p"]
-	2: (8) ["e", "e", "e", "e", "e", "e", "e", "e"]
-	3: (8) ["e", "e", "e", "e", "e", "e", "e", "e"]
-	4: (8) ["e", "e", "e", "e", "e", "e", "e", "e"]
-	5: (8) ["e", "e", "e", "e", "e", "e", "e", "e"]
-	6: (8) ["P", "P", "P", "P", "P", "P", "P", "P"]
-	7: (8) ["R", "N", "B", "Q", "K", "B", "N", "R"]
-	length: 8
-*/
-}
-
-function isIsolatedPawn(each,each_all,i,playerColor) {
-	var pawn = playerColor=="white" ? "P" : "p"
-	var pawn_ = playerColor=="white" ? "p" : "P"
-
-	if(!each_all[i].includes(pawn)){
-		return 0;
-	}
-
-	if(i == 0){ // A
-		return (each[1].size==1 || (each[1].size==2 && Array.from(each[1]).includes(pawn_))) ? 1 : 0
-	}else if(i==7){ // H
-		return (each[6].size==1 || (each[6].size==2 && Array.from(each[6]).includes(pawn_))) ? 1 : 0
-	}else{ // B,..,G
-		return ((each[i+1].size==1 || (each[i+1].size==2 && Array.from(each[i+1]).includes(pawn_))) && (each[i-1].size==1 || (each[i-1].size==2 && Array.from(each[i-1]).includes(pawn_)))) ? 1 : 0
-	}
-	return undefined;
-}
-
-function pawnFeatures(fen,onlyVector) {
-
-	var res = fenToOneBoard(fen,true);
-
-	var each = [0,1,2,3,4,5,6,7].map(ee => new Set(res.map(e => e[ee])));
-	var each_all = [0,1,2,3,4,5,6,7].map(ee => res.map(e => e[ee]));
-
-	var vector = [ 
-	  each.map(e => e.size==1 ? 1 : 0).reduce( ( p, c ) => p + c, 0 ),
-		each[0].size==1 ? 1 : 0,
-		each[1].size==1 ? 1 : 0,
-		each[2].size==1 ? 1 : 0,
-		each[3].size==1 ? 1 : 0,
-		each[4].size==1 ? 1 : 0,
-		each[5].size==1 ? 1 : 0,
-		each[6].size==1 ? 1 : 0,
-		each[7].size==1 ? 1 : 0,
-		each.map(e => e.size==2 ? 1 : 0).reduce( ( p, c ) => p + c, 0 ),
-		each[0].size==2 ? 1 : 0,
-		each[1].size==2 ? 1 : 0,
-		each[2].size==2 ? 1 : 0,
-		each[3].size==2 ? 1 : 0,
-		each[4].size==2 ? 1 : 0,
-		each[5].size==2 ? 1 : 0,
-		each[6].size==2 ? 1 : 0,
-		each[7].size==2 ? 1 : 0,
-		each[0].size==2 && Array.from(each[0]).includes("p") ? 1 : 0,
-		each[1].size==2 && Array.from(each[1]).includes("p") ? 1 : 0,
-		each[2].size==2 && Array.from(each[2]).includes("p") ? 1 : 0,
-		each[3].size==2 && Array.from(each[3]).includes("p") ? 1 : 0,
-		each[4].size==2 && Array.from(each[4]).includes("p") ? 1 : 0,
-		each[5].size==2 && Array.from(each[5]).includes("p") ? 1 : 0,
-		each[6].size==2 && Array.from(each[6]).includes("p") ? 1 : 0,
-		each[7].size==2 && Array.from(each[7]).includes("p") ? 1 : 0,
-		each[0].size==2 && Array.from(each[0]).includes("P") ? 1 : 0,
-		each[1].size==2 && Array.from(each[1]).includes("P") ? 1 : 0,
-		each[2].size==2 && Array.from(each[2]).includes("P") ? 1 : 0,
-		each[3].size==2 && Array.from(each[3]).includes("P") ? 1 : 0,
-		each[4].size==2 && Array.from(each[4]).includes("P") ? 1 : 0,
-		each[5].size==2 && Array.from(each[5]).includes("P") ? 1 : 0,
-		each[6].size==2 && Array.from(each[6]).includes("P") ? 1 : 0,
-		each[7].size==2 && Array.from(each[7]).includes("P") ? 1 : 0,
-		[0,1,2,3,4,5,6,7].map(i => each_all[i].filter(ee => ee=="P").length>=2 ? 1 : 0).reduce( ( p, c ) => p + c, 0 ),
-		[0,1,2,3,4,5,6,7].map(i => each_all[i].filter(ee => ee=="p").length>=2 ? 1 : 0).reduce( ( p, c ) => p + c, 0 ),
-		[0,1,2,3,4,5,6,7].map(e => isIsolatedPawn(each,each_all,e,"white")).reduce( ( p, c ) => p + c, 0 ),
-		[0,1,2,3,4,5,6,7].map(e => isIsolatedPawn(each,each_all,e,"black")).reduce( ( p, c ) => p + c, 0 ),
-		[4,5,6,7].map(e => Array.from(each[e]).includes("P") ? 1 : 0).reduce( ( p, c ) => p + c, 0) > [0,1,2,3].map(e => Array.from(each[e]).includes("P") ? 1 : 0).reduce( ( p, c ) => p + c, 0) ? 1 : 0,
-		[4,5,6,7].map(e => Array.from(each[e]).includes("P") ? 1 : 0).reduce( ( p, c ) => p + c, 0) > [0,1,2,3].map(e => Array.from(each[e]).includes("P") ? 1 : 0).reduce( ( p, c ) => p + c, 0) ? 0 : 1,
-		Math.min(...each_all.map(e => Math.min(...e.map((ee,i) => ee=="P" ? i : 8)))),
-		Math.max(...each_all.map(e => Math.max(...e.map((ee,i) => ee=="p" ? i : -1)))),
-		Math.max(...each_all.map(e => Math.max(...e.map((ee,i) => ee=="P" ? i : -1)))),
-		Math.min(...each_all.map(e => Math.min(...e.map((ee,i) => ee=="p" ? i : 8)))),
-		average(each_all.map(e => average(e.map((ee,i) => ee=="P" ? i : -1).filter(e => e!=-1))).filter(e => !isNaN(e))) || -1,
-		average(each_all.map(e => average(e.map((ee,i) => ee=="p" ? i : -1).filter(e => e!=-1))).filter(e => !isNaN(e))) || -1,
-		[each_all[5][1],each_all[6][2],each_all[7][1]].map(e => e=="P" ? 1 : 0).reduce( ( p, c ) => p + c, 0 ),// pawns on F2,G3,H2
-		[each_all[0][1],each_all[1][2],each_all[2][1]].map(e => e=="P" ? 1 : 0).reduce( ( p, c ) => p + c, 0 ),// pawns on A2,B3,C2
-		[each_all[5][6],each_all[6][5],each_all[7][6]].map(e => e=="p" ? 1 : 0).reduce( ( p, c ) => p + c, 0 ),// pawns on F7,G6,H7
-		[each_all[0][6],each_all[1][5],each_all[2][6]].map(e => e=="p" ? 1 : 0).reduce( ( p, c ) => p + c, 0 ) // pawns on A7,B6,C7
-		];
-	
-	if(onlyVector) return vector;
-
-	var dict = {}
-	vector.forEach((e,i) => {dict[pawnKeys[i]]=e})
-	return dict;
-}
-
-function material(fen, onlyVector){
-	var fen_ = fen.split(" ")[0].split("");
-	var piecesWhite = fen_.filter(e => filterPieces("white",e));
-  var piecesBlack = fen_.filter(e => filterPieces("black",e));
-  var totalMaterialWhite = countMaterial(piecesWhite);
-  var totalMaterialBlack = countMaterial(piecesBlack);
-
-  var vector = [	  
-         totalMaterialWhite+totalMaterialBlack, 
-         totalMaterialWhite, 
-         totalMaterialBlack, 
-         piecesWhite.filter(e => e=='P').length,
-         piecesBlack.filter(e => e=='p').length,
-         piecesWhite.filter(e => e=='N').length,
-         piecesBlack.filter(e => e=='n').length,
-         piecesWhite.filter(e => e=='B').length,
-         piecesBlack.filter(e => e=='b').length,
-         piecesWhite.filter(e => e=='R').length,
-         piecesBlack.filter(e => e=='r').length,
-         piecesWhite.filter(e => e=='Q').length,
-         piecesBlack.filter(e => e=='q').length, 
-         (piecesWhite.filter(e => e=='B').length > piecesBlack.filter(e => e=='n').length) ? 1 : 0, 
-         (piecesWhite.filter(e => e=='N').length > piecesBlack.filter(e => e=='b').length) ? 1 : 0, 
-         (piecesWhite.filter(e => e=='B').length == piecesWhite.filter(e => e=='N').length) ? 1 : 0, 
-         (piecesWhite.filter(e => e=='P').length == piecesBlack.filter(e => e=='p').length) ? 1 : 0,
-         (piecesBlack.filter(e => e=='b').length > piecesWhite.filter(e => e=='N').length) ? 1 : 0, 
-         (piecesBlack.filter(e => e=='n').length > piecesWhite.filter(e => e=='B').length) ? 1 : 0, 
-         (piecesBlack.filter(e => e=='b').length == piecesBlack.filter(e => e=='n').length) ? 1 : 0, 
-         (piecesBlack.filter(e => e=='p').length == piecesWhite.filter(e => e=='P').length) ? 1 : 0 
-  ]
-  if(onlyVector) return vector;
-
-	var dict = {}
-	vector.forEach((e,i) => {dict[materialKeys[i]]=e})
-	return dict; 
-}
-
-function package_density(fen,onlyVector){ 
-	  
-		var res = fenToBoard(fen,true)
-	  var res_b = res.black.map((e,i) => {return e.map((e,ii) => i==7 && e=="e" ? "n" : i>1 && e=="e" ? "p" : i==0 && ii==0 ? "k" : i==0 && ii==7 ? "K" : e=="e" ? e : e.toUpperCase()).map(e => e.toLowerCase()==e && e!="e" ? e.toUpperCase(): e.toLowerCase())}).map(e => e.join("")).join("/")
-    var res_w = res.white.map((e,i) => {return e.map((e,ii) => i==0 && e=="e" ? "n" : i<6 && e=="e" ? "p" : i==7 && ii==0 ? "k" : i==7 && ii==7 ? "K" : e)}).map(e => e.join("")).join("/")
-
-    var new_w = [zipFen(res_w),"w","-","-","0","1"].join(" ");
-    var new_b = [zipFen(res_b),"b","-","-","0","1"].join(" ");
-
-    var newGame = new Chess(new_w);
-    var moves_w = newGame.moves().filter(e => !e.toLowerCase().includes('k') && !e.toLowerCase().includes('='));
-    newGame.load(new_b);
-    var moves_b = newGame.moves().filter(e => !e.toLowerCase().includes('k') && !e.toLowerCase().includes('='));
-
-    var w_pawn_count = new_w.split("").filter(e => e=="P").length
-    var b_pawn_count = new_b.split("").filter(e => e=="p").length
-    // * excluding squares where a pawn protects a pawn 
-
-	  var vector = [
-	        new Set(moves_w.map(e => e.split("x")[1])).size,
-	        new Set(moves_w.map(e => e.split("x")[1])).size/w_pawn_count,
-	        moves_w.map(e => e.split("x")[1]).length - (new Set(moves_w.map(e => e.split("x")[1])).size),
-	        moves_w.map(e => e.split("x")[1]).length / w_pawn_count,
-
-	        new Set(moves_b.map(e => e.split("x")[1])).size,
-	        new Set(moves_b.map(e => e.split("x")[1])).size/b_pawn_count,
-	        moves_b.map(e => e.split("x")[1]).length - (new Set(moves_b.map(e => e.split("x")[1])).size),
-	        moves_b.map(e => e.split("x")[1]).length / b_pawn_count  
-	 ]
-	 vector = [...vector,
-	        vector[0]/vector[4],
-	        vector[1]/vector[5],
-	        vector[2] - vector[6],
-	        vector[3]/vector[7]
-	       ]
-
-   if(onlyVector) return vector;
-
-	 var dict = {}
-	 vector.forEach((e,i) => {dict[packageDensityKeys[i]]=e})
-	 return dict; 
-}
-
-function expansion_factor(fen,onlyVector){ 
-	var fen_ = fen.split(" ")[0];
-	var temp8 = fen_.replace(/[0-9]/g, "").split("/").map(e => {return {w: e.split("").filter(e => e.toLowerCase()!=e).join(""),b: e.split("").filter(e => e.toLowerCase()==e).join("")}}).map((e,i) => [(i+1)*e.w.split("").length,(7-i+1)*e.b.split("").length,e.w.split("").length,e.b.split("").length]).reduce((a,b) => [a[0]+b[0],a[1]+b[1],a[2]+b[2],a[3]+b[3]],[0,0,0,0])
-    var temp9 = expandFen(fen).join("").split("/").map(e => {return {w: [e.slice(0,4),e.slice(4,8)],b: [e.slice(0,4),e.slice(4,8)]}}).map((e,i) => [e.w[0].split("").filter(e => e.toLowerCase()!=e).filter(e => e!="e").length*(i+1),e.w[0].split("").filter(e => e.toLowerCase()!=e).filter(e => e!="e").length,e.w[1].split("").filter(e => e.toLowerCase()!=e).filter(e => e!="e").length*(i+1),e.w[1].split("").filter(e => e.toLowerCase()!=e).filter(e => e!="e").length,e.b[0].split("").filter(e => e.toLowerCase()==e).filter(e => e!="e").length*(7-i+1),e.b[0].split("").filter(e => e.toLowerCase()==e).filter(e => e!="e").length,e.b[1].split("").filter(e => e.toLowerCase()==e).filter(e => e!="e").length*(7-i+1),e.b[1].split("").filter(e => e.toLowerCase()==e).filter(e => e!="e").length]).reduce((a,b) => [a[0]+b[0],a[1]+b[1],a[2]+b[2],a[3]+b[3],a[4]+b[4],a[5]+b[5],a[6]+b[6],a[7]+b[7]],[0,0,0,0,0,0,0,0]);
-    // white and black mixxed because of array 0,4 -> black 5-7 -> white
-    var temp10 = [(temp9[0]/temp9[1]),(temp9[4]/temp9[5]),(temp9[2]/temp9[3]),(temp9[6]/temp9[7]),(temp8[0]/temp8[2]),(temp8[1]/temp8[3])].map(e => isNaN(e) ? 0 : e==Infinity? 0 : e)
-    var temp11 = [temp10[1]/temp10[0],temp10[3]/temp10[2],temp10[5]/temp10[4]].map(e => isNaN(e) ? 0 : e==Infinity? 0 : e)
-
-    var vector = [	  
-       temp11[0], 
-			 temp11[1], 
-			 temp10[0], 
-			 temp10[1], 
-			 temp10[2], 
-			 temp10[3], 
-			 temp11[2], 
-			 temp10[4], 
-   		 temp10[5] 
-			];
-
-    if(onlyVector) return vector;
-
-	  var dict = {}
-	  vector.forEach((e,i) => {dict[expansionFactorKeys[i]]=e})
-	  return dict; 
-}
-
-
-function getColorOfMove(last_move){
-	if(last_move.turn){
-		return last_move.turn;
-	}else{
-		return last_move.color;
-	}
-}
-
-function getNotationOfMove(last_move){
-	if(last_move.notation){
-		return last_move.notation.notation;
-		/* {
-	    "moveNumber": 1,
-	    "notation": {
-	        "fig": null,
-	        "strike": null,
-	        "col": "d",
-	        "row": "4",
-	        "check": null,
-	        "promotion": null,
-	        "notation": "d4"
-	    },
-	    "commentAfter": "+0.00/1 0s",
-	    "variations": [],
-	    "nag": null,
-	    "commentDiag": {
-	        "comment": "+0.00/1 0s"
-	    },
-	    "turn": "w"
-		}*/
-	}else{
-		return last_move.san; //  { color: 'b', from: 'e5', to: 'f4', flags: 'c', piece: 'p', captured: 'p', san: 'exf4' }
-	}
-}
-
-function getRowOfMoveTo(last_move){
-	if(last_move.notation){
-		return parseInt(last_move.notation.row);
-	}else{
-		return parseInt(last_move.to.split("")[1]);
-	}
-}
-
-function getColOfMoveTo(last_move){
-	var cols = ["a","b","c","d","e","f","g","h"]
-	if(last_move.notation){
-		return cols.indexOf(last_move.notation.col);
-	}else{
-		return cols.indexOf(last_move.to.split("")[0]);
-	}
-}
-
-
-function getFigureOfMove(last_move){
-	if(last_move.notation){
-		return last_move.notation.fig;
-	}else{
-		if(last_move.piece=="p"){
-			return null;
-		}
-		return last_move.color=='w' ? last_move.piece.toUpperCase() : last_move.piece.toLowerCase();
-	}
-}
-
-function mobility(game, fen, last_move,onlyVector){
-	  var fen_ = fen.split(" ")[0].split("");
-
-    var piecesWhite = fen_.filter(e => filterPieces("white",e));
-    var piecesBlack = fen_.filter(e => filterPieces("black",e));
-	  var moves = game.moves();
-    var pawn_moves = moves.filter(e => e.length==2 && e.toLowerCase()==e);
-    var non_pawn_moves = moves.filter(e => e.toLowerCase()!=e) 
-
-    var vector = [
-     moves.length,
-   	 non_pawn_moves.length,	
-   	 pawn_moves.length/(getColorOfMove(last_move)=="b" ? piecesWhite.filter(e => e=='P').length : piecesBlack.filter(e => e=='p').length),
-	   non_pawn_moves.filter(e => !e.includes('Q') && !e.includes('K')).length/(getColorOfMove(last_move)=="b" ? piecesWhite.filter(e => e=='B' || e=='N' || e=='R').length : piecesBlack.filter(e => e=='b' || e=='n' || e=='r').length),
-		 non_pawn_moves.filter(e => !e.includes('Q') && !e.includes('K')).length/(getColorOfMove(last_move)=="b" ? piecesWhite.filter(e => e=='Q' || e=='R').length : piecesBlack.filter(e => e=='q' || e=='r').length),
-  	 pawn_moves.length/(getColorOfMove(last_move)=="b" ? piecesWhite.filter(e => e=='P').length : piecesBlack.filter(e => e=='p').length)
-	]
-
-	  if(onlyVector) return vector;
-
-	  var dict = {}
-	  vector.forEach((e,i) => {dict[mobilityKeys[i]]=e})
-	  return dict; 
-}
-
-
-
-function info_move(last_move,onlyVector){
-
-	var color_of_move = getColorOfMove(last_move);
-	var color_of_move_w = getColorOfMove(last_move)=="w";
-	var color_of_move_b = !color_of_move_w;
-	var notation_of_move = getNotationOfMove(last_move);
-	var notation_of_move_lower = notation_of_move.toLowerCase();
-	var figure_of_move = getFigureOfMove(last_move);
-	var notation_of_move_includes_x = notation_of_move.includes('x');
-	var notation_of_move_is_upper = notation_of_move_lower != notation_of_move
-
-	var vector = [
-      (color_of_move_w && !notation_of_move_includes_x && !notation_of_move_is_upper && figure_of_move==null)  ? 1 : 0,
-      (color_of_move_b && !notation_of_move_includes_x && !notation_of_move_is_upper && figure_of_move==null)  ? 1 : 0,
-      (color_of_move_w && !notation_of_move_includes_x && notation_of_move_is_upper && figure_of_move=="B")  ? 1 : 0,
-      (color_of_move_b && !notation_of_move_includes_x && notation_of_move_is_upper && figure_of_move=="B")  ? 1 : 0,
-      (color_of_move_w && !notation_of_move_includes_x && notation_of_move_is_upper && figure_of_move=="N")  ? 1 : 0,
-      (color_of_move_b && !notation_of_move_includes_x && notation_of_move_is_upper && figure_of_move=="N")  ? 1 : 0,
-      (color_of_move_w && !notation_of_move_includes_x && notation_of_move_is_upper && figure_of_move=="R")  ? 1 : 0,
-      (color_of_move_b && !notation_of_move_includes_x && notation_of_move_is_upper && figure_of_move=="R")  ? 1 : 0,
-      (color_of_move_w && !notation_of_move_includes_x && notation_of_move_is_upper && figure_of_move=="Q")  ? 1 : 0,
-      (color_of_move_b && !notation_of_move_includes_x && notation_of_move_is_upper && figure_of_move=="Q")  ? 1 : 0,
-      (color_of_move_w && !notation_of_move_includes_x && notation_of_move_is_upper && figure_of_move=="K")  ? 1 : 0,
-      (color_of_move_b && !notation_of_move_includes_x && notation_of_move_is_upper && figure_of_move=="K")  ? 1 : 0,
-     // ['unusual {high, low} number of {Pawn, Bishop, Knight, Queen, King, Rook} moves']
-      (color_of_move_w && notation_of_move_includes_x && !notation_of_move_is_upper && figure_of_move==null)  ? 1 : 0,
-      (color_of_move_b && notation_of_move_includes_x && !notation_of_move_is_upper && figure_of_move==null)  ? 1 : 0,
-      (color_of_move_w && notation_of_move_includes_x && notation_of_move_is_upper && figure_of_move=="B")  ? 1 : 0,
-      (color_of_move_b && notation_of_move_includes_x && notation_of_move_is_upper && figure_of_move=="B")  ? 1 : 0,
-      (color_of_move_w && notation_of_move_includes_x && notation_of_move_is_upper && figure_of_move=="N")  ? 1 : 0,
-      (color_of_move_b && notation_of_move_includes_x && notation_of_move_is_upper && figure_of_move=="N")  ? 1 : 0,
-      (color_of_move_w && notation_of_move_includes_x && notation_of_move_is_upper && figure_of_move=="Q")  ? 1 : 0,
-      (color_of_move_b && notation_of_move_includes_x && notation_of_move_is_upper && figure_of_move=="Q")  ? 1 : 0,
-      (color_of_move_w && notation_of_move_includes_x && notation_of_move_is_upper && figure_of_move=="R")  ? 1 : 0,
-      (color_of_move_b && notation_of_move_includes_x && notation_of_move_is_upper && figure_of_move=="R")  ? 1 : 0,
-      (color_of_move_w && notation_of_move_includes_x && notation_of_move_is_upper && figure_of_move=="K")  ? 1 : 0,
-      (color_of_move_b && notation_of_move_includes_x && notation_of_move_is_upper && figure_of_move=="K")  ? 1 : 0,
-     // ['unusual {high, low} number of {Pawns, Bishops, Knights, Queens, Kings, Rooks} captures']
-      (color_of_move_w && notation_of_move_includes_x && notation_of_move_is_upper && (figure_of_move=="B" || figure_of_move=="N") )  ? 1 : 0,
-      (color_of_move_b && notation_of_move_includes_x && notation_of_move_is_upper && (figure_of_move=="B" || figure_of_move=="N") )  ? 1 : 0,
-     // ['unusual {high, low} number of minor piece captures']
-      (color_of_move_w && notation_of_move=="O-O")  ? 1 : 0,
-      (color_of_move_b && notation_of_move=="O-O")  ? 1 : 0,
-     // ['{early, average, late} castling timing']
-      (color_of_move_w && notation_of_move=="O-O-O")  ? 1 : 0,
-      (color_of_move_b && notation_of_move=="O-O-O")  ? 1 : 0,
-      getColOfMoveTo(last_move),
-      getRowOfMoveTo(last_move),
-
-                     
-			 ]
-
-		if(onlyVector) return vector;
-
-	  var dict = {}
-	  vector.forEach((e,i) => {dict[infoMoveKeys[i]]=e})
-	  return dict; 
-	
-}
-
-function getStatisticsForPositionDict(new_game,last_move) {
-	return getStatisticsForPosition(new_game,last_move,false);
-}
-
-function getStatisticsForPositionVector(new_game,last_move) {
-	return getStatisticsForPosition(new_game,last_move,true);
-}
-
-function getStatisticsForPosition(new_game,last_move,onlyVector) {
-        var fen = new_game.fen();
-
-				var material_ = material(fen,onlyVector);
-				var package_density_ = package_density(fen,onlyVector);
-				var expansion_factor_ = expansion_factor(fen,onlyVector);
-				var mobility_ = mobility(new_game, fen, last_move,onlyVector);
-				var info_move_ = info_move(last_move,onlyVector);
-				var pawn_features_ = pawnFeatures(fen,onlyVector);
-
-				if(onlyVector){
-					return [last_move.commentAfter,new_game.history().length,getColorOfMove(last_move)=="w" ? 1 : 0,...material_,...package_density_,...expansion_factor_,...mobility_,...info_move_,...pawn_features_]
-				}
-
-        var statistics =  {
-   			 "cp": last_move.commentAfter,
-   			 "halfmove": new_game.history().length,
-   			 "last move by": getColorOfMove(last_move)=="w" ? 1 : 0,
-        }
-        statistics = Object.assign({}, statistics, material_);
-        statistics = Object.assign({}, statistics, package_density_);
-        statistics = Object.assign({}, statistics, expansion_factor_);
-        statistics = Object.assign({}, statistics, mobility_);
-        statistics = Object.assign({}, statistics, info_move_);
-        statistics = Object.assign({}, statistics, pawn_features_);
-        return statistics;
-            }
 
 
 export function getDistanceVectorForStatistics(stats){
@@ -659,6 +83,7 @@ function createModel(inputSize,outputSize) {
   // 512 good results 
   // 256
 
+  model.add(tf.layers.dropout({ rate: 0.25 }))
   // Add an hidden layer
   model.add(tf.layers.dense({units: 256, useBias: false, activation: 'relu'}));  
   // model.add(tf.layers.dense({units: 50, activation: 'sigmoid'}));
@@ -756,8 +181,10 @@ async function trainModel(model, inputs, labels) {
     metrics: ['mse'],
   });
 
-  const batchSize = 16;
-  const epochs = 50;
+  const batchSize = 64;
+  // 16 good results
+  const epochs = 30;
+  // 50 good results
 
   return await model.fit(inputs, labels, {
     batchSize,
@@ -765,7 +192,7 @@ async function trainModel(model, inputs, labels) {
     shuffle: true,
     callbacks: tfvis.show.fitCallbacks(
       { name: 'Training Performance' },
-      ['loss', 'mse'],
+      ['loss', 'poisson'],
       { height: 300, callbacks: ['onEpochEnd'] }
     )
   });
@@ -776,7 +203,10 @@ export async function getFeatureImportance(playerColor) {
 
 	chess_meta.chessGames("engine").then(humanGames => humanGames.get).then(async(games) => {
 		      //console.log(games.length) // 1839
-					var games = games.filter((e,iii) => iii<=100);
+//					var games = games.filter((e,iii) => iii<=3);
+
+ 
+
 //					console.log(games);
 					games.forEach((game,ii) => {
 						 game.moves.forEach((move,i) => {
@@ -791,7 +221,7 @@ export async function getFeatureImportance(playerColor) {
 	        var games_FEN = games
 	        //      .filter(e => playerColor=='w' ? (e.tags.Result=="1-0" || e.tags.Result=="1/2-1/2") : (e.tags.Result=="0-1" || e.tags.Result=="1/2-1/2"))
 	        
-	       const getResults = (n) => {return getMovesAsFENs(n, getStatisticsForPositionVector)}
+	       const getResults = (n) => {return sampleMovesAsFENs(n, evaluation.getStatisticsForPositionVector,0.66,5*2,60*2,-1.5,1.5,0.33)}
 	       for(var x=0;x<games_FEN.length;x++){
 	       	games_FEN[x] = getResults(games_FEN[x]);
 	       } 
@@ -799,13 +229,13 @@ export async function getFeatureImportance(playerColor) {
 	       //console.log(games_FEN)
 	        
 	        var vectors = [].concat.apply([], games_FEN)
-	        //.filter(e => e[allKeys.indexOf("last move by")]==1 && e[allKeys.indexOf("halfmove")]>5*2 && e[allKeys.indexOf("halfmove")]<=45*2)
+	        //.filter(e => e[evaluation.allKeys.indexOf("last move by")]==1 && e[evaluation.allKeys.indexOf("halfmove")]>5*2 && e[evaluation.allKeys.indexOf("halfmove")]<=45*2)
           
 	       //console.log(vectors)
 
           vectors = vectors.map(e => {
-	        	var target = e[allKeys.indexOf("cp")]; 
-	        	e.splice(allKeys.indexOf("cp"), 1);
+	        	var target = e[evaluation.allKeys.indexOf("cp")];  
+	        	e.splice(evaluation.allKeys.indexOf("cp"), 1);
 	        	return {"data": e, "label":target}
 	        })
 
@@ -843,25 +273,26 @@ export async function getFeatureImportance(playerColor) {
 					 */
 
 
-	        //const model = createModel(vectors[0].data.length,1);
-	        const model = await tf.loadLayersModel('localstorage://my-model');
+          var temp = {"input":undefined,"label":undefined};
+					let model;
+          if(true){ // load or create
+	        	model = createModel(vectors[0].data.length,1);
+	      	}else{
+	        	model = await tf.loadLayersModel('localstorage://my-model');
 
+	 					temp = JSON.parse(window.localStorage.getItem("normalizeVector"))
+	 					console.log("loaded normalizeVector from localstorage");
+					}
 					tfvis.show.modelSummary({name: 'Model Summary'}, model);
 
 
 					/* Prepare training data
 					 */
 
-
-          var temp = {"input":undefined,"label":undefined};
- 					temp = JSON.parse(window.localStorage.getItem("normalizeVector"))
- 					console.log("loaded normalizeVector from localstorage");
- 					// load or create min max on the run
-
-
-
 					// Convert the data to a form we can use for training.
 					const tensorData = convertToTensor(vectors,temp.input,temp.label);
+
+
 					const {inputs, labels} = tensorData;
 
 
@@ -872,20 +303,24 @@ export async function getFeatureImportance(playerColor) {
 
 
 					// Train the model
-/*					var res = await trainModel(model, inputs, labels);
-					console.log('Done Training');
+					if(true){ // train or not train
+						var res = await trainModel(model, inputs, labels);
+						console.log('Done Training');
+						
 
-					await model.save('localstorage://my-model');
-					console.log("model saved: my-model")
+						await model.save('localstorage://my-model');
+						console.log("model saved: my-model")
+					}
 					//await model.save('downloads://my-model');
-*/
+
            
 					/* Prepare test data or use training data as testing data
 					 */
 
         	var res = normalizeVector(vectors,temp.input,temp.label);
+ 
 
-        	console.log(res)
+        	//console.log(res)
 
         	var myModel = {predict: (test) => {
         		var p = model.predict(tf.tensor2d(test, [test.length, test[0].length]));
@@ -895,11 +330,11 @@ export async function getFeatureImportance(playerColor) {
 					// Get feature importance
 					const imp = importance(myModel, res.inputs, res.labels, {
 					  kind: 'mse',
-					  n: 50,
+					  n: 1,
 					  means: true,
 					  verbose: true
 					})
-					var importance_list = (imp.map((e,i) => {return {key:allKeys[1+i],value:e}}))
+					var importance_list = (imp.map((e,i) => {return {key:evaluation.allKeys[1+i],value:e}}))
           importance_list = sortJsObject(importance_list);
 					console.log(importance_list)
 
@@ -912,8 +347,8 @@ export async function getFeatureImportance(playerColor) {
 
 					console.log(vectors)
           vectors = [vectors].map(e => {
-	        	var target = e[allKeys.indexOf("cp")]; 
-	        	e.splice(allKeys.indexOf("cp"), 1);
+	        	var target = e[evaluation.allKeys.indexOf("cp")]; 
+	        	e.splice(evaluation.allKeys.indexOf("cp"), 1);
 	        	return {"data": e, "label":target}
 	        })
 					console.log(vectors)
@@ -957,7 +392,7 @@ export async function getGameStatistics(playerColor) {
 
 	        var games_FEN = games
 	              .filter(e => playerColor=='w' ? (e.tags.Result=="1-0" || e.tags.Result=="1/2-1/2") : (e.tags.Result=="0-1" || e.tags.Result=="1/2-1/2"))
-	              .map(game => getMovesAsFENs(game, getStatisticsForPositionDict).map(f => {
+	              .map(game => getMovesAsFENs(game, evaluation.getStatisticsForPositionDict).map(f => {
 	              	return Object.assign({}, { 
 																		         "index": 0, 
 																		   			 "game count": 1
@@ -1031,7 +466,7 @@ export async function getSkillProfile(elo,depth) {
 export function getNotification(chess, playerColor, halfMoves){
 
 	 if(halfMoves>0){ 
-          var my_stats_now = getStatisticsForPositionDict(chess,chess.history({verbose:true}).reverse()[0]);
+          var my_stats_now = evaluation.getStatisticsForPositionDict(chess,chess.history({verbose:true}).reverse()[0]);
           var stats_opp = chess_meta[playerColor=="w" ? "white" : "black"][halfMoves];
           delete stats_opp["game count"];
           delete stats_opp["index"];
