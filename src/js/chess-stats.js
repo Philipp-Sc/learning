@@ -83,7 +83,7 @@ function createModel(inputSize,outputSize) {
   // 512 good results 
   // 256
 
-  model.add(tf.layers.dropout({ rate: 0.25 }))
+  model.add(tf.layers.dropout({ rate: 0.05 }))
   // Add an hidden layer
   model.add(tf.layers.dense({units: 256, useBias: false, activation: 'relu'}));  
   // model.add(tf.layers.dense({units: 50, activation: 'sigmoid'}));
@@ -303,7 +303,7 @@ export async function getFeatureImportance(playerColor) {
 
 
 					// Train the model
-					if(true){ // train or not train
+					if(false){ // train or not train
 						var res = await trainModel(model, inputs, labels);
 						console.log('Done Training');
 						
