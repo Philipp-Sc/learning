@@ -3,7 +3,7 @@ import * as tf from '@tensorflow/tfjs'
 import * as tfvis from '@tensorflow/tfjs-vis' 
 import * as chess_meta from "../js/chess-meta.js"
 import * as d3 from "d3";
-import {average, median, arraysEqual, sum, arrayMin, arrayMax, normalize, undoNormalize, sortJsObject} from "./utilities.js"
+import {average, median, arraysEqual, sum, arrayMin, arrayMax, normalize, undoNormalize, shuffleArray, sortJsObject} from "./utilities.js"
 import * as tf_chess from './tensorflow-chess.js'
 
 import * as evaluation from "../js/eval/evaluation.js"
@@ -76,84 +76,81 @@ export function getDistanceVectorForStatistics(stats){
 
 export async function getFeatureImportance(playerColor) {
 
-	chess_meta.chessGames("engine").then(humanGames => humanGames.get).then(async(games) => {
+	var engineGames = await chess_meta.chessGames("engine").then(humanGames => humanGames.get);
+	var humanGames  = await chess_meta.chessGames("human").then(humanGames => humanGames.get);
 
-					//var humanGames = await chess_meta.chessGames("human").then(humanGames => humanGames.get);
-		      //console.log(games.length) // 1839
-					var games = games.filter((e,iii) => iii<=3);
+	// ~50% Human, ~50% Engine
+  var games_FEN = [...engineGames,...humanGames]
+  shuffleArray(games_FEN);
+  games_FEN = games_FEN.filter((e,i) => i<games_FEN.length/2);
+
+  //console.log(games.length) 
+	//games_FEN = games_FEN.filter((e,iii) => iii<=3);
 
  
+	const getResults = (n) => {return sampleMovesAsFENs(n, evaluation.getStatisticsForPositionVector,0.66,5*2,60*2,-1.5,1.5,0.33)}
+	for(var x=0;x<games_FEN.length;x++){
+		games_FEN[x] = getResults(games_FEN[x]);
+	} 
 
-//					console.log(games);
-				 
-	        //var games_FEN = [...games,...humanGames]
-	        var games_FEN = games
-	        //      .filter(e => playerColor=='w' ? (e.tags.Result=="1-0" || e.tags.Result=="1/2-1/2") : (e.tags.Result=="0-1" || e.tags.Result=="1/2-1/2"))
-	        
-	       const getResults = (n) => {return sampleMovesAsFENs(n, evaluation.getStatisticsForPositionVector,0.66,5*2,60*2,-1.5,1.5,0.33)}
-	       for(var x=0;x<games_FEN.length;x++){
-	       	games_FEN[x] = getResults(games_FEN[x]);
-	       } 
+	//console.log(games_FEN)
 
-	       //console.log(games_FEN)
-	        
-	        var vectors = [].concat.apply([], games_FEN)
-	        //.filter(e => e[evaluation.allKeys.indexOf("last move by")]==1 && e[evaluation.allKeys.indexOf("halfmove")]>5*2 && e[evaluation.allKeys.indexOf("halfmove")]<=45*2)
-          
-	       //console.log(vectors)
+	var vectors = [].concat.apply([], games_FEN)
+	//.filter(e => e[evaluation.allKeys.indexOf("last move by")]==1 && e[evaluation.allKeys.indexOf("halfmove")]>5*2 && e[evaluation.allKeys.indexOf("halfmove")]<=45*2)
 
-          vectors = vectors.map(e => {
-	        	var target = e[evaluation.allKeys.indexOf("cp")];  
-	        	e.splice(evaluation.allKeys.indexOf("cp"), 1);
-	        	return {"data": e, "label":target}
-	        })
+	//console.log(vectors)
 
-	        window.allKeys = evaluation.allKeys;
+	vectors = vectors.map(e => {
+		var target = e[evaluation.allKeys.indexOf("cp")];  
+		e.splice(evaluation.allKeys.indexOf("cp"), 1);
+		return {"data": e, "label":target}
+	})
 
-	        //console.log(vectors)
+	window.allKeys = evaluation.allKeys;
 
-	       /*
-					* Sample the data in a smart way, to avoid overfitting to the median/average label value
-	        */
+	//console.log(vectors)
 
-	        var histGenerator = d3.bin()
-					  .domain([-2,2])    // Set the domain to cover the entire intervall [0;]
-					  .thresholds(10);  // number of thresholds; this will create 10+1 bins
+	/*
+	* Sample the data in a smart way, to avoid overfitting to the median/average label value
+	*/
 
-					var bins = histGenerator(vectors.map(e => e.label))
-					.filter(e => e.length>=1).map(e => [arrayMin(e),e.length,arrayMax(e)])
+	var histGenerator = d3.bin()
+	  .domain([-2,2])    // Set the domain to cover the entire intervall [0;]
+	  .thresholds(10);  // number of thresholds; this will create 10+1 bins
 
-					//console.log(bins);
+	var bins = histGenerator(vectors.map(e => e.label))
+	.filter(e => e.length>=1).map(e => [arrayMin(e),e.length,arrayMax(e)])
 
-					var mean_most_common_least_common_count = median(bins.map(e => e[1]));
+	//console.log(bins);
 
-					var selectVectors = [];
+	var mean_most_common_least_common_count = median(bins.map(e => e[1]));
 
-					for(var i = 0; i<mean_most_common_least_common_count;i++){
-						bins.forEach(e => {
-						var temp = vectors.filter(each => each.label>=e[0] && each.label<=e[2])
-						selectVectors.push(temp[Math.floor(Math.random() * temp.length)])
-						})
-					}
-					
-					//console.log(selectVectors);
+	var selectVectors = [];
 
-					vectors = selectVectors;
+	for(var i = 0; i<mean_most_common_least_common_count;i++){
+		bins.forEach(e => {
+		var temp = vectors.filter(each => each.label>=e[0] && each.label<=e[2])
+		selectVectors.push(temp[Math.floor(Math.random() * temp.length)])
+		})
+	}
 
-					/* Create the model or load model
-					 */
- 
-					 tf_chess.main({
-					 	create: false,
-					 	load: {model: 'my-model', normalizeVector_:'normalizeVector'}, 
-					 	train: true, 
-					 	overrideMinMax: false, 
-					 	saveAfterTraining:  {model: 'my-model', normalizeVector_:'normalizeVector'},
-					 	importance: true,
-					 	test: true,
-					 },vectors, undefined)
- 
-	      })
+	//console.log(selectVectors);
+
+	vectors = selectVectors;
+
+	/* Create the model or load model
+	 */
+
+	 tf_chess.main({
+	 	create: false,
+	 	load: {model: 'my-model', normalizeVector_:'normalizeVector'}, 
+	 	train: true, 
+	 	overrideMinMax: true, 
+	 	saveAfterTraining:  {model: 'my-model', normalizeVector_:'normalizeVector'},
+	 	importance: true,
+	 	test: true,
+	 },vectors, undefined)
+  
 }
 
 export async function getGameStatistics(playerColor) {
