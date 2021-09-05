@@ -3,14 +3,11 @@ import * as fen_utils from "./fen-utils.js"
  
 
 
-export const expansionFactorKeys = [	
-      "Expansion Factor Queen Side", 
-		"Expansion Factor King Side", 
+export const expansionFactorKeys = [	 
 		"Expansion Factor King Side {white}", 
 		"Expansion Factor King Side {black}", 
 		"Expansion Factor Queen Side {white}", 
-		"Expansion Factor Queen Side {black}", 
-		"Expansion Factor", 
+		"Expansion Factor Queen Side {black}",  
 		"Expansion Factor {white}", 
    	"Expansion Factor {black}" 
   ]
@@ -84,7 +81,7 @@ export const expansionFactorKeys = [
 	}
  
     // white and black mixxed because of array 0,4 -> black 5-7 -> white
-    var temp10 = [
+    var vector = [
     (sum_pieces_per_wing.white_pieces_queen_side_ranked/sum_pieces_per_wing.white_pieces_queen_side),
     (sum_pieces_per_wing.black_pieces_queen_side_ranked/sum_pieces_per_wing.black_pieces_queen_side),
     (sum_pieces_per_wing.white_pieces_king_side_ranked/sum_pieces_per_wing.white_pieces_king_side),
@@ -92,21 +89,7 @@ export const expansionFactorKeys = [
     (sum_pieces.white_pieces/sum_pieces.white_pieces_ranked),
     (sum_pieces.black_pieces/sum_pieces.black_pieces_ranked)]
     .map(e => isNaN(e) ? 0 : e==Infinity? 0 : e)
-    
-    var temp11 = [temp10[1]/temp10[0],temp10[3]/temp10[2],temp10[5]/temp10[4]].map(e => isNaN(e) ? 0 : e==Infinity? 0 : e)
-
-    var vector = [	  
-       temp11[0], 
-			 temp11[1], 
-			 temp10[0], 
-			 temp10[1], 
-			 temp10[2], 
-			 temp10[3], 
-			 temp11[2], 
-			 temp10[4], 
-   		 temp10[5] 
-			];
-
+      
     if(onlyVector) return vector;
 
 	  var dict = {}

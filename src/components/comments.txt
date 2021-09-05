@@ -1,7 +1,12 @@
 /*
 
+- note: NN needs to learn to predict cp on both engine game and human game database
+
 add avg rating point gained to evaluation display
 add avg time spent on move
+
+bishops, knights, rooks might not be equal, so split them into two. left, right
+only makes sense with bishops?
 
 - Open File x
 - Half Open File x
@@ -14,7 +19,13 @@ add avg time spent on move
 - Average pawn advancement x
 - Fianchetto x
 
-- Space area. Number of safe squares available for minor pieces on the central four files on ranks 2 to 4. Safe squares one, two or three squares behind a friendly pawn are counted twice.
+- https://en.wikipedia.org/wiki/Pawn_structure Index x
+- potential for each index a distance metric. (N moves till pawn_structure i) x
+
+- Space area. Number of safe squares available for minor pieces on the central four files on ranks 2 to 4. Safe squares one, two or three squares behind a friendly pawn are counted twice. x
+(- Center influence. The number of moves that can end up in the center (excl. pawns))
+
+- Over protection by Pieces And Pawns
 
 - Outposts: Number of Squares that can never be attacked by a opponments pawn and that is free and protected by my own pawns
 - Backward pawn: Number of squares occupied by a pawn that can never be protected by another pawn
@@ -22,13 +33,14 @@ add avg time spent on move
 - connected passed pawns
 - connected pawns
 - passed pawns
-- https://en.wikipedia.org/wiki/Pawn_structure Index
-- potential for each index a distance metric. (N moves till pawn_structure i)
+ 
+- King safety (see wikipedia - pawns before king, etc)
 
-- Center influence
-- Space
-- Over protection
-- King safety
+- Global Pattern.
+-> Bishop pin Knight Pattern NF6/Bg7 (H7)
+-> P A3, A7, H7, H3
+-> P A4, H4, A6, H6
+-> Pawn Fork, Knight Fork, Rook double attack,..
 
 - Attack
 Pinned direction
@@ -52,6 +64,10 @@ Pinned
 - Petrosian: Defense position/algorithm (the "reversed colors" Tal)
 
 https://www.chessprogramming.org/Evaluation
+
+- FRAGE: Sollte ich die Delta Werte/die Veränderung durch den letzten Zug mit an das NN übergeben.
+- (change -> state)
+- Intuitiv: Ja, aber entferne unnütze Features, um die dimensionalität klein zu halten.
 
 
 - Add all the features

@@ -3,8 +3,8 @@ import * as tf from '@tensorflow/tfjs'
 import * as tfvis from '@tensorflow/tfjs-vis' 
 import * as chess_meta from "../js/chess-meta.js"
 import * as d3 from "d3";
-import {average, median, arraysEqual, sum, arrayMin, arrayMax, normalize, sortJsObject} from "./utilities.js"
-
+import {average, median, arraysEqual, sum, arrayMin, arrayMax, normalize, undoNormalize, sortJsObject} from "./utilities.js"
+import * as tf_chess from './tensorflow-chess.js'
 
 import * as evaluation from "../js/eval/evaluation.js"
   
@@ -13,6 +13,7 @@ const importance = require('importance')
 const Chess = require("chess.js"); 
 
 var newGame = new Chess();
+
 
 
 function getMovesAsFENs(game, process){ 
@@ -26,8 +27,8 @@ function sampleMovesAsFENs(game, process,skipProbability, start, end, minCP, max
 	for (var i = 0; i < game.moves.length; i++) {
 		if(game.moves[i] && game.moves[i].notation && game.moves[i].notation.notation){
 			newGame.move(game.moves[i].notation.notation);
-			if(i>=start && i<=end && game.moves[i].commentAfter>=minCP && game.moves[i].commentAfter<=maxCP && Math.random()>skipProbability){
-				if(game.moves[i].commentAfter==0){
+			if(i>=start && i<=end && evaluation.getCP(game.moves[i])>=minCP && evaluation.getCP(game.moves[i])<=maxCP && Math.random()>skipProbability){
+				if(evaluation.getCP(game.moves[i])==0){
 					if(Math.random()>cpZeroProbability){
 						fens.push(process(newGame,game.moves[i]));
 					}
@@ -72,152 +73,20 @@ export function getDistanceVectorForStatistics(stats){
 	return	items.map(entry => entry[0]);
 }
 
-function createModel(inputSize,outputSize) {
-  // Create a sequential model
-  const model = tf.sequential();
-
-  // Add a single input layer
-  model.add(tf.layers.dense({inputShape: [inputSize], units: 256, useBias: true, activation: 'relu'})); 
-
-  // 1024 good results
-  // 512 good results 
-  // 256
-
-  model.add(tf.layers.dropout({ rate: 0.05 }))
-  // Add an hidden layer
-  model.add(tf.layers.dense({units: 256, useBias: false, activation: 'relu'}));  
-  // model.add(tf.layers.dense({units: 50, activation: 'sigmoid'}));
-  // activation ('elu'|'hardSigmoid'|'linear'|'relu'|'relu6'| 'selu'|'sigmoid'|'softmax'|'softplus'|'softsign'|'tanh'|'swish'|'mish')
-
-
-  // Add an output layer
-  model.add(tf.layers.dense({units: outputSize, useBias: false}));
-
-  return model;
-}
-
-function normalizeVector(data,inputMinMax_,labelMinMax_) {
-
-	 var inputMinMax;
-	 var labelMinMax;
-
-   if(!inputMinMax_ || !labelMinMax_){
-		  var v_min = new Array(data[0].data.length).fill(Infinity);
-		  var v_max = new Array(data[0].data.length).fill(-Infinity);
-		  for(var i=0;i<data.length;i++){
-		  	data[i].data.forEach((e,i) => {
-		  		if(e<v_min[i]){
-		  			v_min[i] = e;
-		  		}
-		  		if(e>v_max[i]){
-		  			v_max[i] = e;
-		  		} 
-		  	}) 
-		  }
-	    var inputMinMax =  v_min.map((e,i) => {return {"min":v_min[i], "max":v_max[i]}})
-
-	    var d = data.map(entry => entry.label).map(e => e==undefined ? -1 : (isFinite(e) ? e : -1));
-	    var labelMinMax =  {max: 2, min: -2}
-  }
-
-    if(inputMinMax_ && labelMinMax_){
-    	inputMinMax = inputMinMax_;
-    	labelMinMax = labelMinMax_;
-    }
-    
-
-    // Step 2. Convert data to Tensor
-    const inputs = data.map(d => d.data).map(entry => entry.map((e,i) => normalize(inputMinMax[i].min,inputMinMax[i].max)(e)))
-    const labels = data.map(d => d.label).map(entry => normalize(labelMinMax.min,labelMinMax.max)(entry))
-
-    return {
-    	inputs:inputs,
-    	labels:labels,
-    	inputMinMax:inputMinMax,
-    	labelMinMax:labelMinMax,
-    }
-}
-
-/**
- * Convert the input data to tensors that we can use for machine
- * learning. We will also do the important best practices of _shuffling_
- * the data and _normalizing_ the data
- * MPG on the y-axis.
- */
-function convertToTensor(data,inputMinMax_,labelMinMax_) {
-  // Wrapping these calculations in a tidy will dispose any
-  // intermediate tensors.
-
-  return tf.tidy(() => {
-    // Step 1. Shuffle the data
-    tf.util.shuffle(data);
-
-    const res = normalizeVector(data,inputMinMax_,labelMinMax_);
-    const inputs = res.inputs;
-    const labels = res.labels;
-    //console.log(inputs);
-    //console.log(labels);
-
-
-    const inputTensor = tf.tensor2d(inputs, [inputs.length, inputs[0].length]);
-    const labelTensor = tf.tensor2d(labels, [labels.length, 1]);
-
- 
-    return {
-      inputs: inputTensor,
-      labels: labelTensor,
-      // Return the min/max bounds so we can use them later.
-      inputMinMax: res.inputMinMax,
-      labelMinMax: res.labelMinMax, 
-    }
-  });
-}
-
-async function trainModel(model, inputs, labels) {
-  // Prepare the model for training.
-  model.compile({
-    optimizer: tf.train.adam(),
-    loss: tf.losses.meanSquaredError,
-    metrics: ['mse'],
-  });
-
-  const batchSize = 64;
-  // 16 good results
-  const epochs = 30;
-  // 50 good results
-
-  return await model.fit(inputs, labels, {
-    batchSize,
-    epochs,
-    shuffle: true,
-    callbacks: tfvis.show.fitCallbacks(
-      { name: 'Training Performance' },
-      ['loss', 'poisson'],
-      { height: 300, callbacks: ['onEpochEnd'] }
-    )
-  });
-}
-
 
 export async function getFeatureImportance(playerColor) {
 
 	chess_meta.chessGames("engine").then(humanGames => humanGames.get).then(async(games) => {
+
+					//var humanGames = await chess_meta.chessGames("human").then(humanGames => humanGames.get);
 		      //console.log(games.length) // 1839
-//					var games = games.filter((e,iii) => iii<=3);
+					var games = games.filter((e,iii) => iii<=3);
 
  
 
 //					console.log(games);
-					games.forEach((game,ii) => {
-						 game.moves.forEach((move,i) => {
-						 	if(move.commentAfter){
-						 		var temp = move.commentAfter.split("/")[0].replace("\n"," ").split(" ").reverse()[0];
-						 		var cp = parseFloat(temp);
-						 		games[ii].moves[i].commentAfter = isNaN(cp) ? -1 : cp;
-						 	} 
-					})
-					}) 
-
+				 
+	        //var games_FEN = [...games,...humanGames]
 	        var games_FEN = games
 	        //      .filter(e => playerColor=='w' ? (e.tags.Result=="1-0" || e.tags.Result=="1/2-1/2") : (e.tags.Result=="0-1" || e.tags.Result=="1/2-1/2"))
 	        
@@ -238,6 +107,8 @@ export async function getFeatureImportance(playerColor) {
 	        	e.splice(evaluation.allKeys.indexOf("cp"), 1);
 	        	return {"data": e, "label":target}
 	        })
+
+	        window.allKeys = evaluation.allKeys;
 
 	        //console.log(vectors)
 
@@ -271,125 +142,24 @@ export async function getFeatureImportance(playerColor) {
 
 					/* Create the model or load model
 					 */
-
-
-          var temp = {"input":undefined,"label":undefined};
-					let model;
-          if(true){ // load or create
-	        	model = createModel(vectors[0].data.length,1);
-	      	}else{
-	        	model = await tf.loadLayersModel('localstorage://my-model');
-
-	 					temp = JSON.parse(window.localStorage.getItem("normalizeVector"))
-	 					console.log("loaded normalizeVector from localstorage");
-					}
-					tfvis.show.modelSummary({name: 'Model Summary'}, model);
-
-
-					/* Prepare training data
-					 */
-
-					// Convert the data to a form we can use for training.
-					const tensorData = convertToTensor(vectors,temp.input,temp.label);
-
-
-					const {inputs, labels} = tensorData;
-
-
-					window.localStorage.setItem("normalizeVector",JSON.stringify({"input":tensorData.inputMinMax,"label":tensorData.labelMinMax}))
- 					console.log("normalizeVector written to localStorage")
-
- 					// "{\"input\":[{\"min\":0,\"max\":0},{\"min\":1,\"max\":1},{\"min\":1,\"max\":499},{\"min\":0,\"max\":1},{\"min\":0,\"max\":78},{\"min\":0,\"max\":39},{\"min\":0,\"max\":39},{\"min\":0,\"max\":8},{\"min\":0,\"max\":8},{\"min\":0,\"max\":2},{\"min\":0,\"max\":2},{\"min\":0,\"max\":2},{\"min\":0,\"max\":2},{\"min\":0,\"max\":2},{\"min\":0,\"max\":2},{\"min\":0,\"max\":2},{\"min\":0,\"max\":2},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":14},{\"min\":0,\"max\":2},{\"min\":0,\"max\":6},{\"min\":0,\"max\":2},{\"min\":0,\"max\":13},{\"min\":0,\"max\":2},{\"min\":0,\"max\":6},{\"min\":0,\"max\":2},{\"min\":0,\"max\":null},{\"min\":0,\"max\":null},{\"min\":-4,\"max\":4},{\"min\":0,\"max\":null},{\"min\":0,\"max\":7},{\"min\":0,\"max\":8},{\"min\":0,\"max\":8},{\"min\":0,\"max\":8},{\"min\":0,\"max\":8},{\"min\":0,\"max\":8},{\"min\":0.13333333333333333,\"max\":5.333333333333333},{\"min\":1,\"max\":8},{\"min\":1,\"max\":8},{\"min\":1,\"max\":63},{\"min\":1,\"max\":61},{\"min\":0,\"max\":2},{\"min\":0,\"max\":null},{\"min\":0,\"max\":null},{\"min\":0,\"max\":2},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":8},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":8},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1},{\"min\":0,\"max\":3},{\"min\":0,\"max\":3},{\"min\":0,\"max\":4},{\"min\":0,\"max\":4},{\"min\":0,\"max\":1},{\"min\":0,\"max\":1}],\"label\":{\"max\":2,\"min\":-2}}"
-
-
-					// Train the model
-					if(false){ // train or not train
-						var res = await trainModel(model, inputs, labels);
-						console.log('Done Training');
-						
-
-						await model.save('localstorage://my-model');
-						console.log("model saved: my-model")
-					}
-					//await model.save('downloads://my-model');
-
-           
-					/* Prepare test data or use training data as testing data
-					 */
-
-        	var res = normalizeVector(vectors,temp.input,temp.label);
  
-
-        	//console.log(res)
-
-        	var myModel = {predict: (test) => {
-        		var p = model.predict(tf.tensor2d(test, [test.length, test[0].length]));
-        		return p.dataSync();
-        	}}
-
-					// Get feature importance
-					const imp = importance(myModel, res.inputs, res.labels, {
-					  kind: 'mse',
-					  n: 1,
-					  means: true,
-					  verbose: true
-					})
-					var importance_list = (imp.map((e,i) => {return {key:evaluation.allKeys[1+i],value:e}}))
-          importance_list = sortJsObject(importance_list);
-					console.log(importance_list)
-
-
-          /* Prepare custom testing data
-					var my_test_game = new Chess();
-					my_test_game.load_pgn("1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. a3 {giuoco piano} *");
-	
-					var vectors = getStatisticsForPositionVector(my_test_game,my_test_game.history({verbose:true}).reverse()[0])
-
-					console.log(vectors)
-          vectors = [vectors].map(e => {
-	        	var target = e[evaluation.allKeys.indexOf("cp")]; 
-	        	e.splice(evaluation.allKeys.indexOf("cp"), 1);
-	        	return {"data": e, "label":target}
-	        })
-					console.log(vectors)
-
-        	var res = normalizeVector(vectors,temp.input,temp.label);
-
-
-        	console.log(res);
-        	//res.inputs.length
-				  const preds = model.predict(tf.tensor2d(res.inputs, [res.inputs.length, res.inputs[0].length]));
-				  console.log("first pred, then label")
-				  console.log(preds.dataSync());
-				  console.log(res.labels); 
-*/
-
-				return;
-
-
-
-	        var result = []; 
-	        // we need a evaluation key
-	        // then can do regression here
-	        console.log(games_FEN)
+					 tf_chess.main({
+					 	create: false,
+					 	load: {model: 'my-model', normalizeVector_:'normalizeVector'}, 
+					 	train: true, 
+					 	overrideMinMax: false, 
+					 	saveAfterTraining:  {model: 'my-model', normalizeVector_:'normalizeVector'},
+					 	importance: true,
+					 	test: true,
+					 },vectors, undefined)
  
-	        console.log(JSON.stringify(result));
 	      })
 }
 
 export async function getGameStatistics(playerColor) {
 
 	chess_meta.chessGames("engine").then(humanGames => humanGames.get).then(games => {
-	        games.forEach((game,ii) => {
-						 game.moves.forEach((move,i) => {
-						 	if(move.commentAfter){
-						 		var temp = move.commentAfter.split("/")[0].replace("\n"," ").split(" ").reverse()[0];
-						 		var cp = parseFloat(temp);
-						 		games[ii].moves[i].commentAfter = isNaN(cp) ? -1 : cp;
-						 	} 
-					})
-					})
-
+	       
 	        var games_FEN = games
 	              .filter(e => playerColor=='w' ? (e.tags.Result=="1-0" || e.tags.Result=="1/2-1/2") : (e.tags.Result=="0-1" || e.tags.Result=="1/2-1/2"))
 	              .map(game => getMovesAsFENs(game, evaluation.getStatisticsForPositionDict).map(f => {

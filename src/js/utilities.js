@@ -87,6 +87,11 @@ export function normalize(min, max) {
     };
 }
 
+export function undoNormalize(value,min,max) {
+    var delta = max - min;
+    return (value * delta) + min
+}
+
 export function arrayMin(arr) {
   return arr.reduce(function (p, v) {
     return ( p < v ? p : v );

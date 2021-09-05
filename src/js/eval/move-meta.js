@@ -1,7 +1,7 @@
 const cols = ["a","b","c","d","e","f","g","h"];
 
 export const move_meta_keys = [
-		  "{fig} Pawn {white}",
+		    "{fig} Pawn {white}",
 			"{fig} Pawn {black}",
 			"{fig} Bishop {white}",
 			"{fig} Bishop {black}",
@@ -24,9 +24,7 @@ export const move_meta_keys = [
 			"{capture} Rx {white}",
 			"{capture} rx {black}",
 			"{capture} Kx {white}",
-			"{capture} kx {black}", 
-			"{capture} Bx or Nx {white}",
-			"{capture} bx or nx {black}", 
+			"{capture} kx {black}",  
 			"{castle} 0-0 {white}",
 			"{castle} 0-0 {black}", 
 			"{castle} 0-0-0 {white}",
@@ -106,7 +104,7 @@ function getFigureOfMove(last_move){
 		if(last_move.piece=="p"){
 			return null;
 		}
-		return last_move.color=='w' ? last_move.piece.toUpperCase() : last_move.piece.toLowerCase();
+		return last_move.piece.toUpperCase() 
 	}
 }
 
@@ -145,9 +143,7 @@ export function get_move_meta(last_move,onlyVector){
       (color_of_move_w && notation_of_move_includes_x && notation_of_move_is_upper && figure_of_move=="R")  ? 1 : 0,
       (color_of_move_b && notation_of_move_includes_x && notation_of_move_is_upper && figure_of_move=="R")  ? 1 : 0,
       (color_of_move_w && notation_of_move_includes_x && notation_of_move_is_upper && figure_of_move=="K")  ? 1 : 0,
-      (color_of_move_b && notation_of_move_includes_x && notation_of_move_is_upper && figure_of_move=="K")  ? 1 : 0, 
-      (color_of_move_w && notation_of_move_includes_x && notation_of_move_is_upper && (figure_of_move=="B" || figure_of_move=="N") )  ? 1 : 0,
-      (color_of_move_b && notation_of_move_includes_x && notation_of_move_is_upper && (figure_of_move=="B" || figure_of_move=="N") )  ? 1 : 0,
+      (color_of_move_b && notation_of_move_includes_x && notation_of_move_is_upper && figure_of_move=="K")  ? 1 : 0,  
       (color_of_move_w && notation_of_move=="O-O")  ? 1 : 0,
       (color_of_move_b && notation_of_move=="O-O")  ? 1 : 0, 
       (color_of_move_w && notation_of_move=="O-O-O")  ? 1 : 0,

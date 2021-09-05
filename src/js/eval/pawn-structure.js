@@ -9,8 +9,56 @@ const king_side = [4,5,6,7];
 const queen_side = [0,1,2,3];
 
 
-export const pawnKeys = [
-    "Open Files",
+var pawn_skeleton_list = [
+						"8/pp3ppp/2p1p3/8/3P4/8/PPP2PPP/8",
+						"8/pp3ppp/2p1p3/8/3P4/4P3/PP3PPP/8",
+						"8/pp3ppp/3pp3/8/4P3/8/PPP2PPP/8",
+						"8/pp2pp1p/3p2p1/8/4P3/8/PPP2PPP/8",
+						"8/pp3ppp/3p4/4p3/4P3/8/PPP2PPP/8",
+						"8/pp2pppp/3p4/8/2P1P3/8/PP3PPP/8",
+						"8/pp1p1ppp/4p3/8/2P1P3/8/PP3PPP/8",
+						"8/5ppp/pp1pp3/8/2P1P3/8/PP3PPP/8",
+						"8/pp3ppp/2p5/4p3/2P1P3/8/PP3PPP/8",
+						"8/pp3ppp/2pp4/8/2P1P3/8/PP3PPP/8",
+						"8/ppp2ppp/3p4/3Pp3/4P3/8/PPP2PPP/8",
+						"8/ppp2ppp/4p3/3pP3/3P4/8/PPP2PPP/8",
+						"8/ppp2ppp/8/8/3P4/8/PP3PPP/8",
+						"8/pp3ppp/4p3/8/3P4/8/PP3PPP/8",
+						"8/pp3ppp/4p3/8/2PP4/8/P4PPP/8",
+						"8/pp3ppp/2p5/3p4/3P4/4P3/PP3PPP/8",
+						"8/pp3ppp/4p3/2Pp4/3P4/8/PP3PPP/8",
+						"8/ppp2 pp/4p3/3p1p2/3P1P2/4P3/PPP3PP/8",
+						"8/pp3ppp/3p4/2p1p3/2P1P3/3P4/PP3PPP/8",
+						"8/pp2pppp/3p4/2p5/4P3/3P4/PPP2PPP/8"]
+
+	pawn_skeleton_list = pawn_skeleton_list.map(f => fen_utils.expandFen(f));
+// Source https://en.wikipedia.org/wiki/Pawn_structure
+
+const pawn_skeleton_name_list =	[
+						"The Caro formation",
+						"The Slav formation",
+						"The Scheveningen formation",
+						"The Dragon formation",
+						"The Boleslavsky hole formation",
+						"The Maróczy bind formation with a pawn on d6.",
+						"The Maróczy bind formation with a pawn on e6.",
+						"The Hedgehog formation",
+						"The Rauzer formation  (colors reversed)",
+						"The Boleslavsky Wall formation",
+						"The d5 chain formation",
+						"The e5 chain formation",
+						"The Isolani formation in the Giuoco Piano",
+						"The Isolani formation in the Queen's Gambit ",
+						"The Hanging Pawns formation",
+						"The Carlsbad formation",
+						"The Panov formation",
+						"The Stonewall formation",
+						"The Botvinnik system",
+						"The Closed Sicilian formation"]
+
+
+
+export const pawnKeys = [ 
 		"Open A File",
 		"Open B File",
 		"Open C File",
@@ -18,16 +66,7 @@ export const pawnKeys = [
 		"Open E File",
 		"Open F File",
 		"Open G File",
-		"Open H File",
-		"Half-Open Files",
-		"Half-Open A File",
-		"Half-Open B File",
-		"Half-Open C File",
-		"Half-Open D File",
-		"Half-Open E File",
-		"Half-Open F File",
-		"Half-Open G File",
-		"Half-Open H File",
+		"Open H File",  
 		"Half-Open A File {white}",
 		"Half-Open B File {white}",
 		"Half-Open C File {white}",
@@ -61,7 +100,12 @@ export const pawnKeys = [
 		"Fianchetto King Side {white}",
 		"Fianchetto King Side {black}",
 		"Fianchetto Queen Side {white}",
-		"Fianchetto Queen Side {black}",];
+		"Fianchetto Queen Side {black}",
+		"Pawn Structure 1st Closest Match",
+		"Pawn Structure 2nd Closest Match",
+		"Pawn Structure 3rd Closest Match",
+		"Pawn Structure 1st Closest Match Count",
+		"Pawn Structure 2nd Closest Match Count"];
 
 
 function isIsolatedPawn(each_size,each,each_all,i,each_Pp, each_pP) { 
@@ -82,6 +126,24 @@ function isIsolatedPawn(each_size,each,each_all,i,each_Pp, each_pP) {
 
 export function pawnFeatures(fen,onlyVector) {
 
+	var game_pawn_structure = fen_utils.expandFen(fen).map(e => e=="P" || e=="p" || e=="e" || e=="/" ? e : "e");
+
+	// count correctly placed pawns for each pattern
+	// return index of matching/closest pattern 
+
+	var matches = pawn_skeleton_list.map(f =>  f.map((e,i) => e==game_pawn_structure[i]).filter(e => e).length);
+	var max = Math.max(...matches);
+	var closest_pawn_structure = matches.indexOf(max)
+	var max_1 = Math.max(...matches.filter(e => e<max))
+	var closest_pawn_structure_1 = matches.indexOf(max_1);
+	var max_2 = Math.max(...matches.filter(e => e<max_1));
+	var closest_pawn_structure_2 = matches.indexOf(max_2);
+
+	// todo: go back one move
+	// then match closest pawn structure
+	// if same; repeat;
+	// until new pattern found or end reached.
+
 	var res = fen_utils.fenToOneBoard(fen,true);
 
 	var each_all = arr.map(ee => res.map(e => e[ee]));
@@ -98,8 +160,7 @@ export function pawnFeatures(fen,onlyVector) {
 
 
 
-	var vector = [ 
-	    reduce_sum(each_size.map(e => e==1 ? 1 : 0)),
+	var vector = [  
 		each_size[0]==1 ? 1 : 0,
 		each_size[1]==1 ? 1 : 0,
 		each_size[2]==1 ? 1 : 0,
@@ -107,16 +168,7 @@ export function pawnFeatures(fen,onlyVector) {
 		each_size[4]==1 ? 1 : 0,
 		each_size[5]==1 ? 1 : 0,
 		each_size[6]==1 ? 1 : 0,
-		each_size[7]==1 ? 1 : 0,
-		reduce_sum(each_size.map(e => e==2 ? 1 : 0)),
-		each_size[0]==2 ? 1 : 0,
-		each_size[1]==2 ? 1 : 0,
-		each_size[2]==2 ? 1 : 0,
-		each_size[3]==2 ? 1 : 0,
-		each_size[4]==2 ? 1 : 0,
-		each_size[5]==2 ? 1 : 0,
-		each_size[6]==2 ? 1 : 0,
-		each_size[7]==2 ? 1 : 0,
+		each_size[7]==1 ? 1 : 0,  
 		each_size[0]==2 && each_p[0] ? 1 : 0,
 		each_size[1]==2 && each_p[1] ? 1 : 0,
 		each_size[2]==2 && each_p[2] ? 1 : 0,
@@ -150,7 +202,12 @@ export function pawnFeatures(fen,onlyVector) {
 		reduce_sum([each_all_P[5][1],each_all_P[6][2],each_all_P[7][1]].map(e => e ? 1 : 0)),// pawns on F2,G3,H2
 		reduce_sum([each_all_P[0][1],each_all_P[1][2],each_all_P[2][1]].map(e => e ? 1 : 0)),// pawns on A2,B3,C2
 		reduce_sum([each_all_p[5][6],each_all_p[6][5],each_all_p[7][6]].map(e => e ? 1 : 0)),// pawns on F7,G6,H7
-		reduce_sum([each_all_p[0][6],each_all_p[1][5],each_all_p[2][6]].map(e => e ? 1 : 0)) // pawns on A7,B6,C7
+		reduce_sum([each_all_p[0][6],each_all_p[1][5],each_all_p[2][6]].map(e => e ? 1 : 0)), // pawns on A7,B6,C7
+		closest_pawn_structure,
+		closest_pawn_structure_1,
+		closest_pawn_structure_2,
+		max,
+		max_1, 
 		];
 	
 	if(onlyVector) return vector;

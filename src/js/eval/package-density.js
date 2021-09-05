@@ -6,19 +6,13 @@ const Chess = require("chess.js");
 
 var newGame = new Chess();
 
-export const packageDensityKeys = [ 
-       "Protected-squares ratio (excl. pieces as defenders, protected pawns, overprotection)",
-	"Protected-squares per pawn ratio (excl. pieces as defenders, protected pawns, overprotection)",
-	"Over-protected-squares ratio (excl. pieces as defenders, protected pawns)",
-       "Packing density ratio (excl. pieces as defenders, prodected pawns)",
+export const packageDensityKeys = [   
        "Protected-squares (excl. pieces as defenders, protected pawns, overprotection) {white}",
        "Protected-squares per pawn (excl. pieces as defenders, protected pawns, overprotection) {white}",
-       "Over-protected-squares (excl. pieces as defenders, protected pawns) {white}",
-       "Packing density (excl. pieces as defenders, prodected pawns) {white}",
+       "Over-protected-squares (excl. pieces as defenders, protected pawns) {white}", 
        "Protected-squares (excl. pieces as defenders, protected pawns, overprotection) {black}",
        "Protected-squares per pawn (excl. pieces as defenders, protected pawns, overprotection) {black}",
-       "Over-protected squares (excl. pieces as defenders, protected pawns) {black}",
-       "Packing density (excl. pieces as defenders, protected pawns) {black}"
+       "Over-protected squares (excl. pieces as defenders, protected pawns) {black}", 
        ]
 
        // attacked occupied squares defended
@@ -70,30 +64,27 @@ export function package_density(fen,onlyVector){
     // * excluding squares where a pawn protects a pawn 
 
     var moves_can_capture_w = moves_w.map(e => e.split("x")[1]);
-    var squares_can_capture_w = new Set(moves_can_capture_w).size
+    var squares_can_capture_w_set = new Set(moves_can_capture_w)
+
+    const squares_can_capture_w = squares_can_capture_w_set.size
+
     var moves_can_capture_b = moves_b.map(e => e.split("x")[1]);
-    var squares_can_capture_b = new Set(moves_can_capture_b).size
+    var squares_can_capture_b_set = new Set(moves_can_capture_b)
+
+    const squares_can_capture_b = squares_can_capture_b_set.size
 
 	  var vector = [
 	        squares_can_capture_w,
 	        squares_can_capture_w/w_pawn_count,
-	        moves_can_capture_w.length - squares_can_capture_w,
-	        moves_can_capture_w.length / w_pawn_count,
+	        moves_can_capture_w.length - squares_can_capture_w, 
 	        squares_can_capture_b,
 	        squares_can_capture_b/b_pawn_count,
-	        moves_can_capture_b.length - squares_can_capture_b,
-	        moves_can_capture_b.length / b_pawn_count,
-	 ]
-	 vector = [
-	        vector[0]/vector[4],
-	        vector[1]/vector[5],
-	        vector[2]-vector[6],
-	        vector[3]/vector[7],...vector,
-	       ]
+	        moves_can_capture_b.length - squares_can_capture_b, 
+	 ] 
 
-   if(onlyVector) return vector;
+   if(onlyVector) return {vector: vector, opt: {"squares_can_capture_w":squares_can_capture_w_set,"squares_can_capture_b":squares_can_capture_b_set}};
 
 	 var dict = {}
 	 vector.forEach((e,i) => {dict[packageDensityKeys[i]]=e})
-	 return dict; 
+	 return {dict:dict,opt: {"squares_can_capture_w":squares_can_capture_w_set,"squares_can_capture_b":squares_can_capture_b_set}}; 
 }
