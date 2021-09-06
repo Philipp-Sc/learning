@@ -15,6 +15,8 @@ export const mobilityKeys = [
 // maybe add "Opponement Space Area (Protected)"
 // "Number of Moves that can move into protected space"
 
+// Over protection by Pieces And Pawns
+
 // board replace king with empty space
 // for each candidate square
 // place king there

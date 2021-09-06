@@ -161,7 +161,7 @@ const AppContainer: React.FC = () => {
 
 // app chess logic
 
-  const takeBackMove = () => {
+  const takeBackMove = async() => {
       if(refHalfMoves.current<=0){
         return;
       } 
@@ -179,7 +179,7 @@ const AppContainer: React.FC = () => {
         refHalfMoves.current = refHalfMoves.current - 2;
         setHalfMoves(refHalfMoves.current)
 
-        refNotificationOut.current=chess_stats.getNotification(chess,playerColor,refHalfMoves.current);;
+        refNotificationOut.current= await chess_stats.getNotification(chess,playerColor,refHalfMoves.current);;
         setNotificationOut(refNotificationOut.current);
 
         refMovePerformance.current = chess_meta.historicPerformanceAtMoveNumber(refHalfMoves.current,{pgn_db: player_pgn_db_ref.current,pgn_analysis: player_pgn_analysis_ref.current});
@@ -207,12 +207,12 @@ const AppContainer: React.FC = () => {
     } 
   }
 
-  const handleMove = (move: ShortMove) => {
+  const handleMove = async(move: ShortMove) => {
     if (chess.move(move)) {
         refFen.current=chess.fen();
         setFen(refFen.current);   
 
-      refNotificationOut.current=chess_stats.getNotification(chess,playerColor,refHalfMoves.current);;
+      refNotificationOut.current=await chess_stats.getNotification(chess,playerColor,refHalfMoves.current);;
       setNotificationOut(refNotificationOut.current);
 
       document.dispatchEvent(new Event('move_executed'))   
@@ -479,9 +479,12 @@ const AppContainer: React.FC = () => {
       // using pre computed skill profile
       skill_profile = chess_meta.skill_profiles[refElo.current] 
 
+
+      //chess_stats.loadChessModel();
+
       if(create_aggregated_data_development_option || true){
 
-        chess_stats.getFeatureImportance("w")
+        await chess_stats.getFeatureImportance();
         return;
         // create skill profile 
         // skill_profile = await chess_stats.getSkillProfile(refElo.current,depth_for_database)

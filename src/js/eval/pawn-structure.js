@@ -105,7 +105,21 @@ export const pawnKeys = [
 		"Pawn Structure 2nd Closest Match",
 		"Pawn Structure 3rd Closest Match",
 		"Pawn Structure 1st Closest Match Count",
-		"Pawn Structure 2nd Closest Match Count"];
+		"Pawn Structure 2nd Closest Match Count",
+		"Pawn On A3 {white}",
+		"Pawn On H3 {white}",
+		"Pawn On A4 {white}",
+		"Pawn On H4 {white}",
+		"Pawn On A6 {black}",
+		"Pawn On H6 {black}",
+		"Pawn On A5 {black}",
+		"Pawn On H5 {black}",
+		"Count Pawns On White Squares {white}",
+		"Count Pawns On Black Squares {white}",
+		"Count Pawns On White Squares {black}",
+		"Count Pawns On Black Squares {black}",];
+
+		//Count pawns on white square, count pawns on black square
 
 
 function isIsolatedPawn(each_size,each,each_all,i,each_Pp, each_pP) { 
@@ -126,7 +140,8 @@ function isIsolatedPawn(each_size,each,each_all,i,each_Pp, each_pP) {
 
 export function pawnFeatures(fen,onlyVector) {
 
-	var game_pawn_structure = fen_utils.expandFen(fen).map(e => e=="P" || e=="p" || e=="e" || e=="/" ? e : "e");
+	var expandedFen = fen_utils.expandFen(fen);
+	var game_pawn_structure = expandedFen.map(e => e=="P" || e=="p" || e=="e" || e=="/" ? e : "e");
 
 	// count correctly placed pawns for each pattern
 	// return index of matching/closest pattern 
@@ -147,6 +162,26 @@ export function pawnFeatures(fen,onlyVector) {
 	var res = fen_utils.fenToOneBoard(fen,true);
 
 	var each_all = arr.map(ee => res.map(e => e[ee]));
+	/* (8) [Array(8), Array(8), Array(8), Array(8), Array(8), Array(8), Array(8), Array(8)]
+H	0: (8) ["e", "p", "e", "e", "e", "e", "P", "e"]
+G	1: (8) ["e", "p", "e", "e", "e", "e", "P", "e"]
+F	2: (8) ["e", "p", "e", "e", "e", "e", "P", "e"]
+E	3: (8) ["e", "p", "e", "e", "e", "e", "P", "e"]
+D	4: (8) ["e", "p", "e", "e", "e", "e", "P", "e"]
+C	5: (8) ["e", "p", "e", "e", "e", "e", "P", "e"]
+B	6: (8) ["e", "p", "e", "e", "e", "e", "P", "e"]
+A	7: (8) ["e", "p", "e", "e", "e", "e", "P", "e"]
+	         8    7    6    5    4    3    2    1
+	*/
+
+	var each_all_square_color = new Array(8).fill(undefined).map((e,i) => i%2==0 ? new Array(8).fill(null).map((e,i) => i%2!=0) : new Array(8).fill(null).map((e,i) => i%2==0))
+	// true -> white
+	// false -> black
+	var each_all_square_color_1d = [].concat.apply([], each_all_square_color);
+
+	
+	
+
 	var each = each_all.map(ee => new Set(ee));
 
 	// could run in parallel
@@ -155,9 +190,16 @@ export function pawnFeatures(fen,onlyVector) {
 	var each_size = each.map(e => e.size);
 
 	var each_all_p = each_all.map(ee => ee.map(e => e=="p"));
-	var each_all_P = each_all.map(ee => ee.map(e => e=="p"));
+	var each_all_P = each_all.map(ee => ee.map(e => e=="P"));
 	// />
+	var each_all_p_1d =[].concat.apply([], each_all_p);
+	var each_all_P_1d =[].concat.apply([], each_all_P);
 
+	var each_all_p_1d_on_white_squares = each_all_p_1d.filter((e,i) => each_all_square_color_1d[i] && e).length
+	var each_all_p_1d_on_black_squares = each_all_p_1d.filter((e,i) => !each_all_square_color_1d[i] && e).length
+	var each_all_P_1d_on_white_squares = each_all_P_1d.filter((e,i) => each_all_square_color_1d[i] && e).length
+	var each_all_P_1d_on_black_squares = each_all_P_1d.filter((e,i) => !each_all_square_color_1d[i] && e).length
+	
 
 
 	var vector = [  
@@ -193,21 +235,33 @@ export function pawnFeatures(fen,onlyVector) {
 		reduce_sum(king_side.map(e => each_P[e] ? 1 : 0)) < reduce_sum(queen_side.map(e => each_P[e] ? 1 : 0)) ? 1 : 0,
 		reduce_sum(king_side.map(e => each_p[e] ? 1 : 0)) > reduce_sum(queen_side.map(e => each_p[e] ? 1 : 0)) ? 1 : 0,
 		reduce_sum(king_side.map(e => each_p[e] ? 1 : 0)) < reduce_sum(queen_side.map(e => each_p[e] ? 1 : 0)) ? 1 : 0,
-		Math.min(...each_all_P.map(e => Math.min(...e.map((ee,i) => ee ? i : 8)))),
-		Math.max(...each_all_p.map(e => Math.max(...e.map((ee,i) => ee ? i : -1)))),
-		Math.max(...each_all_P.map(e => Math.max(...e.map((ee,i) => ee ? i : -1)))),
-		Math.min(...each_all_p.map(e => Math.min(...e.map((ee,i) => ee ? i : 8)))),
-		average(each_all_P.map(e => average(e.map((ee,i) => ee ? i : -1).filter(e => e!=-1))).filter(e => !isNaN(e))) || -1,
-		average(each_all_p.map(e => average(e.map((ee,i) => ee ? i : -1).filter(e => e!=-1))).filter(e => !isNaN(e))) || -1,
-		reduce_sum([each_all_P[5][1],each_all_P[6][2],each_all_P[7][1]].map(e => e ? 1 : 0)),// pawns on F2,G3,H2
-		reduce_sum([each_all_P[0][1],each_all_P[1][2],each_all_P[2][1]].map(e => e ? 1 : 0)),// pawns on A2,B3,C2
-		reduce_sum([each_all_p[5][6],each_all_p[6][5],each_all_p[7][6]].map(e => e ? 1 : 0)),// pawns on F7,G6,H7
-		reduce_sum([each_all_p[0][6],each_all_p[1][5],each_all_p[2][6]].map(e => e ? 1 : 0)), // pawns on A7,B6,C7
+		8-Math.min(...each_all_P.map(e => Math.min(...e.map((ee,i) => ee ? i : 8)))),
+		8-Math.max(...each_all_p.map(e => Math.max(...e.map((ee,i) => ee ? i : -1)))),
+		8-Math.max(...each_all_P.map(e => Math.max(...e.map((ee,i) => ee ? i : -1)))),
+		8-Math.min(...each_all_p.map(e => Math.min(...e.map((ee,i) => ee ? i : 8)))),
+		(8-average(each_all_P.map(e => average(e.map((ee,i) => ee ? i : -1).filter(e => e!=-1))).filter(e => !isNaN(e)))) || -1,
+		(8-average(each_all_p.map(e => average(e.map((ee,i) => ee ? i : -1).filter(e => e!=-1))).filter(e => !isNaN(e)))) || -1,
+		reduce_sum([each_all_P[2][6],each_all_P[1][5],each_all_P[0][6]].map(e => e ? 1 : 0)),// pawns on F2,G3,H2
+		reduce_sum([each_all_P[7][6],each_all_P[6][5],each_all_P[5][6]].map(e => e ? 1 : 0)),// pawns on A2,B3,C2
+		reduce_sum([each_all_p[2][1],each_all_p[1][2],each_all_p[0][1]].map(e => e ? 1 : 0)),// pawns on F7,G6,H7
+		reduce_sum([each_all_p[7][1],each_all_p[6][2],each_all_p[5][1]].map(e => e ? 1 : 0)), // pawns on A7,B6,C7
 		closest_pawn_structure,
 		closest_pawn_structure_1,
 		closest_pawn_structure_2,
 		max,
 		max_1, 
+		each_all_P[7][5] ? 1 : 0, // A3
+		each_all_P[0][5] ? 1 : 0,  // H3
+		each_all_P[7][4] ? 1 : 0, // A4
+		each_all_P[0][4] ? 1 : 0,  // H4
+		each_all_p[7][2] ? 1 : 0, // A6
+		each_all_p[0][2] ? 1 : 0, // H6
+		each_all_p[7][3] ? 1 : 0, // A5
+		each_all_p[0][3] ? 1 : 0, // H5
+		each_all_P_1d_on_white_squares,
+		each_all_P_1d_on_black_squares,
+		each_all_p_1d_on_white_squares,
+		each_all_p_1d_on_black_squares,
 		];
 	
 	if(onlyVector) return vector;

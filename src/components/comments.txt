@@ -26,21 +26,28 @@ only makes sense with bishops?
 (- Center influence. The number of moves that can end up in the center (excl. pawns))
 
 - Over protection by Pieces And Pawns
-
 - Outposts: Number of Squares that can never be attacked by a opponments pawn and that is free and protected by my own pawns
 - Backward pawn: Number of squares occupied by a pawn that can never be protected by another pawn
-- Longest Diagonal Pawn chain (Left To Right, Right to Left)
 - connected passed pawns
 - connected pawns
 - passed pawns
+
+
+- Longest Diagonal Pawn chain (Left To Right, Right to Left)
+
  
-- King safety (see wikipedia - pawns before king, etc)
 
 - Global Pattern.
--> Bishop pin Knight Pattern NF6/Bg7 (H7)
--> P A3, A7, H7, H3
--> P A4, H4, A6, H6
--> Pawn Fork, Knight Fork, Rook double attack,..
+-> Bishop pin Knight Pattern nf6/Bg7, nc6/Bb7, Nf3/bg4, Nc3/bb3 (H7) Knight on the rim is dim
+ 
+
+-> Count pawns on white square, count pawns on black square x
+-> P A3, A7, H7, H3 x
+-> P A4, H4, A6, H6 x
+
+-> Pawn Fork, Knight Fork, Rook double attack,.. 
+
+- King safety (see wikipedia - pawns before king, etc)  
 
 - Attack
 Pinned direction

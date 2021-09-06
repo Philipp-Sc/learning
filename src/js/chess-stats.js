@@ -7,6 +7,7 @@ import {average, median, arraysEqual, sum, arrayMin, arrayMax, normalize, undoNo
 import * as tf_chess from './tensorflow-chess.js'
 
 import * as evaluation from "../js/eval/evaluation.js"
+import * as data_prep from "../js/eval/data-prep.js"
   
 const importance = require('importance')
 
@@ -74,82 +75,87 @@ export function getDistanceVectorForStatistics(stats){
 }
 
 
-export async function getFeatureImportance(playerColor) {
+export async function loadChessModel() {
 
-	var engineGames = await chess_meta.chessGames("engine").then(humanGames => humanGames.get);
+	 await tf_chess.main({
+	 	create: false,
+	 	load: {default: true, model: 'my-model', normalizeVector_:'normalizeVector'}, 
+	 	train: false, 
+	 	overrideMinMax: false, 
+	 	saveAfterTraining:  {model: 'my-model', normalizeVector_:'normalizeVector'},
+	 	importance: false,
+	 	test: true,
+	 },undefined, undefined)
+
+	window.test_model("1.g3 e5 2.bg3 d5")
+
+
+
+}
+
+export async function getFeatureImportance() {
+
+	var engineGames_1 = await chess_meta.chessGames("engine").then(humanGames => humanGames.get);
+	var engineGames_2 = await chess_meta.chessGames("engine_2").then(humanGames => humanGames.get); 
 	var humanGames  = await chess_meta.chessGames("human").then(humanGames => humanGames.get);
 
-	// ~50% Human, ~50% Engine
-  var games_FEN = [...engineGames,...humanGames]
+	// Do not train all at once, to it in batches.
+  var games_FEN = [...engineGames_1,...engineGames_2,...humanGames]
   shuffleArray(games_FEN);
-  games_FEN = games_FEN.filter((e,i) => i<games_FEN.length/2);
+  // games_FEN = games_FEN.filter((e,i) => i<games_FEN.length/2);
+  // use other halfe for testing!
 
-  //console.log(games.length) 
-	//games_FEN = games_FEN.filter((e,iii) => iii<=3);
+  console.log(games_FEN.length) 
+	games_FEN = games_FEN.filter((e,iii) => iii<=3000);
 
- 
 	const getResults = (n) => {return sampleMovesAsFENs(n, evaluation.getStatisticsForPositionVector,0.66,5*2,60*2,-1.5,1.5,0.33)}
 	for(var x=0;x<games_FEN.length;x++){
 		games_FEN[x] = getResults(games_FEN[x]);
 	} 
-
-	//console.log(games_FEN)
-
+ 
 	var vectors = [].concat.apply([], games_FEN)
-	//.filter(e => e[evaluation.allKeys.indexOf("last move by")]==1 && e[evaluation.allKeys.indexOf("halfmove")]>5*2 && e[evaluation.allKeys.indexOf("halfmove")]<=45*2)
-
-	//console.log(vectors)
-
-	vectors = vectors.map(e => {
-		var target = e[evaluation.allKeys.indexOf("cp")];  
-		e.splice(evaluation.allKeys.indexOf("cp"), 1);
-		return {"data": e, "label":target}
+		.map(e => {
+			var target = e[evaluation.allKeys.indexOf("cp")];  
+			e.splice(evaluation.allKeys.indexOf("cp"), 1);
+			return {"data": e, "label":target}
 	})
 
 	window.allKeys = evaluation.allKeys;
 
 	//console.log(vectors)
 
-	/*
-	* Sample the data in a smart way, to avoid overfitting to the median/average label value
-	*/
-
-	var histGenerator = d3.bin()
-	  .domain([-2,2])    // Set the domain to cover the entire intervall [0;]
-	  .thresholds(10);  // number of thresholds; this will create 10+1 bins
-
-	var bins = histGenerator(vectors.map(e => e.label))
-	.filter(e => e.length>=1).map(e => [arrayMin(e),e.length,arrayMax(e)])
-
-	//console.log(bins);
-
-	var mean_most_common_least_common_count = median(bins.map(e => e[1]));
-
-	var selectVectors = [];
-
-	for(var i = 0; i<mean_most_common_least_common_count;i++){
-		bins.forEach(e => {
-		var temp = vectors.filter(each => each.label>=e[0] && each.label<=e[2])
-		selectVectors.push(temp[Math.floor(Math.random() * temp.length)])
-		})
-	}
-
-	//console.log(selectVectors);
-
-	vectors = selectVectors;
+	vectors = data_prep.sample_with_bins([-2,2],10,vectors);
 
 	/* Create the model or load model
 	 */
+	 var create = false;
+	 var load = !create;
 
-	 tf_chess.main({
+	 if(create){
+		 await tf_chess.main({
+		 	create: true,
+		 	//load: {default: true, model: 'my-model', normalizeVector_:'normalizeVector'}, 
+		 	train: true, 
+		 	//updatenormalizeVector: true, 
+		 	saveAfterTraining:  {model: 'my-model', normalizeVector_:'normalizeVector'},
+		 	importance: true,
+		 	test: true,
+		 },vectors, undefined)
+	}
+	if(load){
+	 await tf_chess.main({
 	 	create: false,
-	 	load: {model: 'my-model', normalizeVector_:'normalizeVector'}, 
+	 	load: {default: false, model: 'my-model', normalizeVector_:'normalizeVector'}, 
 	 	train: true, 
-	 	overrideMinMax: true, 
+	 	updatenormalizeVector: true, 
 	 	saveAfterTraining:  {model: 'my-model', normalizeVector_:'normalizeVector'},
 	 	importance: true,
 	 	test: true,
 	 },vectors, undefined)
+	}
+
+	window.test_model("1.g3 e5 2.bg3 d5")
+
   
 }
 
@@ -230,9 +236,9 @@ export async function getSkillProfile(elo,depth) {
      })
 }
 
-export function getNotification(chess, playerColor, halfMoves){
+export async function getNotification(chess, playerColor, halfMoves){
 
-	 if(halfMoves>0){ 
+	 if(halfMoves>=0){ 
           var my_stats_now = evaluation.getStatisticsForPositionDict(chess,chess.history({verbose:true}).reverse()[0]);
           var stats_opp = chess_meta[playerColor=="w" ? "white" : "black"][halfMoves];
           delete stats_opp["game count"];
@@ -253,7 +259,8 @@ export function getNotification(chess, playerColor, halfMoves){
             }
             return e.replace("(excl.","\n(excl.")
           })
-          return Array.from(new Set(notification)); 
+          var prediction = await window.test_model(chess.pgn())
+          return ["Chess Model Predicted: "+prediction.prediction_value,...Array.from(new Set(notification))]; 
  
         }else{
           return [];
