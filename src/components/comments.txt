@@ -39,7 +39,7 @@ only makes sense with bishops?
 
 - Global Pattern.
 -> Bishop pin Knight Pattern nf6/Bg7, nc6/Bb7, Nf3/bg4, Nc3/bb3 (H7) Knight on the rim is dim
- 
+
 
 -> Count pawns on white square, count pawns on black square x
 -> P A3, A7, H7, H3 x
@@ -167,3 +167,15 @@ function getEuclidianDistance(arr1, arr2) {
         })
         return distTensor[0];
 }// use this to only provide novel vectors to train.
+
+
+
+// get vector for the move played position
+// get vectors for all alternative moves
+
+// calculate labels for all vectors
+
+// train neural network on all vectors with labels (possibly skip)
+// possibly add some random games into the mix
+
+// calculate importance for all features

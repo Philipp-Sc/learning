@@ -106,9 +106,9 @@ export async function getFeatureImportance() {
   // use other halfe for testing!
 
   console.log(games_FEN.length) 
-	games_FEN = games_FEN.filter((e,iii) => iii<=3000);
+	games_FEN = games_FEN.filter((e,iii) => iii<=1000);
 
-	const getResults = (n) => {return sampleMovesAsFENs(n, evaluation.getStatisticsForPositionVector,0.66,5*2,60*2,-1.5,1.5,0.33)}
+	const getResults = (n) => {return sampleMovesAsFENs(n, evaluation.getStatisticsForPositionVector,0.66,5,60*2,-1.5,1.5,0.33)}
 	for(var x=0;x<games_FEN.length;x++){
 		games_FEN[x] = getResults(games_FEN[x]);
 	} 
@@ -146,10 +146,10 @@ export async function getFeatureImportance() {
 	 await tf_chess.main({
 	 	create: false,
 	 	load: {default: false, model: 'my-model', normalizeVector_:'normalizeVector'}, 
-	 	train: true, 
-	 	updatenormalizeVector: true, 
+	 	train: false, 
+	 	updatenormalizeVector: false, 
 	 	saveAfterTraining:  {model: 'my-model', normalizeVector_:'normalizeVector'},
-	 	importance: true,
+	 	importance: false,
 	 	test: true,
 	 },vectors, undefined)
 	}
