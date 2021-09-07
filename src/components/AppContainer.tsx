@@ -484,7 +484,7 @@ const AppContainer: React.FC = () => {
 
       if(create_aggregated_data_development_option || true){
 
-        await chess_stats.getFeatureImportance();
+        await chess_stats.getFeatureImportance(false);
         return;
         // create skill profile 
         // skill_profile = await chess_stats.getSkillProfile(refElo.current,depth_for_database)

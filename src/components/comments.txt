@@ -170,10 +170,17 @@ function getEuclidianDistance(arr1, arr2) {
 
 
 
+// NOTE: all moves that have been already calculated at @depth20 with SF can be used to train the model.
+// this way the model is learning on the go thanks to SF.
+
 // get vector for the move played position
 // get vectors for all alternative moves
 
 // calculate labels for all vectors
+// a) with Stockfish
+// --> b) with the NN
+
+// mean permutationScore (change per feature) vs ground truth
 
 // train neural network on all vectors with labels (possibly skip)
 // possibly add some random games into the mix

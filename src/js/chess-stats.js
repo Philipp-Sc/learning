@@ -92,21 +92,7 @@ export async function loadChessModel() {
 
 
 }
-
-export async function getFeatureImportance() {
-
-	var engineGames_1 = await chess_meta.chessGames("engine").then(humanGames => humanGames.get);
-	var engineGames_2 = await chess_meta.chessGames("engine_2").then(humanGames => humanGames.get); 
-	var humanGames  = await chess_meta.chessGames("human").then(humanGames => humanGames.get);
-
-	// Do not train all at once, to it in batches.
-  var games_FEN = [...engineGames_1,...engineGames_2,...humanGames]
-  shuffleArray(games_FEN);
-  // games_FEN = games_FEN.filter((e,i) => i<games_FEN.length/2);
-  // use other halfe for testing!
-
-  console.log(games_FEN.length) 
-	games_FEN = games_FEN.filter((e,iii) => iii<=1000);
+function gamesToVector(games_FEN) {
 
 	const getResults = (n) => {return sampleMovesAsFENs(n, evaluation.getStatisticsForPositionVector,0.66,5,60*2,-1.5,1.5,0.33)}
 	for(var x=0;x<games_FEN.length;x++){
@@ -120,16 +106,52 @@ export async function getFeatureImportance() {
 			return {"data": e, "label":target}
 	})
 
-	window.allKeys = evaluation.allKeys;
+	console.log(evaluation.allKeys);
 
 	//console.log(vectors)
 
 	vectors = data_prep.sample_with_bins([-2,2],10,vectors);
+	return vectors;
+}
+
+export async function getFeatureImportance(loadData) {
+
+	var vectors;
+
+
+	var create = false;
+	var load = !create;
+
+	if(loadData || true){
+
+	var engineGames_1 = await chess_meta.chessGames("engine").then(humanGames => humanGames.get);
+	var engineGames_2 = await chess_meta.chessGames("engine_2").then(humanGames => humanGames.get); 
+	var humanGames  = await chess_meta.chessGames("human").then(humanGames => humanGames.get);
+
+	shuffleArray(engineGames_1);
+	shuffleArray(engineGames_2);
+	shuffleArray(humanGames);
+
+	// Do not train all at once, to it in batches.
+  var games_FEN = [...engineGames_1.filter((e,i) => i<humanGames.length/2),...engineGames_2.filter((e,i) => i<humanGames.length/2),...humanGames]
+  // 50% human games, 25% + 25% engine games,
+  shuffleArray(games_FEN);
+
+  // games_FEN = games_FEN.filter((e,i) => i<games_FEN.length/2);
+  // use other halfe for testing!
+
+  console.log(games_FEN.length) 
+	games_FEN = games_FEN.filter((e,iii) => iii<=1000);
+
+	vectors = gamesToVector(games_FEN)
+
+	var test_vectors = vectors.filter((e,i) => i<vectors.length/2)
+	vectors = vectors.filter((e,i) => i>=vectors.length/2)
+
+
 
 	/* Create the model or load model
 	 */
-	 var create = false;
-	 var load = !create;
 
 	 if(create){
 		 await tf_chess.main({
@@ -140,9 +162,27 @@ export async function getFeatureImportance() {
 		 	saveAfterTraining:  {model: 'my-model', normalizeVector_:'normalizeVector'},
 		 	importance: true,
 		 	test: true,
-		 },vectors, undefined)
+		 },vectors, undefined, undefined)
 	}
 	if(load){
+	 await tf_chess.main({
+	 	create: false,
+	 	load: {default: false, model: 'my-model', normalizeVector_:'normalizeVector'}, 
+	 	train: true, 
+	 	updatenormalizeVector: false, 
+	 	saveAfterTraining:  {model: 'my-model', normalizeVector_:'normalizeVector'},
+	 	importance: true,
+	 	test: true,
+	 },vectors, test_vectors, undefined)
+	}
+
+	window.test_model("1.g3 e5 2.bg3 d5")
+
+
+	}else{
+
+	if(load){ // just load model and init test_model function
+
 	 await tf_chess.main({
 	 	create: false,
 	 	load: {default: false, model: 'my-model', normalizeVector_:'normalizeVector'}, 
@@ -151,11 +191,15 @@ export async function getFeatureImportance() {
 	 	saveAfterTraining:  {model: 'my-model', normalizeVector_:'normalizeVector'},
 	 	importance: false,
 	 	test: true,
-	 },vectors, undefined)
+	 },vectors, undefined, undefined)
 	}
 
 	window.test_model("1.g3 e5 2.bg3 d5")
 
+
+	}
+
+	
   
 }
 

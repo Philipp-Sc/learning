@@ -164,7 +164,6 @@ export function getImportance(model, vectors, normalizeVector_) {
         		var p = model.predict(tf.tensor2d(test, [test.length, test[0].length]));
         		return p.dataSync();
     }}
-	// Get feature importance
 	const imp = importance(myModel, n_vectors.inputs, n_vectors.labels, {
 	  kind: 'mse',
 	  n: 1,
@@ -210,7 +209,7 @@ const test_model_vectors = async(model,normalizeVector_,vectors,pgn) => {
 
 }
 
-export async function main(arg,vectors,test_pgns) {
+export async function main(arg,vectors,test_vectors,test_pgns) {
 	
   var normalizeVector_ = {"input":undefined,"label":undefined};
 	let model;
@@ -261,6 +260,9 @@ export async function main(arg,vectors,test_pgns) {
 
 		if(arg.importance){
  			getImportance(model,vectors, normalizeVector_) 
+ 			if(test_vectors){
+ 				getImportance(model,test_vectors, normalizeVector_) 
+ 			}
 		}
 		if(arg.test){
 		/* Prepare test data or use training data as testing data
