@@ -37,6 +37,7 @@ export function getCP(move) {
             }
             return undefined;
         }
+        return 0;
     }
 }
 
@@ -51,7 +52,7 @@ export function getStatisticsForPositionVector(new_game,last_move) {
 export function getStatisticsForPosition(new_game,last_move,onlyVector) {
 
                 var fen = new_game.fen();
-
+                
                 var __1 = getCP(last_move);
                 var __2 = new_game.history().length;
                 var __3 = move_meta.getColorOfMove(last_move)=="w" ? 1 : 0;

@@ -157,6 +157,11 @@ export async function load_model(my_model,normalizeVector_) {
 }
 
 export function getImportance(model, vectors, normalizeVector_) {
+	return getImportance_(model, vectors, normalizeVector_,1);
+
+}
+
+export function getImportance_(model, vectors, normalizeVector_,n_) {
 
     var n_vectors = normalizeVector(vectors,normalizeVector_.input,normalizeVector_.label);
 
@@ -166,19 +171,86 @@ export function getImportance(model, vectors, normalizeVector_) {
     }}
 	const imp = importance(myModel, n_vectors.inputs, n_vectors.labels, {
 	  kind: 'mse',
-	  n: 1,
+	  n: n_,
 	  means: true,
-	  verbose: true
+	  verbose: false
 	})
 	var importance_list = (imp.map((e,i) => {return {key:evaluation.allKeys[1+i],value:e}}))
-    importance_list = sortJsObject(importance_list);
-	console.log(importance_list)
+  importance_list = sortJsObject(importance_list);
+	//console.log(importance_list)
+	return importance_list
+}
+
+
+export const get_feature_importance_with_pgn = async(model,normalizeVector_, pgn) => {
+ 	var my_test_game = new Chess();
+	my_test_game.load_pgn(pgn);
+
+
+	var vectors = [];
+
+	my_test_game.undo();
+	var alternatives = my_test_game.moves({verbose:true});
+
+	// importance means the features that are used to evaluate the position
+	// with live training, that sentence changes to:
+	// importance means the features that are used to evaluate position correctly
+	// what we need is:
+	// filter the features if they have changed with the last move
+	// this makes two sets of features:
+	// static features, dynamic features
+	// for the dynamic features (really the only features the player has direct control over)
+	// todo: find out which values are the aspiration
+	// make a spider diagram, with each alternative move with the dynamic features is plotted?
+  // the coloring of the move would resemble the evaluation
+	
+
+  // not sure if this is a good idea:
+	// filter moves that maintain a evaluation >=0 for white and <=0 for black
+	// use stockfish, because it is more accurate
+
+	// this way we get the importance of the features that improve the position
+
+	for(var i=0;i<alternatives.length;i++){
+		my_test_game.load_pgn(pgn);
+		my_test_game.undo();
+		my_test_game.move(alternatives[i]);   
+		var vector = evaluation.getStatisticsForPositionVector(my_test_game, my_test_game.history({verbose:true}).reverse()[0]);
+		var label = await test_model_with_pgn(model,normalizeVector_,my_test_game.pgn()); 
+		vector[evaluation.allKeys.indexOf("cp")] = label.prediction_value 
+		vectors.push(vector)
+	} 
+
+	vectors = vectors.map(e => {
+		var target = e[evaluation.allKeys.indexOf("cp")]; 
+		e.splice(evaluation.allKeys.indexOf("cp"), 1);
+		return {"data": e, "label":target}
+	}) 
+
+	/*
+   * feature vectors for all possible positions that could have arisen a move ago
+   *
+   * - this shows the features that are important to make the right move
+   * - it does not show all the features that are important to evaluate the position correctly,
+   *   the missing features are unaffectd by the last move.
+   *   -> but they are still important to evaluate the position.
+   *
+   * Plan: 
+   * - Use the importance of the features over all test data.
+   *		- Order Notification Feature Vector by that.
+   * - Highlight the features that are important and affected by any possible last move
+   * - Highlight these features again by
+   *    - How relevant they are for positive/negative evaluations
+	 */
+ 
+	return getImportance_(model, vectors, normalizeVector_,Math.max(1,Math.floor(alternatives.length/2)));
+
 }
 
 export const test_model_with_pgn = async(model,normalizeVector_, pgn) => {
  	var my_test_game = new Chess();
 	my_test_game.load_pgn(pgn);
-
+ 
 	var vectors = evaluation.getStatisticsForPositionVector(my_test_game,my_test_game.history({verbose:true}).reverse()[0])
 
 	vectors = [vectors].map(e => {
@@ -232,7 +304,7 @@ export async function main(arg,vectors,test_vectors,test_pgns) {
 			console.log("init normalizeVector:")
 			console.log(normalizeVector_)
 		}
-	}
+	} 
 
 	if(arg.train){ 
 	
@@ -259,9 +331,9 @@ export async function main(arg,vectors,test_vectors,test_pgns) {
 	if((arg.load || (arg.create && arg.train))){
 
 		if(arg.importance){
- 			getImportance(model,vectors, normalizeVector_) 
+ 			console.log(getImportance(model,vectors, normalizeVector_))
  			if(test_vectors){
- 				getImportance(model,test_vectors, normalizeVector_) 
+ 				console.log(getImportance(model,test_vectors, normalizeVector_))
  			}
 		}
 		if(arg.test){
@@ -273,6 +345,8 @@ export async function main(arg,vectors,test_vectors,test_pgns) {
 			// allow live testing
 			window.test_model = (pgn) => test_model_with_pgn(model,normalizeVector_,pgn);
 
+			window.get_feature_importance_with_pgn = (pgn) => get_feature_importance_with_pgn(model,normalizeVector_,pgn)
+
 			if(test_pgns){
 				var res = Promise.all(...test_pgns.map(e => test_model_with_pgn(model,normalizeVector_,e)));
 				console.log(res)
@@ -283,12 +357,7 @@ export async function main(arg,vectors,test_vectors,test_pgns) {
 	}
 				 
 					
-        	
-
-					
-
-
-          ///* Prepare custom testing data
+        	 
 					
 
 }

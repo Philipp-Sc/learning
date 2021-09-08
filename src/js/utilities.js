@@ -118,6 +118,15 @@ export function sortJsObject(dict) {
     return items;
 }
 
+export function sortArrayKeyValue(items) {  
+
+    // Sort the array based on the second element
+    items.sort(function(first, second) {
+      return second[1] - first[1];
+    });
+    return items;
+}
+
 export function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));

@@ -485,13 +485,12 @@ const AppContainer: React.FC = () => {
       if(create_aggregated_data_development_option || true){
 
         await chess_stats.getFeatureImportance(false);
-        return;
+        //return;
         // create skill profile 
         // skill_profile = await chess_stats.getSkillProfile(refElo.current,depth_for_database)
         // if(refDebug.current) console.log(JSON.stringify(skill_profile)) 
         // create game (best-play) statistics
-        chess_stats.getGameStatistics("w")
-        chess_stats.getGameStatistics("b")
+        //chess_stats.getGameStatistics() 
       }
       }, [elo]);  
 

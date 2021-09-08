@@ -97,10 +97,10 @@ export const pawnKeys = [
 		"Least advanced pawn {black}",
 		"Avg advanced pawn {white}",
 		"Avg advanced pawn {black}",
-		"Fianchetto King Side {white}",
-		"Fianchetto King Side {black}",
 		"Fianchetto Queen Side {white}",
+		"Fianchetto King Side {white}",
 		"Fianchetto Queen Side {black}",
+		"Fianchetto King Side {black}",
 		"Pawn Structure 1st Closest Match",
 		"Pawn Structure 2nd Closest Match",
 		"Pawn Structure 3rd Closest Match",
@@ -119,9 +119,7 @@ export const pawnKeys = [
 		"Count Pawns On White Squares {black}",
 		"Count Pawns On Black Squares {black}",];
 
-		//Count pawns on white square, count pawns on black square
-
-
+	 
 function isIsolatedPawn(each_size,each,each_all,i,each_Pp, each_pP) { 
 	if(!each_Pp[i]){
 		return 0;

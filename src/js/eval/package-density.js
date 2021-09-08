@@ -75,10 +75,10 @@ export function package_density(fen,onlyVector){
 
 	  var vector = [
 	        squares_can_capture_w,
-	        squares_can_capture_w/w_pawn_count,
+	        squares_can_capture_w!=0 ? squares_can_capture_w/w_pawn_count :0,
 	        moves_can_capture_w.length - squares_can_capture_w, 
 	        squares_can_capture_b,
-	        squares_can_capture_b/b_pawn_count,
+	        squares_can_capture_b!=0 ? squares_can_capture_b/b_pawn_count :0,
 	        moves_can_capture_b.length - squares_can_capture_b, 
 	 ] 
 

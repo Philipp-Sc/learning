@@ -27,7 +27,14 @@ const ModalChessMetaContent: React.FC<ContainerProps> = ({halfMoves,playerColor,
 
 
 	return <IonModal isOpen={showModal} onDidDismiss={() => setShowModal(false)} cssClass='my-custom-class2'>
-        
+  
+      </IonModal> 
+};
+
+
+export default ModalChessMetaContent;
+
+  /*    
        <IonBadge>{chess_meta.pieceLookup[pieceClicked.split("")[1]][modalIndex].length==1 ? chess_meta.pieceLookup[pieceClicked.split("")[1]][modalIndex].replace("P","")+squareClicked : chess_meta.pieceLookup[pieceClicked.split("")[1]][modalIndex]} ({pieceClicked.split("")[0]=="w" ? "white" : "black"})</IonBadge>
          
        {[chess_meta.pieceLookup[pieceClicked.split("")[1]][modalIndex]=="Pawns"].filter(e => e==true).map(e => (
@@ -224,9 +231,4 @@ const ModalChessMetaContent: React.FC<ContainerProps> = ({halfMoves,playerColor,
         </div>
         ))} 
        <IonButton onClick={() => {setShowModal(false);}}>Close</IonButton>
-          
-      </IonModal> 
-};
-
-
-export default ModalChessMetaContent;
+          */

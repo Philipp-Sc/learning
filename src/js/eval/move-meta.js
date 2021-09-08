@@ -29,9 +29,27 @@ export const move_meta_keys = [
 			"{castle} 0-0 {black}", 
 			"{castle} 0-0-0 {white}",
 			"{castle} 0-0-0 {black}",
-			"move to file (A,B,C,D,E,F,G,H)",
-			"move to rank (1,2,3,4,5,6,7,8)"
+			"move to file A",
+			"move to rank 1",
+			"move to file B",
+			"move to rank 2",
+			"move to file C",
+			"move to rank 3",
+			"move to file D",
+			"move to rank 4",
+			"move to file E",
+			"move to rank 5",
+			"move to file F",
+			"move to rank 6",
+			"move to file G",
+			"move to rank 7",
+			"move to file H",
+			"move to rank 8",
 			]
+
+			// change move to rank into 8 seperate features
+			// same with move to file.
+
  			// possibly add:
 			// move from file (A,B,C,D,E,F,G,H) 
 			// move from rank (1,2,3,4,5,6,7,8)
@@ -83,18 +101,20 @@ function getNotationOfMove(last_move){
 
 function getRowOfMoveTo(last_move){
 	if(last_move.notation){
-		return parseInt(last_move.notation.row);
+		var result = parseInt(last_move.notation.row);
 	}else{
-		return parseInt(last_move.to.split("")[1]);
+		var result = parseInt(last_move.to.split("")[1]);
 	}
+	return isNaN(result) ? -1 : result;
 }
 
 function getColOfMoveTo(last_move){
 	if(last_move.notation){
-		return cols.indexOf(last_move.notation.col);
+		var result = cols.indexOf(last_move.notation.col);
 	}else{
-		return cols.indexOf(last_move.to.split("")[0]);
+		var result = cols.indexOf(last_move.to.split("")[0]);
 	}
+	return isNaN(result) ? -1 : result;
 }
 
 function getFigureOfMove(last_move){
@@ -118,6 +138,9 @@ export function get_move_meta(last_move,onlyVector){
 	var figure_of_move = getFigureOfMove(last_move);
 	var notation_of_move_includes_x = notation_of_move.includes('x');
 	var notation_of_move_is_upper = notation_of_move_lower != notation_of_move
+
+	var file =  getColOfMoveTo(last_move);
+    var rank =  getRowOfMoveTo(last_move);
 
 	var vector = [
       (color_of_move_w && !notation_of_move_includes_x && !notation_of_move_is_upper && figure_of_move==null)  ? 1 : 0,
@@ -148,8 +171,22 @@ export function get_move_meta(last_move,onlyVector){
       (color_of_move_b && notation_of_move=="O-O")  ? 1 : 0, 
       (color_of_move_w && notation_of_move=="O-O-O")  ? 1 : 0,
       (color_of_move_b && notation_of_move=="O-O-O")  ? 1 : 0,
-      getColOfMoveTo(last_move),
-      getRowOfMoveTo(last_move),                
+      file==1 ? 1 : 0,
+      rank==1 ? 1 : 0,
+      file==2 ? 1 : 0,
+      rank==2 ? 1 : 0,
+      file==3 ? 1 : 0,
+      rank==3 ? 1 : 0,
+      file==4 ? 1 : 0,
+      rank==4 ? 1 : 0,
+      file==5 ? 1 : 0,
+      rank==5 ? 1 : 0,
+      file==6 ? 1 : 0,
+      rank==6 ? 1 : 0,
+      file==7 ? 1 : 0,
+      rank==7 ? 1 : 0,
+      file==8 ? 1 : 0,
+      rank==8 ? 1 : 0,                
 	]
 
 		if(onlyVector) return vector;
