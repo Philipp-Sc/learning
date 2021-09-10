@@ -45,6 +45,16 @@ interface ContainerProps {
 
 const ChessMetaContent: React.FC<ContainerProps> = ({halfMoves,playerColor,movePerformance,live,evaluation,highlightAnalysis,setHighlightAnalysis,highlightEngine,setHighlightEngine,avgPerf,setAvgPerf,medianPerf,setMedianPerf,notificationOut,liveRatingDepth,setLiveRatingDepth,depth}) => {
  
+
+  const [showPieceType,setShowPieceType] = useState(true);
+  const [showMoveTo,setShowMoveTo] = useState(true);
+  const [showHistory,setShowHistory] = useState(true);
+  const [showPawnOn,setShowPawnOn] = useState(true);
+  const [showOpenFile,setShowOpenFile] = useState(true);
+  const [showHalfOpenFile,setShowHalfOpenFile] = useState(true);
+  const [showCapture,setShowCapture] = useState(true);
+  const [showMaterialCount,setShowMaterialCount] = useState(true);
+
  	const game_stats = chess_meta[playerColor=="w" ? "white" : "black"];
 
   const avg_player_perf = (-1*movePerformance.average_eval).toFixed(2);
@@ -66,10 +76,48 @@ const ChessMetaContent: React.FC<ContainerProps> = ({halfMoves,playerColor,moveP
 
 	return <div> 
 
+         
         <IonList>
-          {notificationOut.map(e => {return <IonItemSliding>
+        {notificationOut
+            .filter((e,i) => i==0).map(e => {return <IonItemSliding>
             <IonItem>
-              <IonLabel>{e}</IonLabel>
+              <IonLabel>{e.toString().split("\|\|")[0]}</IonLabel>
+              <IonLabel style={{flex: 'unset'}}>{e.toString().split("\|\|")[1]}</IonLabel>
+            </IonItem>
+        
+        <IonBadge onClick={() => {setShowMoveTo(!showMoveTo)} }>{showMoveTo ? "@(+)" : "@"}move_to</IonBadge>
+        <IonBadge onClick={() => {setShowPawnOn(!showPawnOn)} }>{showPawnOn ? "@(+)" : "@"}pawn_on</IonBadge>
+        
+        <IonBadge onClick={() => {setShowPieceType(!showPieceType)} }>{showPieceType ? "@(+)" : "@"}figure</IonBadge>
+        
+        <IonBadge onClick={() => {setShowOpenFile(!showOpenFile)} }>{showOpenFile ? "@(+)" : "@"}open_file</IonBadge>
+        <IonBadge onClick={() => {setShowHalfOpenFile(!showHalfOpenFile)} }>{showHalfOpenFile ? "@(+)" : "@"}half_open_file</IonBadge>
+    
+        <IonBadge onClick={() => {setShowHistory(!showHistory)} }>{showHistory ? "@(+)" : "@"}history</IonBadge>
+
+        <IonBadge onClick={() => {setShowCapture(!showCapture)} }>{showCapture ? "@(+)" : "@"}capture</IonBadge>
+        
+        <IonBadge onClick={() => {setShowMaterialCount(!showMaterialCount)} }>{showMaterialCount ? "@(+)" : "@"}material</IonBadge>
+     
+
+            <IonItemOptions side="end">
+              <IonItemOption onClick={() => {}}>Show</IonItemOption>
+            </IonItemOptions>
+          </IonItemSliding>})}
+
+          {notificationOut
+            .filter((e,i) => i!=0)
+            .filter(e => showCapture ? true : !e.includes("{capture}"))
+            .filter(e => showMaterialCount ? true : !e.includes("count {"))
+            .filter(e => showHalfOpenFile ? true : !e.includes("Half-Open"))
+            .filter(e => showOpenFile ? true : !e.includes("Open") || (e.includes("Open") && e.includes("Half")))
+            .filter(e => showPawnOn ? true : !e.includes("Pawn On"))
+            .filter(e => showHistory ? true : !e.includes("{history}"))
+            .filter(e => showMoveTo ? true : !e.includes("move to"))
+            .filter(e => showPieceType ? true : (!e.includes("{fig}") || e.includes("{history}")) ).map(e => {return <IonItemSliding>
+            <IonItem>
+              <IonLabel>{e.toString().split("\|\|")[0]}</IonLabel>
+              <IonLabel style={{flex: 'unset'}}>{e.toString().split("\|\|")[1]}</IonLabel>
             </IonItem>
             <IonItemOptions side="end">
               <IonItemOption onClick={() => {}}>Show</IonItemOption>

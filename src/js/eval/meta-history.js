@@ -12,7 +12,7 @@ export function get_move_meta_history(game,onlyVector){
 	  if(onlyVector) return vector;
 
 	  var dict = {}
-	  vector.forEach((e,i) => {dict[move_meta.move_meta_keys[i]]=e})
+	  vector.forEach((e,i) => {dict[historyKeys[i]]=e})
 	  return dict; 
 	
 }

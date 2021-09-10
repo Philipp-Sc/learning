@@ -3,13 +3,14 @@ import * as fen_utils from "./fen-utils.js"
 
 import {average,reduce_sum} from "../utilities.js"
 
+const Chess = require("chess.js"); 
 
 const arr = [0,1,2,3,4,5,6,7];
 const king_side = [4,5,6,7];
 const queen_side = [0,1,2,3];
 
 
-var pawn_skeleton_list = [
+const pawn_skeleton_fen_list = [
 						"8/pp3ppp/2p1p3/8/3P4/8/PPP2PPP/8",
 						"8/pp3ppp/2p1p3/8/3P4/4P3/PP3PPP/8",
 						"8/pp3ppp/3pp3/8/4P3/8/PPP2PPP/8",
@@ -31,8 +32,14 @@ var pawn_skeleton_list = [
 						"8/pp3ppp/3p4/2p1p3/2P1P3/3P4/PP3PPP/8",
 						"8/pp2pppp/3p4/2p5/4P3/3P4/PPP2PPP/8"]
 
-	pawn_skeleton_list = pawn_skeleton_list.map(f => fen_utils.expandFen(f));
+var pawn_skeleton_list = [...pawn_skeleton_fen_list].map(f => fen_utils.expandFen(f));
 // Source https://en.wikipedia.org/wiki/Pawn_structure
+
+export const skeleton_to_ascii = (index) => { 
+		var chess = new Chess(pawn_skeleton_fen_list[index]+" w - - 0 1");
+		return chess.ascii(); 
+
+}
 
 const pawn_skeleton_name_list =	[
 						"The Caro formation",

@@ -3,11 +3,14 @@ import * as tf from '@tensorflow/tfjs'
 import * as tfvis from '@tensorflow/tfjs-vis' 
 import * as chess_meta from "../js/chess-meta.js"
 import * as d3 from "d3";
-import {average, median, arraysEqual, sum, arrayMin, arrayMax, normalize, undoNormalize, shuffleArray, sortJsObject, sortArrayKeyValue} from "./utilities.js"
+import {sum_array, average, median, arraysEqual, sum, arrayMin, arrayMax, normalize, undoNormalize, shuffleArray, sortJsObject, sortArrayKeyValue} from "./utilities.js"
 import * as tf_chess from './tensorflow-chess.js'
 
 import * as evaluation from "../js/eval/evaluation.js"
 import * as data_prep from "../js/eval/data-prep.js"
+
+
+import {skeleton_to_ascii} from "../js/eval/pawn-structure.js"
   
 const importance = require('importance')
 
@@ -114,75 +117,57 @@ function gamesToVector(games_FEN) {
 	return vectors;
 }
 
-export async function getFeatureImportance(loadData) {
-
-	var vectors;
-
-
-	var create = false;
-	var load = !create;
-
-	if(loadData){
-
+export async function load_data() {
+	
 	var engineGames_1 = await chess_meta.chessGames("engine").then(humanGames => humanGames.get);
 	var engineGames_2 = await chess_meta.chessGames("engine_2").then(humanGames => humanGames.get); 
 	var humanGames  = await chess_meta.chessGames("human").then(humanGames => humanGames.get);
 
+	// allows me to train with a % of different data each time.
 	shuffleArray(engineGames_1);
 	shuffleArray(engineGames_2);
 	shuffleArray(humanGames);
 
-	// Do not train all at once, to it in batches.
   var games_FEN = [...engineGames_1.filter((e,i) => i<humanGames.length/2),...engineGames_2.filter((e,i) => i<humanGames.length/2),...humanGames]
-  // 50% human games, 25% + 25% engine games,
+
   shuffleArray(games_FEN);
 
-  // games_FEN = games_FEN.filter((e,i) => i<games_FEN.length/2);
-  // use other halfe for testing!
+  console.log("Number of games: "+games_FEN.length)  
 
-  console.log(games_FEN.length) 
-	games_FEN = games_FEN.filter((e,iii) => iii<=1000);
+	var vectors = gamesToVector(games_FEN)
 
-	vectors = gamesToVector(games_FEN)
+  console.log("Number of positions: "+vectors.length)  
 
-	var test_vectors = vectors.filter((e,i) => i<vectors.length/2)
-	vectors = vectors.filter((e,i) => i>=vectors.length/2)
+  return vectors;
+}
 
+export async function build_my_model(output) {
 
+	var vectors= await load_data();
 
-	/* Create the model or load model
-	 */
-
-	 if(create){
-		 await tf_chess.main({
-		 	create: true,
-		 	//load: {default: true, model: 'my-model', normalizeVector_:'normalizeVector'}, 
-		 	train: true, 
-		 	//updatenormalizeVector: true, 
+   
+	await tf_chess.main({
+		 	create: true, 
+		 	train: true,  
 		 	saveAfterTraining:  {model: 'my-model', normalizeVector_:'normalizeVector'},
 		 	importance: true,
 		 	test: true,
-		 },vectors, undefined, undefined)
-	}
-	if(load){
-	 await tf_chess.main({
-	 	create: false,
-	 	load: {default: false, model: 'my-model', normalizeVector_:'normalizeVector'}, 
-	 	train: true, 
-	 	updatenormalizeVector: false, 
-	 	saveAfterTraining:  {model: 'my-model', normalizeVector_:'normalizeVector'},
-	 	importance: true,
-	 	test: true,
-	 },vectors, test_vectors, undefined)
-	}
+		 },vectors, undefined, undefined)	 
 
-	window.test_model("1.g3 e5 2.bg3 d5")
+	if(output){
+		window.default_model = JSON.stringify(Object.entries(localStorage).filter(e => e[0].includes("tensorflow") || e[0].includes("normalizeVector")))
+		console.log("saved to window.default_model");
+	} 
+
+	window.test_model("1.g3 e5 2.bg3 d5");
+	window.test_model("1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. a3 {giuoco piano} *")
+
+}
 
 
-	}else{
 
-	if(load){ // just load model and init test_model function
-
+export async function load_my_model() {
+  
 	 await tf_chess.main({
 	 	create: false,
 	 	load: {default: false, model: 'my-model', normalizeVector_:'normalizeVector'}, 
@@ -191,23 +176,41 @@ export async function getFeatureImportance(loadData) {
 	 	saveAfterTraining:  {model: 'my-model', normalizeVector_:'normalizeVector'},
 	 	importance: false,
 	 	test: true,
-	 },vectors, undefined, undefined)
-	}
+	 },undefined, undefined, undefined) 
 
-	window.test_model("1.g3 e5 2.bg3 d5")
+	window.test_model("1.g3 e5 2.bg3 d5");
+	window.test_model("1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. a3 {giuoco piano} *")
+}
 
+export async function train_my_model() {
+ 
+	var vectors= await load_data();
 
-	}
+	var test_vectors = vectors.filter((e,i) => i<vectors.length/2)
+	vectors = vectors.filter((e,i) => i>=vectors.length/2)
 
+ 
+	 await tf_chess.main({
+	 	create: false,
+	 	load: {default: false, model: 'my-model', normalizeVector_:'normalizeVector'}, 
+	 	train: true, 
+	 	updatenormalizeVector: false, 
+	 	saveAfterTraining:  {model: 'my-model', normalizeVector_:'normalizeVector'},
+	 	importance: true,
+	 	test: true,
+	 },vectors, test_vectors, undefined) 
+
+	window.test_model("1.g3 e5 2.bg3 d5");
+	window.test_model("1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. a3 {giuoco piano} *")
 	
   
 }
 
-export async function getGameStatistics() {
+export async function calculate_average_position_vector_list(pgn_database_name) {
 
-	var games = await chess_meta.chessGames("engine").then(humanGames => humanGames.get)
+	var games = await chess_meta.chessGames(pgn_database_name).then(humanGames => humanGames.get)
 	       
-  games = games//.filter((e,i) => i==100)    
+  games = games//.filter((e,i) => i<3)    
         .map(game => {return {
         	forBlack: (game.tags.Result=="0-1" || game.tags.Result=="1/2-1/2"),
         	forWhite: (game.tags.Result=="1-0" || game.tags.Result=="1/2-1/2"),
@@ -219,32 +222,31 @@ export async function getGameStatistics() {
 
   const getResult = (games_FEN) => {
 
-  	var result = [];
+	  var vectors_for_move = [];
 
-	  const zero_vector = new Array(games_FEN[0][0].length).fill(0); 
-
-	  for(var i=0;i<180;i++){ 
-	      var zero = [...zero_vector]
-	      var game_count = 0;
-	      for(var ii=0;ii<games_FEN.length;ii++){
-	      	game_count = games_FEN[ii].length;
-	      	if(games_FEN[ii][i]){
-	      		zero = zero.map((e,iii) => e + games_FEN[ii][i][iii]);
-	      	}
-	      }
-	      zero = zero.map(e => (e/game_count).toFixed(2)) 
-	      var index=result.length 
-	      result.push([index,game_count,...zero]);
+	  for(var i = 0; i<games_FEN.length;i++){ 
+	  	for(var ii = 0; ii<games_FEN[i].length;ii++){ // game // move
+	  		 var move_vector = games_FEN[i][ii]; // vector
+	  		 var move_vector_list = vectors_for_move[ii] || [];
+	  		 move_vector_list.push(move_vector);
+	  		 vectors_for_move[ii] = move_vector_list;
+	  	}
+	  }
+	  for(var i = 0; i<vectors_for_move.length;i++){
+	  	var length = vectors_for_move[i].length; 
+	  	var amalgamation = vectors_for_move[i].reduce(sum_array);
+	  	amalgamation = amalgamation.map(e => e/length)
+	  	vectors_for_move[i] = [i,length,...amalgamation];
 	  }
 
 	  var keys = ["index","game count",...evaluation.allKeys];
 
-	  return {data: result, keys: keys};
+	  return {data: vectors_for_move, keys: keys};
 
   }
 
-  console.log(getResult(games_FEN_forWhite))
-  console.log(getResult(games_FEN_forBlack))
+  console.log(JSON.stringify(getResult(games_FEN_forWhite)))
+  console.log(JSON.stringify(getResult(games_FEN_forBlack)))
   
   
  
@@ -330,27 +332,32 @@ export async function getNotification(chess, playerColor, halfMoves){
 
           var my_stats_now = evaluation.getStatisticsForPositionDict(chess,chess.history({verbose:true}).reverse()[0]); 
           // filter my_stats_now by feature importance
-/*
 
-          var stats_opp = chess_meta[playerColor=="w" ? "white" : "black"][halfMoves];
-          delete stats_opp["index"];  
-          delete stats_opp["game count"];  
-          delete stats_opp["cp"];
-          delete stats_opp["last move by"];  
+          var stats_hero = chess_meta[playerColor=="w" ? "white" : "black"][halfMoves]; 
+          var stats_human = chess_meta[playerColor=="w" ? "white_human" : "black_human"][halfMoves]; 
 
-          Object.values(stats_opp)*/
-/*
-          for(var i=0;i<evaluation.allKeys.length;i++){
-          	my_stats_now[evaluation.allKeys[i]] -=  my_stats_now[evaluation.allKeys[i]];
-          }*/ 
-          console.log(my_stats_now)
-          console.log(combined_importance)
  
           var notification = [];
           for(var i=0;i<combined_importance.length;i++){ 
-          	var msg = "("+(combined_importance[i][1].toFixed(2))+", "+(combined_importance[i][2].toFixed(2))+") "+combined_importance[i][0]+" "+my_stats_now[combined_importance[i][0]];
-          	notification.push(msg)
+          	var difference = ((combined_importance[i][1]-combined_importance[i][2]).toFixed(2))
+          	var positive = difference > 0 ? "+" : (difference < 0 ? "-" : "")
+          	//+(combined_importance[i][1].toFixed(2))+" ("+positive+difference+") \n"
+
+          	var msg;
+          	var value;
+          	if(combined_importance[i][0].includes("Pawn Structure") && !combined_importance[i][0].includes("Count")){
+          		value = skeleton_to_ascii(my_stats_now[combined_importance[i][0]])+"\n";
+          		msg = combined_importance[i][0]+" \n"+value+" \|\|           "+positive+"\n"+"    ("+(stats_human[combined_importance[i][0]].toFixed(2))+", "+(stats_hero[combined_importance[i][0]].toFixed(2))+")";
+          
+          	}else{
+          		value = my_stats_now[combined_importance[i][0]];
+          		msg = combined_importance[i][0]+" \|\|           "+positive+"\n"+value+"    ("+(stats_human[combined_importance[i][0]].toFixed(2))+", "+(stats_hero[combined_importance[i][0]].toFixed(2))+")";
+          
+          	}
+
+          		notification.push(msg)
           }
+ 
           // order and color by importance later
 
 
@@ -376,7 +383,35 @@ export async function getNotification(chess, playerColor, halfMoves){
 */
 
           var prediction = await window.test_model(chess.pgn())
-          return ["Chess Model Predicted: "+prediction.prediction_value,...Array.from(new Set(notification))]; 
+          // predict each possible move, order them, get index of played move.
+          var prediction_cp = (parseFloat(prediction.prediction_value).toFixed(2)); 
+          var my_test_game = new Chess();
+					my_test_game.load_pgn(chess.pgn());
+
+
+					var predictions = [];
+
+					my_test_game.undo();
+					var alternatives = my_test_game.moves({verbose:true}); 
+
+					for(var i=0;i<alternatives.length;i++){
+						my_test_game.load_pgn(chess.pgn());
+						my_test_game.undo();
+						my_test_game.move(alternatives[i]);  
+						predictions.push(window.test_model(my_test_game.pgn()));
+					} 
+					predictions = await Promise.all(predictions); 
+
+					predictions = predictions
+						.map((e,i) => [alternatives[i].san,e.prediction[0]]) 
+
+					predictions = sortArrayKeyValue(predictions).map((e,i) => [e[0],i]);
+ 
+
+					var index_of_played_move = 1+getValueByKey(predictions,chess.history({verbose:true}).reverse()[0].san)
+
+
+          return ["NN evaluation of "+chess.history().reverse()[0]+": "+prediction_cp+" ("+index_of_played_move+"/"+alternatives.length+") \nInput Neurons:",...Array.from(new Set(notification))]; 
  
         }else{
           return [];

@@ -46,7 +46,7 @@ var default_model = "[[\"tensorflowjs_models/my-model/model_topology\",\"{\\\"cl
 
 export function normalizeVector(data,inputMinMax_,labelMinMax_) {
 
-	 var inputMinMax;
+ 	 var inputMinMax;
 	 var labelMinMax;
 
    if(!inputMinMax_ || !labelMinMax_){
@@ -83,7 +83,7 @@ export function normalizeVector(data,inputMinMax_,labelMinMax_) {
     	labels:labels,
     	inputMinMax:inputMinMax,
     	labelMinMax:labelMinMax,
-    }
+    } 
 }
 
 /**
@@ -95,8 +95,7 @@ export function normalizeVector(data,inputMinMax_,labelMinMax_) {
 export function convertToTensor(data,inputMinMax_,labelMinMax_) {
   // Wrapping these calculations in a tidy will dispose any
   // intermediate tensors.
-
-  return tf.tidy(() => {
+ 
     // Step 1. Shuffle the data
     tf.util.shuffle(data);
 
@@ -107,8 +106,8 @@ export function convertToTensor(data,inputMinMax_,labelMinMax_) {
     //console.log(labels);
 
 
-    const inputTensor = tf.tensor2d(inputs, [inputs.length, inputs[0].length]);
-    const labelTensor = tf.tensor2d(labels, [labels.length, 1]);
+    const inputTensor = [inputs, [inputs.length, inputs[0].length]];
+    const labelTensor = [labels, [labels.length, 1]];
 
  
     return {
@@ -117,33 +116,39 @@ export function convertToTensor(data,inputMinMax_,labelMinMax_) {
       // Return the min/max bounds so we can use them later.
       inputMinMax: res.inputMinMax,
       labelMinMax: res.labelMinMax, 
-    }
-  });
+    } 
 }
 
 export async function trainModel(model, inputs, labels) {
-  // Prepare the model for training.
-  model.compile({
-    optimizer: tf.train.adam(),
-    loss: tf.losses.meanSquaredError,
-    metrics: ['mse'],
-  });
 
-  const batchSize = 64;
-  // 16 good results
-  const epochs = 100;
-  // 50 good results
+	  var inputTensor = tf.tensor2d(...inputs);
+	  var labelTensor = tf.tensor2d(...labels);
+ 
+	  // Prepare the model for training.
+	  model.compile({
+	    optimizer: tf.train.adam(),
+	    loss: tf.losses.meanSquaredError,
+	    metrics: ['mse'],
+	  });
 
-  return await model.fit(inputs, labels, {
-    batchSize,
-    epochs,
-    shuffle: true,
-    callbacks: tfvis.show.fitCallbacks(
-      { name: 'Training Performance' },
-      ['loss'],
-      { height: 400, callbacks: ['onEpochEnd'] }
-    )
-  });
+	  const batchSize = 64;
+	  // 16 good results
+	  const epochs = 100;
+	  // 50 good results
+
+	  var res = await model.fit(inputTensor, labelTensor, {
+	    batchSize,
+	    epochs,
+	    shuffle: true,
+	    callbacks: tfvis.show.fitCallbacks(
+	      { name: 'Training Performance' },
+	      ['loss'],
+	      { height: 400, callbacks: ['onEpochEnd'] }
+	    )
+	  })
+	  inputTensor.dispose();
+	  labelTensor.dispose();
+	  return res;
 }
 
 
@@ -161,24 +166,26 @@ export function getImportance(model, vectors, normalizeVector_) {
 
 }
 
-export function getImportance_(model, vectors, normalizeVector_,n_) {
+export function getImportance_(model, vectors, normalizeVector_,n_) { 
+	  var n_vectors = normalizeVector(vectors,normalizeVector_.input,normalizeVector_.label);
 
-    var n_vectors = normalizeVector(vectors,normalizeVector_.input,normalizeVector_.label);
-
-    var myModel = {predict: (test) => {
-        		var p = model.predict(tf.tensor2d(test, [test.length, test[0].length]));
-        		return p.dataSync();
-    }}
-	const imp = importance(myModel, n_vectors.inputs, n_vectors.labels, {
-	  kind: 'mse',
-	  n: n_,
-	  means: true,
-	  verbose: false
-	})
-	var importance_list = (imp.map((e,i) => {return {key:evaluation.allKeys[1+i],value:e}}))
-  importance_list = sortJsObject(importance_list);
-	//console.log(importance_list)
-	return importance_list
+	  var myModel = {predict: (test) => { 
+								  						var tensor = tf.tensor2d(test, [test.length, test[0].length]);
+									        		var p = model.predict(tensor);
+									        		var res = p.dataSync();
+									        		tensor.dispose();
+									        		return res;}
+	    						}
+		const imp = importance(myModel, n_vectors.inputs, n_vectors.labels, {
+		  kind: 'mse',
+		  n: n_,
+		  means: true,
+		  verbose: false
+		})
+		var importance_list = (imp.map((e,i) => {return {key:evaluation.allKeys[1+i],value:e}}))
+	  importance_list = sortJsObject(importance_list);
+		//console.log(importance_list)
+		return importance_list 
 }
 
 
@@ -210,16 +217,23 @@ export const get_feature_importance_with_pgn = async(model,normalizeVector_, pgn
 	// use stockfish, because it is more accurate
 
 	// this way we get the importance of the features that improve the position
+	var reduce = 0; 
+	while(vectors.length==0){
 
-	for(var i=0;i<alternatives.length;i++){
-		my_test_game.load_pgn(pgn);
-		my_test_game.undo();
-		my_test_game.move(alternatives[i]);   
-		var vector = evaluation.getStatisticsForPositionVector(my_test_game, my_test_game.history({verbose:true}).reverse()[0]);
-		var label = await test_model_with_pgn(model,normalizeVector_,my_test_game.pgn()); 
-		vector[evaluation.allKeys.indexOf("cp")] = label.prediction_value 
-		vectors.push(vector)
-	} 
+		for(var i=0;i<alternatives.length;i++){
+			my_test_game.load_pgn(pgn);
+			my_test_game.undo();
+			my_test_game.move(alternatives[i]);   
+			var vector = evaluation.getStatisticsForPositionVector(my_test_game, my_test_game.history({verbose:true}).reverse()[0]);
+			var label = await test_model_with_pgn(model,normalizeVector_,my_test_game.pgn()); 
+			
+			if(label.prediction[0]>=0.5-reduce){ // we want to know about features that are important for good moves
+				vector[evaluation.allKeys.indexOf("cp")] = label.prediction_value[0]
+				vectors.push(vector)
+			}
+		} 
+		reduce = reduce + 0.1;
+	}
 
 	vectors = vectors.map(e => {
 		var target = e[evaluation.allKeys.indexOf("cp")]; 
@@ -265,19 +279,21 @@ export const test_model_with_pgn = async(model,normalizeVector_, pgn) => {
 
 const test_model_vectors = async(model,normalizeVector_,vectors,pgn) => {
  
- 	var res = normalizeVector(vectors,normalizeVector_.input,normalizeVector_.label);
+ 
+	 	var res = normalizeVector(vectors,normalizeVector_.input,normalizeVector_.label);
 
-	const preds = await model.predict(tf.tensor2d(res.inputs, [res.inputs.length, res.inputs[0].length]));
-	
-	const data = await preds.dataSync();
+	 	var tensor = tf.tensor2d(res.inputs, [res.inputs.length, res.inputs[0].length]);
+		const preds = await model.predict(tensor);
+		const data = await preds.dataSync();
+		tensor.dispose();
 
-	return {pgn: pgn,
-			vectors: vectors, 
-			normalizeVector: {input: res.inputMinMax, label: res.labelMinMax}, 
-			prediction: data, 
-			prediction_value: data.map(e => undoNormalize(e,-2,2)),
-			label: res.labels
-			}
+		return {pgn: pgn,
+				vectors: vectors, 
+				normalizeVector: {input: res.inputMinMax, label: res.labelMinMax}, 
+				prediction: data, 
+				prediction_value: data.map(e => undoNormalize(e,-2,2)),
+				label: res.labels
+				} 
 
 }
 
@@ -331,16 +347,16 @@ export async function main(arg,vectors,test_vectors,test_pgns) {
 	if((arg.load || (arg.create && arg.train))){
 
 		if(arg.importance){
+			console.log("Importance on training data:")
  			console.log(getImportance(model,vectors, normalizeVector_))
  			if(test_vectors){
+				console.log("Importance on test data:")
  				console.log(getImportance(model,test_vectors, normalizeVector_))
  			}
 		}
 		if(arg.test){
 		/* Prepare test data or use training data as testing data
-		 */
-			var res = await test_model_with_pgn(model,normalizeVector_,"1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. a3 {giuoco piano} *");
-			console.log(res);
+		 */ 
 
 			// allow live testing
 			window.test_model = (pgn) => test_model_with_pgn(model,normalizeVector_,pgn);

@@ -25,4 +25,6 @@
 
 .item, .item .sc-ion-label-ios-h {
   white-space: pre-wrap;
+  font-family: monospace;
+  font-size: large;
 }

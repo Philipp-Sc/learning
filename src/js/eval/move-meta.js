@@ -39,11 +39,11 @@ export const move_meta_keys = [
 			"move to rank 4",
 			"move to file E",
 			"move to rank 5",
-			"move to file F",
+			"move to file F", 
 			"move to rank 6",
-			"move to file G",
+			"move to file G", 
 			"move to rank 7",
-			"move to file H",
+			"move to file H",  
 			"move to rank 8",
 			]
 
@@ -143,18 +143,18 @@ export function get_move_meta(last_move,onlyVector){
     var rank =  getRowOfMoveTo(last_move);
 
 	var vector = [
-      (color_of_move_w && !notation_of_move_includes_x && !notation_of_move_is_upper && figure_of_move==null)  ? 1 : 0,
-      (color_of_move_b && !notation_of_move_includes_x && !notation_of_move_is_upper && figure_of_move==null)  ? 1 : 0,
-      (color_of_move_w && !notation_of_move_includes_x && notation_of_move_is_upper && figure_of_move=="B")  ? 1 : 0,
-      (color_of_move_b && !notation_of_move_includes_x && notation_of_move_is_upper && figure_of_move=="B")  ? 1 : 0,
-      (color_of_move_w && !notation_of_move_includes_x && notation_of_move_is_upper && figure_of_move=="N")  ? 1 : 0,
-      (color_of_move_b && !notation_of_move_includes_x && notation_of_move_is_upper && figure_of_move=="N")  ? 1 : 0,
-      (color_of_move_w && !notation_of_move_includes_x && notation_of_move_is_upper && figure_of_move=="R")  ? 1 : 0,
-      (color_of_move_b && !notation_of_move_includes_x && notation_of_move_is_upper && figure_of_move=="R")  ? 1 : 0,
-      (color_of_move_w && !notation_of_move_includes_x && notation_of_move_is_upper && figure_of_move=="Q")  ? 1 : 0,
-      (color_of_move_b && !notation_of_move_includes_x && notation_of_move_is_upper && figure_of_move=="Q")  ? 1 : 0,
-      (color_of_move_w && !notation_of_move_includes_x && notation_of_move_is_upper && figure_of_move=="K")  ? 1 : 0,
-      (color_of_move_b && !notation_of_move_includes_x && notation_of_move_is_upper && figure_of_move=="K")  ? 1 : 0, 
+      (color_of_move_w && !notation_of_move_is_upper && figure_of_move==null)  ? 1 : 0,
+      (color_of_move_b && !notation_of_move_is_upper && figure_of_move==null)  ? 1 : 0,
+      (color_of_move_w && notation_of_move_is_upper && figure_of_move=="B")  ? 1 : 0,
+      (color_of_move_b && notation_of_move_is_upper && figure_of_move=="B")  ? 1 : 0,
+      (color_of_move_w && notation_of_move_is_upper && figure_of_move=="N")  ? 1 : 0,
+      (color_of_move_b && notation_of_move_is_upper && figure_of_move=="N")  ? 1 : 0,
+      (color_of_move_w && notation_of_move_is_upper && figure_of_move=="R")  ? 1 : 0,
+      (color_of_move_b && notation_of_move_is_upper && figure_of_move=="R")  ? 1 : 0,
+      (color_of_move_w && notation_of_move_is_upper && figure_of_move=="Q")  ? 1 : 0,
+      (color_of_move_b && notation_of_move_is_upper && figure_of_move=="Q")  ? 1 : 0,
+      (color_of_move_w && notation_of_move_is_upper && figure_of_move=="K")  ? 1 : 0,
+      (color_of_move_b && notation_of_move_is_upper && figure_of_move=="K")  ? 1 : 0, 
       (color_of_move_w && notation_of_move_includes_x && !notation_of_move_is_upper && figure_of_move==null)  ? 1 : 0,
       (color_of_move_b && notation_of_move_includes_x && !notation_of_move_is_upper && figure_of_move==null)  ? 1 : 0,
       (color_of_move_w && notation_of_move_includes_x && notation_of_move_is_upper && figure_of_move=="B")  ? 1 : 0,
@@ -171,21 +171,28 @@ export function get_move_meta(last_move,onlyVector){
       (color_of_move_b && notation_of_move=="O-O")  ? 1 : 0, 
       (color_of_move_w && notation_of_move=="O-O-O")  ? 1 : 0,
       (color_of_move_b && notation_of_move=="O-O-O")  ? 1 : 0,
-      file==1 ? 1 : 0,
+      file==0 ? 1 : 0,
       rank==1 ? 1 : 0,
-      file==2 ? 1 : 0,
+
+      file==1 ? 1 : 0,
       rank==2 ? 1 : 0,
-      file==3 ? 1 : 0,
+
+      file==2 ? 1 : 0,
       rank==3 ? 1 : 0,
-      file==4 ? 1 : 0,
+
+      file==3 ? 1 : 0,
       rank==4 ? 1 : 0,
-      file==5 ? 1 : 0,
+
+      file==4 ? 1 : 0,
       rank==5 ? 1 : 0,
-      file==6 ? 1 : 0,
+
+      file==5 ? 1 : 0,
       rank==6 ? 1 : 0,
-      file==7 ? 1 : 0,
+
+      file==6 ? 1 : 0,
       rank==7 ? 1 : 0,
-      file==8 ? 1 : 0,
+
+      file==7 ? 1 : 0,
       rank==8 ? 1 : 0,                
 	]
 

@@ -186,3 +186,19 @@ function getEuclidianDistance(arr1, arr2) {
 // possibly add some random games into the mix
 
 // calculate importance for all features
+
+
+/* TO DO
+
+1) Generate pawn structure list from game database, by creating pawn fen for every move, then count and create list top 100
+
+2)
+
+- create webworker for tf_chess, to prevent blocking the thread.
+
+3) 
+
+- add other features
+- rename features to be more intuitive in UI
+- add visualisation
+*/

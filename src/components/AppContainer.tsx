@@ -179,8 +179,12 @@ const AppContainer: React.FC = () => {
         refHalfMoves.current = refHalfMoves.current - 2;
         setHalfMoves(refHalfMoves.current)
 
-        refNotificationOut.current= await chess_stats.getNotification(chess,playerColor,refHalfMoves.current);;
-        setNotificationOut(refNotificationOut.current);
+        setTimeout(() => {
+        chess_stats.getNotification(chess,playerColor,refHalfMoves.current).then(result => {
+            refNotificationOut.current = result;
+            setNotificationOut(refNotificationOut.current)
+          }) 
+        },0)
 
         refMovePerformance.current = chess_meta.historicPerformanceAtMoveNumber(refHalfMoves.current,{pgn_db: player_pgn_db_ref.current,pgn_analysis: player_pgn_analysis_ref.current});
         setMovePerformance(refMovePerformance.current);
@@ -212,11 +216,15 @@ const AppContainer: React.FC = () => {
         refFen.current=chess.fen();
         setFen(refFen.current);   
 
-      refNotificationOut.current=await chess_stats.getNotification(chess,playerColor,refHalfMoves.current);;
-      setNotificationOut(refNotificationOut.current);
+      setTimeout(() => {
+        chess_stats.getNotification(chess,playerColor,refHalfMoves.current).then(result => {
+            refNotificationOut.current = result;
+            setNotificationOut(refNotificationOut.current)
+            document.dispatchEvent(new Event('move_executed'))   
+            engine_turn();
+          }) 
+      },0)
 
-      document.dispatchEvent(new Event('move_executed'))   
-      engine_turn();
     }
   }; 
 
@@ -480,17 +488,32 @@ const AppContainer: React.FC = () => {
       skill_profile = chess_meta.skill_profiles[refElo.current] 
 
 
-      //chess_stats.loadChessModel();
+      // needed in production to provide the prediction methods.
+      await chess_stats.load_my_model(); // todo: in production need to load default_model
+      // will be overriden by development
+      
 
-      if(create_aggregated_data_development_option || true){
+      if(create_aggregated_data_development_option){
 
-        await chess_stats.getFeatureImportance(false);
-        //return;
-        // create skill profile 
-        // skill_profile = await chess_stats.getSkillProfile(refElo.current,depth_for_database)
-        // if(refDebug.current) console.log(JSON.stringify(skill_profile)) 
-        // create game (best-play) statistics
-        //chess_stats.getGameStatistics() 
+        // once needed every time the feature vector or model definition are changed.
+        //await chess_stats.build_my_model();
+
+        // retrain the model & new importance
+        await chess_stats.train_my_model(); 
+
+        var rebuild_prod_prerequisites = false;
+        if(rebuild_prod_prerequisites){
+
+          // once needed every time the feature vector or model definition are changed.
+          // also new importance
+          //await chess_stats.build_my_model();
+  
+          chess_stats.calculate_average_position_vector_list("engine")
+          chess_stats.calculate_average_position_vector_list("human") 
+
+          skill_profile = await chess_stats.getSkillProfile(refElo.current,depth_for_database)
+          console.log(JSON.stringify(skill_profile))  
+        }
       }
       }, [elo]);  
 
