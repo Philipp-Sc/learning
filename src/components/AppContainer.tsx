@@ -216,15 +216,13 @@ const AppContainer: React.FC = () => {
         refFen.current=chess.fen();
         setFen(refFen.current);   
 
-      setTimeout(() => {
         chess_stats.getNotification(chess,playerColor,refHalfMoves.current).then(result => {
             refNotificationOut.current = result;
             setNotificationOut(refNotificationOut.current)
-            document.dispatchEvent(new Event('move_executed'))   
-            engine_turn();
-          }) 
-      },0)
+          })  
 
+        document.dispatchEvent(new Event('move_executed'))   
+        engine_turn();
     }
   }; 
 
@@ -488,18 +486,21 @@ const AppContainer: React.FC = () => {
       skill_profile = chess_meta.skill_profiles[refElo.current] 
 
 
-      // needed in production to provide the prediction methods.
-      await chess_stats.load_my_model(); // todo: in production need to load default_model
-      // will be overriden by development
+      await chess_stats.load_my_model(); 
+      
+      //console.log(await chess_stats.test_model());
       
 
-      if(create_aggregated_data_development_option){
+      if(create_aggregated_data_development_option || true){
 
         // once needed every time the feature vector or model definition are changed.
         //await chess_stats.build_my_model();
+ 
 
         // retrain the model & new importance
         await chess_stats.train_my_model(); 
+
+
 
         var rebuild_prod_prerequisites = false;
         if(rebuild_prod_prerequisites){

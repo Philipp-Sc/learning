@@ -6,6 +6,8 @@ import * as d3 from "d3";
 import {sum_array, average, median, arraysEqual, sum, arrayMin, arrayMax, normalize, undoNormalize, shuffleArray, sortJsObject, sortArrayKeyValue} from "./utilities.js"
 import * as tf_chess from './tensorflow-chess.js'
 
+import * as importance_chess from './importance-chess.js'
+
 import * as evaluation from "../js/eval/evaluation.js"
 import * as data_prep from "../js/eval/data-prep.js"
 
@@ -78,23 +80,6 @@ export function getDistanceVectorForStatistics(stats){
 }
 
 
-export async function loadChessModel() {
-
-	 await tf_chess.main({
-	 	create: false,
-	 	load: {default: true, model: 'my-model', normalizeVector_:'normalizeVector'}, 
-	 	train: false, 
-	 	overrideMinMax: false, 
-	 	saveAfterTraining:  {model: 'my-model', normalizeVector_:'normalizeVector'},
-	 	importance: false,
-	 	test: true,
-	 },undefined, undefined)
-
-	window.test_model("1.g3 e5 2.bg3 d5")
-
-
-
-}
 function gamesToVector(games_FEN) {
 
 	const getResults = (n) => {return sampleMovesAsFENs(n, evaluation.getStatisticsForPositionVector,0.66,5,60*2,-1.5,1.5,0.33)}
@@ -124,17 +109,19 @@ export async function load_data() {
 	var humanGames  = await chess_meta.chessGames("human").then(humanGames => humanGames.get);
 
 	// allows me to train with a % of different data each time.
-	shuffleArray(engineGames_1);
-	shuffleArray(engineGames_2);
-	shuffleArray(humanGames);
+	//shuffleArray(engineGames_1);
+	//shuffleArray(engineGames_2);
+	//shuffleArray(humanGames);
 
-  var games_FEN = [...engineGames_1.filter((e,i) => i<humanGames.length/2),...engineGames_2.filter((e,i) => i<humanGames.length/2),...humanGames]
+  //var games_FEN = [...engineGames_1.filter((e,i) => i<humanGames.length/2),...engineGames_2.filter((e,i) => i<humanGames.length/2),...humanGames]
+
+  var games_FEN = [...engineGames_1,...engineGames_2,...humanGames]
 
   shuffleArray(games_FEN);
 
   console.log("Number of games: "+games_FEN.length)  
 
-	var vectors = gamesToVector(games_FEN)
+	var vectors = gamesToVector(games_FEN)//.filter((e,i) => i<3)
 
   console.log("Number of positions: "+vectors.length)  
 
@@ -143,43 +130,44 @@ export async function load_data() {
 
 export async function build_my_model(output) {
 
-	var vectors= await load_data();
+	var vectors = await load_data();
 
    
 	await tf_chess.main({
-		 	create: true, 
-		 	train: true,  
-		 	saveAfterTraining:  {model: 'my-model', normalizeVector_:'normalizeVector'},
-		 	importance: true,
-		 	test: true,
-		 },vectors, undefined, undefined)	 
+		 	create: {model_name: 'my-model'}, 
+		 	train: {initial: true},    
+		 },vectors, undefined)	 
 
 	if(output){
 		window.default_model = JSON.stringify(Object.entries(localStorage).filter(e => e[0].includes("tensorflow") || e[0].includes("normalizeVector")))
 		console.log("saved to window.default_model");
 	} 
 
-	window.test_model("1.g3 e5 2.bg3 d5");
-	window.test_model("1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. a3 {giuoco piano} *")
+	console.log(await test_model())
 
 }
 
+export async function test_model(){
+
+	var games = ["1.g3 e5 2.bg3 d5",
+							 "1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. a3 {giuoco piano} *"]
+
+	var results = [];
+	for(var i=0;i<games.length;i++){
+		var result = await tf_chess.test_model_with_pgn('my-model',games[i]);
+		results.push(result);
+	}
+
+	return results
+}
 
 
 export async function load_my_model() {
   
-	 await tf_chess.main({
-	 	create: false,
-	 	load: {default: false, model: 'my-model', normalizeVector_:'normalizeVector'}, 
-	 	train: false, 
-	 	updatenormalizeVector: false, 
-	 	saveAfterTraining:  {model: 'my-model', normalizeVector_:'normalizeVector'},
-	 	importance: false,
-	 	test: true,
-	 },undefined, undefined, undefined) 
-
-	window.test_model("1.g3 e5 2.bg3 d5");
-	window.test_model("1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. a3 {giuoco piano} *")
+	 await tf_chess.main({ 
+	 	load: {model_name: 'my-model'},    
+	 },undefined) 
+ 
 }
 
 export async function train_my_model() {
@@ -190,19 +178,15 @@ export async function train_my_model() {
 	vectors = vectors.filter((e,i) => i>=vectors.length/2)
 
  
-	 await tf_chess.main({
-	 	create: false,
-	 	load: {default: false, model: 'my-model', normalizeVector_:'normalizeVector'}, 
-	 	train: true, 
-	 	updatenormalizeVector: false, 
-	 	saveAfterTraining:  {model: 'my-model', normalizeVector_:'normalizeVector'},
-	 	importance: true,
-	 	test: true,
-	 },vectors, test_vectors, undefined) 
+	 await tf_chess.main({ 
+	 	load: {model_name: 'my-model'}, 
+	 	train: {initial: false},    
+	 },vectors) 
 
-	window.test_model("1.g3 e5 2.bg3 d5");
-	window.test_model("1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. a3 {giuoco piano} *")
 	
+	console.log(await test_model())
+
+	importance_chess.main('my-model',vectors,test_vectors)
   
 }
 
@@ -306,10 +290,9 @@ export async function getNotification(chess, playerColor, halfMoves){
 	 				//
 
 	 				// get importance in this position
-	 				var global_feature_importance = chess_meta.global_test_importance;
-	 				//await window.get_feature_importance_with_pgn(chess.pgn())           
+	 				var global_feature_importance = JSON.parse(window.localStorage.getItem('my-model'+"://importance"));   
 
-					var feature_importance = await window.get_feature_importance_with_pgn(chess.pgn())      
+					var feature_importance = await importance_chess.get_feature_importance_with_pgn('my-model',chess.pgn())      
 
 
 	 				function getValueByKey(key_value_array,key) {
@@ -360,29 +343,9 @@ export async function getNotification(chess, playerColor, halfMoves){
  
           // order and color by importance later
 
+ 
 
-
-//          var notification = getDistanceVectorForStatistics({'playerStats':my_stats_now,'stats': stats_opp})
-
-/*
-          .filter(e => e.includes(playerColor=="w" ? "{white}" : "{black}")).map(e => e.replace(playerColor=="w" ? "{white}" : "{black}",""));
-*/          
-/*
-          notification = notification.map(e => {
-            if(e.includes("{fig}")){
-              return "Probabilities were: \n"+notification.filter(e => e.includes("{fig}")).map(e => e.replace("{fig}","")).join("\n")
-            }
-            if(e.includes("{capture}")){
-              return "Probabilities were: \n"+notification.filter(e => e.includes("{capture}")).map(e => e.replace("{capture}","")).join("\n")
-            }
-            if(e.includes("{castle}")){
-              return "Probabilities were: \n"+notification.filter(e => e.includes("{castle}")).map(e => e.replace("{castle}","")).join("\n")
-            }
-            return e.replace("(excl.","\n(excl.")
-          })
-*/
-
-          var prediction = await window.test_model(chess.pgn())
+          var prediction = await tf_chess.test_model_with_pgn('my-model',chess.pgn())
           // predict each possible move, order them, get index of played move.
           var prediction_cp = (parseFloat(prediction.prediction_value).toFixed(2)); 
           var my_test_game = new Chess();
@@ -398,7 +361,7 @@ export async function getNotification(chess, playerColor, halfMoves){
 						my_test_game.load_pgn(chess.pgn());
 						my_test_game.undo();
 						my_test_game.move(alternatives[i]);  
-						predictions.push(window.test_model(my_test_game.pgn()));
+						predictions.push(await tf_chess.test_model_with_pgn('my-model',my_test_game.pgn()));
 					} 
 					predictions = await Promise.all(predictions); 
 
