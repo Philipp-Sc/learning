@@ -77,15 +77,6 @@ https://www.chessprogramming.org/Evaluation
 - Intuitiv: Ja, aber entferne unnütze Features, um die dimensionalität klein zu halten.
 
 
-- Add all the features
-- possibly investigate random forest
-- Do PCR Analysis on the feature, take explain 90%
-- (cleans the feature vector)
-
-
-- Make a regression analysis with all stats and the evaluation. To find out the most relevant features.
-
-
 */
  
     // load  engine database. for every game transform it to a list of FENs
@@ -192,10 +183,6 @@ function getEuclidianDistance(arr1, arr2) {
 
 1) Generate pawn structure list from game database, by creating pawn fen for every move, then count and create list top 100
 
-2)
-
-- create webworker for tf_chess, to prevent blocking the thread.
-
 3) 
 
 - add other features
@@ -204,4 +191,3 @@ function getEuclidianDistance(arr1, arr2) {
 */
 
 
-Make evaluation.js into one importable module, then use webworker to manage the parallelism

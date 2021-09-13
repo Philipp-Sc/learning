@@ -498,7 +498,7 @@ const AppContainer: React.FC = () => {
  
 
         // retrain the model & new importance
-        await chess_stats.train_my_model(); 
+        // await chess_stats.train_my_model(); 
 
 
 

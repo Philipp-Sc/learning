@@ -22,10 +22,10 @@ var newGame = new Chess();
 
 
 /* Returns a promise, which we need to resolve with await before we send another request.*/
-function sendToChessToVectorWorker(worker,game_index,index){
+function sendToChessToVectorWorker(worker,game_index){
 	var promise = new Promise((res, rej) => {
   
-		  worker.postMessage({method:"getStatisticsForPositionVector",params: [game_index,index]}); 
+		  worker.postMessage({method:"getStatisticsForPositionVector",params: [game_index]}); 
 		  worker.onmessage = (message) => {   
 		        res(message.data.value)     
 		  }
@@ -102,7 +102,6 @@ export function getDistanceVectorForStatistics(stats){
 
 async function gamesToVector(games_FEN) {
 
-
 	var batchSize = 32;
 
   var myWorkers = new Array(batchSize);
@@ -112,36 +111,28 @@ async function gamesToVector(games_FEN) {
 
 	var toLength = games_FEN.length - (games_FEN.length % batchSize)
 	var frame = toLength/batchSize
- 
- 	var sendingData = [];
- 	var batch = [];
-
-
+  
  	for(var i=0;i<myWorkers.length;i++){
  		var batchData = games_FEN.filter((e,ii) => ii>=i*frame && ii<(i+1)*frame);
- 		batch.push(batchData);
-		sendingData.push(sendGameDataToChessWorker(myWorkers[i],batchData));
+		await sendGameDataToChessWorker(myWorkers[i],batchData);
  	}
-	const getResults = (game_index,game,i) => {
-		return sampleMovesAsFENs(game_index,game, sendToChessToVectorWorker.bind(null,myWorkers[i]),0.66,5,60*2,-1.5,1.5,0.33)
+
+	const getResults = (game_index,i) => {
+		return sendToChessToVectorWorker(myWorkers[i],game_index);
 	} 
-  const task = (game_index,game,i) => {return () => getResults(game_index,game,i)};
+  const task = (game_index,i) => {return () => getResults(game_index,i)};
  
 	console.log("Games: "+toLength);
-
 	console.log("Batches: "+frame)
   
 	var myBatchTasks = [];
-
-
- 	await Promise.all(sendingData);
-
-	for(var i=0; i<batch.length;i++){
+ 
+	for(var i=0; i<myWorkers.length;i++){
 		var myTasks = [];
 		for(var x=0;x<frame-1;x++){
 		  //var value = await getResults(x,batch[i][x],i); 
 		  //var promise = getResults(x,batch[i][x],i); // (gets called immidiatly)
-		  myTasks.push(task(x,batch[i][x],i)) 
+		  myTasks.push(task(x,i)) 
 		}
 		myBatchTasks.push(myTasks);
 	}
@@ -151,6 +142,7 @@ async function gamesToVector(games_FEN) {
 		for(var i = 0; i<tasks.length;i++){
 			var res = await tasks[i]();
 			result.push(res);
+			console.log("...")
 		}
 		return result;
 	}
@@ -158,6 +150,7 @@ async function gamesToVector(games_FEN) {
  	// evaluate all batches in parallel
 	var myPromises = await Promise.all(myBatchTasks.map(tasks => syncDoTask(tasks)));
  
+
 	myWorkers.forEach(e => e.terminate());
 
 	var vectors = [].concat.apply([],[].concat.apply([], myPromises))
@@ -168,7 +161,9 @@ async function gamesToVector(games_FEN) {
 	})
 
 
-	console.log(evaluation.allKeys);
+	//console.log(vectors)
+	window.allKeys =evaluation.allKeys;
+	console.log("window.allKeys")
 
 	//console.log(vectors)
 
@@ -195,7 +190,7 @@ export async function load_data() {
 
   console.log("Number of games: "+games_FEN.length)  
 
-	var vectors = await gamesToVector(games_FEN.filter((e,i) => i<=(32*2)-1))
+	var vectors = await gamesToVector(games_FEN.filter((e,i) => i<=(32*200)-1))
 
   console.log("Number of positions: "+vectors.length)  
 
@@ -407,7 +402,7 @@ export async function getNotification(chess, playerColor, halfMoves){
           		msg = combined_importance[i][0]+" \n"+value+" \|\|           "+positive+"\n"+"    ("+(stats_human[combined_importance[i][0]].toFixed(2))+", "+(stats_hero[combined_importance[i][0]].toFixed(2))+")";
           
           	}else{
-          		value = my_stats_now[combined_importance[i][0]];
+          		value = my_stats_now[combined_importance[i][0]].toFixed(2);
           		msg = combined_importance[i][0]+" \|\|           "+positive+"\n"+value+"    ("+(stats_human[combined_importance[i][0]].toFixed(2))+", "+(stats_hero[combined_importance[i][0]].toFixed(2))+")";
           
           	}

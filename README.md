@@ -17,14 +17,20 @@ It is written using Ionic, Capacitorjs and Expressjs.
 # Roadmap
 # Chess
 * **@self_play** Have the opponement play the same opening and eventually mirror your playing style based on your past games. Bobby Fisher has been known to play himself. Alpha Zero was trained using self play.
+
 * **@custom_book** Extend functionality: 1) Filter by Elo independent from current elo. 2) Allow the use of the engine pgn database as source. 3) Optional weighting of common opening moves. Still random but prefer common openings. 4) Allow user to provide pgn database.
  
-* Highlight the Statistical Measures (Degree of Freedom, Mobility, Expansion factor, Protected squares, Packing density) if possible on the board.
-* Improve the Visualization of the Statistical Measures, make it intuitive. (e.g Illustrations, Charts, Explainations)
-* **notification** show and highlight most important principles relevant in the current position
-* 1. two feature vectors predict evaluation (before and after move), reverse engineer the importance of feature(s) that changed
-* 2. list features that are relevant in the position
-* PERMUTATION IMPORTANCE for global ordering of features
+* Highlight the Features (Degree of Freedom, Mobility, Expansion factor, Protected squares,..) if possible on the board.
+
+* **notification** show and highlight most important principles/features relevant in the current position
+* Improve NN by providing better training data. (Annotate Lichess Chess Database with Stockfish)
+* Consider live training the NN on the current (or simialar) game position. Stockfish evaluations are already partly there anyway.
+* Add more principles/features.
+* Calculate Pawn Structure from Database.
+
+* Improve Importance calculation code to run asynchron and display results immidiatly. 
+
+* 
 
 * **@training** 
 * a) Based on game history let the opponement go for positions where you made mistakes in the past.
@@ -80,14 +86,7 @@ Labels
 Pieces (you can click/tap the pieces on the board to get extra information)
 * Learn about Chess by exploring the information provided to you. Including valuable statistics related to your position.
 
-
-*Statistical Measures*
-* Material
-* Degree of Freedom
-* Mobility
-* Expansion factor
-* Protected squares
-* Packing density
+ 
 
 # Language Learning
 
@@ -117,6 +116,10 @@ Pieces (you can click/tap the pieces on the board to get extra information)
 * `npm install @wmik/use-media-recorder --force`
 
 **Build the Capacitor PWA**
+
+* `cd src/webpack; npx webpack; cp dist/main.js ../../public/chess-to-vector-worker/main.js;cd ../..;`
+(you may need to install webpack, anyway this command is only needed for development. The main.js for the package is already provided with this repo.)
+
 
 * `npm run build`
 

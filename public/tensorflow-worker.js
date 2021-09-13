@@ -1,7 +1,10 @@
 
 //importScripts("https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.9.0/dist/tf.min.js"); 
+//importScripts("https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-wasm/dist/tf-backend-wasm.js")
 importScripts("./tensorflow/tf.min.js"); 
-tf.setBackend('cpu')
+//importScripts("./tensorflow/tf-backend-wasm.js")
+//tf.setBackend('cpu')
+//tf.setBackend('wasm')
 
 var loaded_model;
 var loaded_model_name;
