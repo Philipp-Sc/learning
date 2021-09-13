@@ -91,7 +91,9 @@
     ]
   },
   "devDependencies": {
-    "@capacitor/cli": "^3.1.2"
+    "@capacitor/cli": "^3.1.2",
+    "webpack": "^4.44.2",
+    "webpack-cli": "^4.8.0"
   },
   "description": "An Ionic project"
 }

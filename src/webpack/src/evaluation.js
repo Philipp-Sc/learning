@@ -7,7 +7,6 @@ import {material,materialKeys} from "./material.js"
 import {pawnFeatures,pawnKeys} from "./pawn-structure.js"
 import {expansion_factor,expansionFactorKeys} from "./expansion-factor.js"
 
-
 export const allKeys = [ 
    			 "cp",
    			 "halfmove",

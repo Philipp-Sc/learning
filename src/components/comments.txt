@@ -202,3 +202,6 @@ function getEuclidianDistance(arr1, arr2) {
 - rename features to be more intuitive in UI
 - add visualisation
 */
+
+
+Make evaluation.js into one importable module, then use webworker to manage the parallelism

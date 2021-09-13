@@ -21,31 +21,51 @@ const Chess = require("chess.js");
 var newGame = new Chess();
 
 
-
-function getMovesAsFENs(game, process){ 
-	return sampleMovesAsFENs(game,process,0,0,512,-10,10,0);
+/* Returns a promise, which we need to resolve with await before we send another request.*/
+function sendToChessToVectorWorker(worker,game_index,index){
+	var promise = new Promise((res, rej) => {
+  
+		  worker.postMessage({method:"getStatisticsForPositionVector",params: [game_index,index]}); 
+		  worker.onmessage = (message) => {   
+		        res(message.data.value)     
+		  }
+		});
+	return promise;
 }
 
-function sampleMovesAsFENs(game, process,skipProbability, start, end, minCP, maxCP,cpZeroProbability){ 
-	console.log("...")
-	newGame.reset();
-	var fens : string[] = [];
+function sendGameDataToChessWorker(worker,game_data){
+	var promise = new Promise((res, rej) => {
+  
+		  worker.postMessage({method:"receive_game_data",params: [game_data]});
+
+		  worker.onmessage = (message) => {  
+		        res(message.data.value)     
+		  }
+		});
+	return promise;
+}
+
+function getMovesAsFENs(game_index,game, process){ 
+	return sampleMovesAsFENs(game_index,game,process,0,0,512,-10,10,0);
+}
+ 
+async function sampleMovesAsFENs(game_index,game, process,skipProbability, start, end, minCP, maxCP,cpZeroProbability){  
+	console.log("...")     
+	var res = [];
 	for (var i = 0; i < game.moves.length; i++) {
 		if(game.moves[i] && game.moves[i].notation && game.moves[i].notation.notation){
-			newGame.move(game.moves[i].notation.notation);
 			if(i>=start && i<=end && evaluation.getCP(game.moves[i])>=minCP && evaluation.getCP(game.moves[i])<=maxCP && Math.random()>skipProbability){
 				if(evaluation.getCP(game.moves[i])==0){
-					if(Math.random()>cpZeroProbability){
-						fens.push(process(newGame,game.moves[i]));
+					if(Math.random()>cpZeroProbability){ 
+						res.push(await process(game_index,i))
 					}
 				}else{
-					fens.push(process(newGame,game.moves[i]));
-
+						res.push(await process(game_index,i))
 				}
 			}
 		}
-	}
-	return fens;
+	}   
+	return Promise.resolve(res);
 }
 
 
@@ -80,19 +100,73 @@ export function getDistanceVectorForStatistics(stats){
 }
 
 
-function gamesToVector(games_FEN) {
+async function gamesToVector(games_FEN) {
 
-	const getResults = (n) => {return sampleMovesAsFENs(n, evaluation.getStatisticsForPositionVector,0.66,5,60*2,-1.5,1.5,0.33)}
-	for(var x=0;x<games_FEN.length;x++){
-		games_FEN[x] = getResults(games_FEN[x]);
-	} 
+
+	var batchSize = 32;
+
+  var myWorkers = new Array(batchSize);
+  for(var i=0;i<myWorkers.length;i++){
+  	myWorkers[i] = new Worker("chess-to-vector-worker/main.js");
+  } 
+
+	var toLength = games_FEN.length - (games_FEN.length % batchSize)
+	var frame = toLength/batchSize
  
-	var vectors = [].concat.apply([], games_FEN)
+ 	var sendingData = [];
+ 	var batch = [];
+
+
+ 	for(var i=0;i<myWorkers.length;i++){
+ 		var batchData = games_FEN.filter((e,ii) => ii>=i*frame && ii<(i+1)*frame);
+ 		batch.push(batchData);
+		sendingData.push(sendGameDataToChessWorker(myWorkers[i],batchData));
+ 	}
+	const getResults = (game_index,game,i) => {
+		return sampleMovesAsFENs(game_index,game, sendToChessToVectorWorker.bind(null,myWorkers[i]),0.66,5,60*2,-1.5,1.5,0.33)
+	} 
+  const task = (game_index,game,i) => {return () => getResults(game_index,game,i)};
+ 
+	console.log("Games: "+toLength);
+
+	console.log("Batches: "+frame)
+  
+	var myBatchTasks = [];
+
+
+ 	await Promise.all(sendingData);
+
+	for(var i=0; i<batch.length;i++){
+		var myTasks = [];
+		for(var x=0;x<frame-1;x++){
+		  //var value = await getResults(x,batch[i][x],i); 
+		  //var promise = getResults(x,batch[i][x],i); // (gets called immidiatly)
+		  myTasks.push(task(x,batch[i][x],i)) 
+		}
+		myBatchTasks.push(myTasks);
+	}
+
+	const syncDoTask = async(tasks) => {  // evaluate task sequentially
+		var result = [];
+		for(var i = 0; i<tasks.length;i++){
+			var res = await tasks[i]();
+			result.push(res);
+		}
+		return result;
+	}
+ 
+ 	// evaluate all batches in parallel
+	var myPromises = await Promise.all(myBatchTasks.map(tasks => syncDoTask(tasks)));
+ 
+	myWorkers.forEach(e => e.terminate());
+
+	var vectors = [].concat.apply([],[].concat.apply([], myPromises))
 		.map(e => {
 			var target = e[evaluation.allKeys.indexOf("cp")];  
 			e.splice(evaluation.allKeys.indexOf("cp"), 1);
 			return {"data": e, "label":target}
 	})
+
 
 	console.log(evaluation.allKeys);
 
@@ -121,7 +195,7 @@ export async function load_data() {
 
   console.log("Number of games: "+games_FEN.length)  
 
-	var vectors = gamesToVector(games_FEN)//.filter((e,i) => i<3)
+	var vectors = await gamesToVector(games_FEN.filter((e,i) => i<=(32*2)-1))
 
   console.log("Number of positions: "+vectors.length)  
 
@@ -195,10 +269,10 @@ export async function calculate_average_position_vector_list(pgn_database_name) 
 	var games = await chess_meta.chessGames(pgn_database_name).then(humanGames => humanGames.get)
 	       
   games = games//.filter((e,i) => i<3)    
-        .map(game => {return {
+        .map((game,i) => {return {
         	forBlack: (game.tags.Result=="0-1" || game.tags.Result=="1/2-1/2"),
         	forWhite: (game.tags.Result=="1-0" || game.tags.Result=="1/2-1/2"),
-        	vector: getMovesAsFENs(game, evaluation.getStatisticsForPositionVector)}})
+        	vector: getMovesAsFENs(i,game, evaluation.getStatisticsForPositionVector)}})
 
   var games_FEN_forWhite = games.filter(e => e.forWhite).map(e => e.vector);
   var games_FEN_forBlack = games.filter(e => e.forBlack).map(e => e.vector);
