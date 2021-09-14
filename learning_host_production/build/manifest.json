@@ -1,0 +1,9 @@
+{
+  "short_name": "Learning",
+  "name": "Learning",
+  "icons": [],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff"
+}

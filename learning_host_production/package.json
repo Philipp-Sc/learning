@@ -1,0 +1,19 @@
+{
+  "name": "Learning Host",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "cors": "^2.8.5",  
+    "express": "^4.17.1",
+    "express-rate-limit": "^5.3.0", 
+    "fs": "^0.0.1-security",
+    "https": "^1.0.0"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "test": "node server-localhost.js"
+  },
+  "devDependencies": { 
+  },
+  "description": "Learning Host Production"
+}

@@ -1,0 +1,7 @@
+Dockerfile
+.dockerignore
+node_modules
+npm-debug.log
+philipp-sc_learning_latest.tar.gz
+philipp-sc_learning_latest.xz
+philipp-sc_learning_latest.lzma 
