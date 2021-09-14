@@ -1,10 +1,7 @@
 import React from 'react';
-import CardContent from '../components/CardContent';
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonSelect, IonSelectOption } from '@ionic/react'; 
+import CardContent from '../components/CardContent'; 
 import './Tab1.css';
-import { IonGrid, IonRow, IonCol, IonToggle, IonSpinner, IonBadge} from '@ionic/react'; 
-import { IonItem, IonLabel, IonInput, IonButton, IonIcon, IonAlert } from '@ionic/react';
-import { IonTextarea, IonItemDivider, IonList } from '@ionic/react';
+import {  IonContent, IonPage, IonSelect, IonSelectOption, IonSpinner, IonIcon } from '@ionic/react'; 
 import { useState, useRef, useEffect } from 'react';
 import { micCircleOutline, cameraOutline, trashOutline, returnUpForwardOutline, returnDownBackOutline, helpOutline, informationOutline, checkmarkDoneOutline, clipboardOutline, documentTextOutline, cogOutline } from 'ionicons/icons';
 
@@ -15,13 +12,13 @@ import {InputGroup, DropdownButton, Dropdown, FormControl, Button, Modal} from '
 import useMediaRecorder from '@wmik/use-media-recorder';
 
 
-import {IonSlides, IonSlide, IonInfiniteScroll, IonInfiniteScrollContent, IonCard, useIonAlert} from '@ionic/react';
+import {IonSlides, IonSlide, useIonAlert} from '@ionic/react';
 
 import { Plugins, CameraResultType } from '@capacitor/core';
 
 //import ReactAudioPlayer from 'react-audio-player';
-import AudioPlayer from 'react-h5-audio-player';
-import 'react-h5-audio-player/lib/styles.css';
+//import AudioPlayer from 'react-h5-audio-player';
+//import 'react-h5-audio-player/lib/styles.css';
 
 var hash = require('object-hash');
 

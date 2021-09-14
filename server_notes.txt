@@ -1,0 +1,7 @@
+
+git pull
+
+docker container stop learning-xtreme;docker container rm learning-xtreme;docker image rm philipp-sc/learning;docker system prune -a
+nohup docker build -t philipp-sc/learning  --no-cache . &
+docker run --name=learning-xtreme -d -p 443:8080 philipp-sc/learning npm start
+exit

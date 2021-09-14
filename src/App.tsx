@@ -1,22 +1,21 @@
 import { Redirect, Route } from 'react-router-dom';
 import {
-  IonApp,
-  IonIcon,
+  IonApp, 
   IonLabel,
   IonRouterOutlet,
   IonTabBar,
   IonTabButton,
   IonTabs,
 } from '@ionic/react';
-import { IonReactRouter, IonReactMemoryRouter } from '@ionic/react-router';
+import { IonReactMemoryRouter } from '@ionic/react-router';
 import { createMemoryHistory} from 'history';
 
-import { createGesture, Gesture, setupConfig } from '@ionic/react';
+import { createGesture, setupConfig } from '@ionic/react';
 
 //import { ellipse, square, triangle } from 'ionicons/icons';
 import Tab1 from './pages/Tab1';
 import Tab2 from './pages/Tab2';
-import Tab3 from './pages/Tab3';
+//import Tab3 from './pages/Tab3';
 import Faq from './pages/Faq';
 import Signup from './pages/Signup';
 import Policy from './pages/Policy';

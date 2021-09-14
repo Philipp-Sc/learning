@@ -1,26 +1,21 @@
-
-import * as tf from '@tensorflow/tfjs'
-import * as tfvis from '@tensorflow/tfjs-vis' 
-import {default_model} from "../js/default_model.js"
-import * as chess_meta from "../js/chess-meta.js"
-import * as d3 from "d3";
-import {sum_array, average, median, arraysEqual, sum, arrayMin, arrayMax, normalize, undoNormalize, shuffleArray, sortJsObject, sortArrayKeyValue} from "./utilities.js"
+ 
+import * as chess_meta from "../js/chess-meta.js" 
+import {sum_array, average, median, shuffleArray, sortArrayKeyValue} from "./utilities.js"
 import * as tf_chess from './tensorflow-chess.js'
 
 import * as importance_chess from './importance-chess.js'
 
-import * as evaluation from "../js/eval/evaluation.js"
+import * as evaluation from "../webpack-eval-package/src/evaluation.js"
 import * as data_prep from "../js/eval/data-prep.js"
 
 
-import {skeleton_to_ascii} from "../js/eval/pawn-structure.js"
-  
-const importance = require('importance')
+import {skeleton_to_ascii} from "../webpack-eval-package/src/pawn-structure.js"
+   
 
 const Chess = require("chess.js"); 
 
-var newGame = new Chess();
-
+const default_model = require('./json/default_model.json')
+ 
 var debug = false;
 
 

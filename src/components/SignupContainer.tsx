@@ -1,6 +1,6 @@
 import React from 'react';
 import './ExploreContainer.css';
-import { IonLoading, IonContent, IonItem, IonLabel, IonList, IonListHeader, IonSelect, IonSelectOption, IonPage, IonItemDivider } from '@ionic/react';
+import { IonItem, IonList} from '@ionic/react';
 
 interface ContainerProps {
   name: string;

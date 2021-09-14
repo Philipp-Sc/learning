@@ -1,15 +1,9 @@
-import React from 'react';
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react';  
-import { IonGrid, IonRow, IonCol, IonToggle, IonSpinner, IonBadge} from '@ionic/react'; 
-import { IonItem, IonLabel, IonInput, IonButton, IonIcon, IonAlert } from '@ionic/react';
-import { IonTextarea, IonItemDivider, IonList } from '@ionic/react';
-import { useState, useRef, useEffect } from 'react';
-import { micCircleOutline, cameraOutline, helpOutline, informationOutline, checkmarkDoneOutline, clipboardOutline, documentTextOutline, cogOutline } from 'ionicons/icons';
+import React from 'react'; 
+import { IonItem, IonIcon, IonCard } from '@ionic/react';  
+import { helpOutline, informationOutline, checkmarkDoneOutline, clipboardOutline, documentTextOutline, cogOutline } from 'ionicons/icons';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
-import {InputGroup, DropdownButton, Dropdown, FormControl, Button, Modal, Card} from 'react-bootstrap'
-  
-import {IonSlides, IonSlide, IonInfiniteScroll, IonInfiniteScrollContent, IonCard} from '@ionic/react';
+import {InputGroup, Card} from 'react-bootstrap'
  
 import AudioPlayer from 'react-h5-audio-player';
 import 'react-h5-audio-player/lib/styles.css';

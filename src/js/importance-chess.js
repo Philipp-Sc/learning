@@ -1,12 +1,9 @@
- 
-
-import * as chess_meta from "../js/chess-meta.js"
-import * as d3 from "d3";
-import {average, median, arraysEqual, sum, arrayMin, arrayMax, normalize, undoNormalize, sortJsObject} from "./utilities.js"
+   
+import {sortJsObject} from "./utilities.js"
 
 import * as tf_chess from './tensorflow-chess.js'
 
-import * as evaluation from "../js/eval/evaluation.js"
+import * as evaluation from "../webpack-eval-package/src/evaluation.js"
 
 
 import {importance} from './importance/index.js'

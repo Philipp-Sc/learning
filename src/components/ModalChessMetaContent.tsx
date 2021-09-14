@@ -1,14 +1,14 @@
 import React from 'react';
-import { IonModal, IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react';  
-import { IonGrid, IonRow, IonCol, IonToggle, IonSpinner, IonBadge} from '@ionic/react'; 
-import { IonItem, IonLabel, IonInput, IonButton, IonIcon, IonAlert } from '@ionic/react';
-import { IonTextarea, IonItemDivider, IonList } from '@ionic/react';
-import { useState, useRef, useEffect } from 'react';
+import { IonModal } from '@ionic/react';  
+//import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar,IonGrid, IonRow, IonCol, IonToggle, IonSpinner, IonBadge} from '@ionic/react'; 
+//import { IonItem, IonLabel, IonInput, IonButton, IonIcon, IonAlert } from '@ionic/react';
+//import { IonTextarea, IonItemDivider, IonList } from '@ionic/react';
+//import { useState, useRef, useEffect } from 'react';
 
-import {InputGroup, DropdownButton, Dropdown, FormControl, Button, Modal, Card} from 'react-bootstrap'
+//import {InputGroup, DropdownButton, Dropdown, FormControl, Button, Modal, Card} from 'react-bootstrap'
 
 
-import * as chess_meta from "../js/chess-meta.js"
+//import * as chess_meta from "../js/chess-meta.js"
 
 interface ContainerProps {
   halfMoves: number;
@@ -23,7 +23,7 @@ interface ContainerProps {
 
 const ModalChessMetaContent: React.FC<ContainerProps> = ({halfMoves,playerColor,pieceClicked,squareClicked,modalIndex,showModal,setShowModal}) => {
  
- 	const game_stats = chess_meta[playerColor=="w" ? "white" : "black"];
+ 	//const game_stats = chess_meta[playerColor=="w" ? "white" : "black"];
 
 
 	return <IonModal isOpen={showModal} onDidDismiss={() => setShowModal(false)} cssClass='my-custom-class2'>

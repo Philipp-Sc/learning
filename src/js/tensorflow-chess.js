@@ -1,15 +1,12 @@
 
 import * as tf from '@tensorflow/tfjs'
 import * as tfvis from '@tensorflow/tfjs-vis' 
-
-import * as chess_meta from "../js/chess-meta.js"
-import * as d3 from "d3";
-import {average, median, arraysEqual, sum, arrayMin, arrayMax, normalize, undoNormalize, sortJsObject} from "./utilities.js"
-
-
-import * as evaluation from "../js/eval/evaluation.js"
   
-const importance = require('importance')
+import {normalize, undoNormalize} from "./utilities.js"
+
+
+import * as evaluation from "../webpack-eval-package/src/evaluation.js"
+  
 
 const Chess = require("chess.js"); 
 

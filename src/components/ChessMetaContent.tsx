@@ -1,16 +1,8 @@
 import React from 'react';
-import { IonModal, IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react';  
-import { IonGrid, IonRow, IonCol, IonSpinner, IonBadge} from '@ionic/react'; 
-import { IonButton, IonIcon, IonAlert } from '@ionic/react';
-import { IonTextarea, IonItemDivider } from '@ionic/react';
-import { useState, useRef, useEffect } from 'react';
+import {IonBadge} from '@ionic/react';   
+import {useState} from 'react';
 
-import {InputGroup, DropdownButton, Dropdown, FormControl, Button, Modal, Card} from 'react-bootstrap'
-
-import { IonList, IonItem, IonLabel, IonInput, IonToggle, IonRadio, IonCheckbox, IonItemSliding, IonItemOption, IonItemOptions } from '@ionic/react';
-
-
-import * as chess_meta from "../js/chess-meta.js"
+import { IonList, IonItem, IonLabel, IonItemSliding, IonItemOption, IonItemOptions } from '@ionic/react';
  
 interface MovePerformance {
   average_eval: number;
@@ -55,8 +47,6 @@ const ChessMetaContent: React.FC<ContainerProps> = ({halfMoves,playerColor,moveP
   const [showCapture,setShowCapture] = useState(true);
   const [showMaterialCount,setShowMaterialCount] = useState(true);
 
- 	const game_stats = chess_meta[playerColor=="w" ? "white" : "black"];
-
   const avg_player_perf = (-1*movePerformance.average_eval).toFixed(2);
   const median_player_perf = (-1*movePerformance.median_eval).toFixed(2);
 
@@ -81,8 +71,8 @@ const ChessMetaContent: React.FC<ContainerProps> = ({halfMoves,playerColor,moveP
         {notificationOut
             .filter((e,i) => i==0).map(e => {return <IonItemSliding>
             <IonItem>
-              <IonLabel>{e.toString().split("\|\|")[0]}</IonLabel>
-              <IonLabel style={{flex: "unset"}}>{e.toString().split("\|\|")[1]}</IonLabel>
+              <IonLabel>{e.toString().split("||")[0]}</IonLabel>
+              <IonLabel style={{flex: "unset"}}>{e.toString().split("||")[1]}</IonLabel>
             </IonItem>
         
         <IonBadge onClick={() => {setShowMoveTo(!showMoveTo)} }>{showMoveTo ? "@(+)" : "@"}move_to</IonBadge>
@@ -116,8 +106,8 @@ const ChessMetaContent: React.FC<ContainerProps> = ({halfMoves,playerColor,moveP
             .filter(e => showMoveTo ? true : !e.includes("move to"))
             .filter(e => showPieceType ? true : (!e.includes("{fig}") || e.includes("{history}")) ).map(e => {return <IonItemSliding>
             <IonItem>
-              <IonLabel>{e.toString().split("\|\|")[0]}</IonLabel>
-              <IonLabel style={{flex: 'unset'}}>{e.toString().split("\|\|")[1]}</IonLabel>
+              <IonLabel>{e.toString().split("||")[0]}</IonLabel>
+              <IonLabel style={{flex: 'unset'}}>{e.toString().split("||")[1]}</IonLabel>
             </IonItem>
             <IonItemOptions side="end">
               <IonItemOption onClick={() => {}}>Show</IonItemOption>

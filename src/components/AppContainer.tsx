@@ -482,7 +482,10 @@ const AppContainer: React.FC = () => {
     }
     }, [engineOn]);  
  
-   useEffect(async() => { 
+   useEffect(() => { 
+
+      async function doTask() {
+
       // using pre computed skill profile
       skill_profile = chess_meta.skill_profiles[refElo.current] 
 
@@ -521,6 +524,8 @@ const AppContainer: React.FC = () => {
           console.log(JSON.stringify(skill_profile))  
         }
       }
+    }
+    doTask();
       }, [elo]);  
 
    const toggle_engine_tolerance = () => {
