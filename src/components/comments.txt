@@ -191,3 +191,15 @@ function getEuclidianDistance(arr1, arr2) {
 */
 
 
+// update website PWA to current, console.log @debug 
+
+
+// calculate pawn structure &
+
+
+// add new NN features
+
+// improve importance code to run faster
+
+
+// create script to run stockfish on my server to evaluate human games in my free time.

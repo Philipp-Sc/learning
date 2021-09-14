@@ -1,6 +1,7 @@
 
 import * as tf from '@tensorflow/tfjs'
 import * as tfvis from '@tensorflow/tfjs-vis' 
+import {default_model} from "../js/default_model.js"
 import * as chess_meta from "../js/chess-meta.js"
 import * as d3 from "d3";
 import {sum_array, average, median, arraysEqual, sum, arrayMin, arrayMax, normalize, undoNormalize, shuffleArray, sortJsObject, sortArrayKeyValue} from "./utilities.js"
@@ -19,6 +20,8 @@ const importance = require('importance')
 const Chess = require("chess.js"); 
 
 var newGame = new Chess();
+
+var debug = false;
 
 
 /* Returns a promise, which we need to resolve with await before we send another request.*/
@@ -50,7 +53,7 @@ function getMovesAsFENs(game_index,game, process){
 }
  
 async function sampleMovesAsFENs(game_index,game, process,skipProbability, start, end, minCP, maxCP,cpZeroProbability){  
-	console.log("...")     
+	if(debug) console.log("...")     
 	var res = [];
 	for (var i = 0; i < game.moves.length; i++) {
 		if(game.moves[i] && game.moves[i].notation && game.moves[i].notation.notation){
@@ -122,8 +125,8 @@ async function gamesToVector(games_FEN) {
 	} 
   const task = (game_index,i) => {return () => getResults(game_index,i)};
  
-	console.log("Games: "+toLength);
-	console.log("Batches: "+frame)
+	if(debug) console.log("Games: "+toLength);
+	if(debug) console.log("Batches: "+frame)
   
 	var myBatchTasks = [];
  
@@ -142,7 +145,7 @@ async function gamesToVector(games_FEN) {
 		for(var i = 0; i<tasks.length;i++){
 			var res = await tasks[i]();
 			result.push(res);
-			console.log("...")
+			if(debug) console.log("...")
 		}
 		return result;
 	}
@@ -161,11 +164,11 @@ async function gamesToVector(games_FEN) {
 	})
 
 
-	//console.log(vectors)
+	//if(debug) console.log(vectors)
 	window.allKeys =evaluation.allKeys;
-	console.log("window.allKeys")
+	if(debug) console.log("window.allKeys")
 
-	//console.log(vectors)
+	//if(debug) console.log(vectors)
 
 	vectors = data_prep.sample_with_bins([-2,2],10,vectors);
 	return vectors;
@@ -188,11 +191,11 @@ export async function load_data() {
 
   shuffleArray(games_FEN);
 
-  console.log("Number of games: "+games_FEN.length)  
+  if(debug) console.log("Number of games: "+games_FEN.length)  
 
 	var vectors = await gamesToVector(games_FEN.filter((e,i) => i<=(32*200)-1))
 
-  console.log("Number of positions: "+vectors.length)  
+  if(debug) console.log("Number of positions: "+vectors.length)  
 
   return vectors;
 }
@@ -209,10 +212,10 @@ export async function build_my_model(output) {
 
 	if(output){
 		window.default_model = JSON.stringify(Object.entries(localStorage).filter(e => e[0].includes("tensorflow") || e[0].includes("normalizeVector")))
-		console.log("saved to window.default_model");
+		if(debug) console.log("saved to window.default_model");
 	} 
 
-	console.log(await test_model())
+	if(debug) console.log(await test_model())
 
 }
 
@@ -231,12 +234,20 @@ export async function test_model(){
 }
 
 
-export async function load_my_model() {
+export async function load_my_model(args) {
+
+	 if(args.isProduction){
+	  	await tf_chess.import_model('my-model',default_model)
+	 }
   
 	 await tf_chess.main({ 
 	 	load: {model_name: 'my-model'},    
 	 },undefined) 
  
+}
+
+export function export_my_model() {
+	return tf_chess.export_model('my-model');
 }
 
 export async function train_my_model() {
@@ -253,7 +264,7 @@ export async function train_my_model() {
 	 },vectors) 
 
 	
-	console.log(await test_model())
+	if(debug) console.log(await test_model())
 
 	importance_chess.main('my-model',vectors,test_vectors)
   
@@ -298,8 +309,8 @@ export async function calculate_average_position_vector_list(pgn_database_name) 
 
   }
 
-  console.log(JSON.stringify(getResult(games_FEN_forWhite)))
-  console.log(JSON.stringify(getResult(games_FEN_forBlack)))
+  if(debug) console.log(JSON.stringify(getResult(games_FEN_forWhite)))
+  if(debug) console.log(JSON.stringify(getResult(games_FEN_forBlack)))
   
   
  

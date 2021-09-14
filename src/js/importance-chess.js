@@ -14,6 +14,8 @@ import {importance} from './importance/index.js'
    
 const Chess = require("chess.js"); 
 
+var debug = false;
+
 
 export async function getImportance(model_name, vectors, norm,n_) { 
 	  var n_vectors = tf_chess.convertToTensor(vectors,norm);
@@ -24,7 +26,7 @@ export async function getImportance(model_name, vectors, norm,n_) {
 		  kind: 'mse',
 		  n: n_,
 		  means: true,
-		  verbose: true
+		  verbose: debug
 		})
 	  var importance_list = (imp.map((e,i) => {return {key:evaluation.allKeys[1+i],value:e}}))
 	  importance_list = sortJsObject(importance_list); 
@@ -113,16 +115,16 @@ export async function main(model_name,vectors,test_vectors) {
 			var norm = JSON.parse(window.localStorage.getItem(model_name));
 
 			if(vectors){
-				console.log("Importance on training data:")
-	 			console.log(await getImportance(model_name,vectors, norm,1))
+				if(debug) console.log("Importance on training data:")
+	 			if(debug) console.log(await getImportance(model_name,vectors, norm,1))
  			}
 
  			if(test_vectors){
-				console.log("Importance on test data:")
+				if(debug) console.log("Importance on test data:")
 				var global_feature_importance = await getImportance(model_name,test_vectors, norm,1);
-				console.log(global_feature_importance)		
+				if(debug) console.log(global_feature_importance)		
 				window.localStorage.setItem(model_name+"://importance",JSON.stringify(global_feature_importance))
-				console.log('Saved '+model_name+"://importance")
+				if(debug) console.log('Saved '+model_name+"://importance")
 			}		
 
 }

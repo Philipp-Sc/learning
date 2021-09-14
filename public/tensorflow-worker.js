@@ -9,18 +9,20 @@ importScripts("./tensorflow/tf.min.js");
 var loaded_model;
 var loaded_model_name;
 
+var debug = false;
+
 onmessage = function(message) {
   const {data} = message;
   if (data.method && data.params) {
     if(data.method!="modelPredict"){
-      console.log('Tensorflow Worker:');
-      console.log(">> Method: "+data.method)
-      console.log(">> Params: "+data.params.length)
+      if(debug) console.log('Tensorflow Worker:');
+      if(debug) console.log(">> Method: "+data.method)
+      if(debug) console.log(">> Params: "+data.params.length)
     }
   	var res = self[data.method](data.method,...data.params);
     res.then(result => postMessage(result));
   } else { 
-    console.log('Tensorflow Worker: Invalid message'); 
+    if(debug) console.log('Tensorflow Worker: Invalid message'); 
   }
 
 }
@@ -81,7 +83,7 @@ async function trainModel(method, model_name, inputs, labels) {
 
     const callbacks = {
       onEpochEnd: async (epoch, logs) => {
-        console.log("epoch: " + epoch +" "+ JSON.stringify(logs))
+        if(debug) console.log("epoch: " + epoch +" "+ JSON.stringify(logs))
         callback("onEpochEnd",epoch,logs);
       }
     };

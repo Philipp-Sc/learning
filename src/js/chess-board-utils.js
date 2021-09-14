@@ -48,7 +48,7 @@ export const highlightBoard = (movePerformance, avgPerf, medianPerf) => {
   }else if(!medianPerf && !avgPerf){
     a = 0;
   }
-  return {
+  return {margin: "0px auto",
           marginBottom: '30px',
           borderRadius: '5px',
           boxShadow: `0 10px 30px `+'rgba('+(a*-1>=0 ? 0 : 255)+','+(a*-1>=0 ? 255 : 0)+',0,'+(Math.min(1,Math.abs(a)))+')'

@@ -77,12 +77,12 @@ const ChessMetaContent: React.FC<ContainerProps> = ({halfMoves,playerColor,moveP
 	return <div> 
 
          
-        <IonList>
+        <IonList style={{"maxWidth": "700px", "margin": "0 auto"}}>
         {notificationOut
             .filter((e,i) => i==0).map(e => {return <IonItemSliding>
             <IonItem>
               <IonLabel>{e.toString().split("\|\|")[0]}</IonLabel>
-              <IonLabel style={{flex: 'unset'}}>{e.toString().split("\|\|")[1]}</IonLabel>
+              <IonLabel style={{flex: "unset"}}>{e.toString().split("\|\|")[1]}</IonLabel>
             </IonItem>
         
         <IonBadge onClick={() => {setShowMoveTo(!showMoveTo)} }>{showMoveTo ? "@(+)" : "@"}move_to</IonBadge>

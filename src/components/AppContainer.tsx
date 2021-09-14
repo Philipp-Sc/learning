@@ -144,7 +144,7 @@ const AppContainer: React.FC = () => {
   const [engineNewGame, setEngineNewGame] = useState(false);
   const refEngineNewGame = useRef(engineNewGame);
 
-  const [boardWidth, setBoardWidth] = useState(window.innerWidth);
+  const [boardWidth, setBoardWidth] = useState(Math.min(700,window.innerWidth));
   const refBoardWidth = useRef(boardWidth);
 
   const [movePerformance, setMovePerformance] = useState(default_movePerformance);
@@ -379,7 +379,8 @@ const AppContainer: React.FC = () => {
   }
  
  useEffect(() => { 
-    window.addEventListener('resize',() => {setTimeout(() => {setBoardWidth(window.innerWidth); refBoardWidth.current=window.innerWidth;},500)});
+    window.addEventListener('resize',() => {setTimeout(() => {refBoardWidth.current=Math.min(700,window.innerWidth);setBoardWidth(refBoardWidth.current); },500)});
+    
     document.addEventListener("transition_engine_to_next_position", transition_engine_to_next_position.bind(null,false));
     document.addEventListener("move_ready", move_ready);
     document.addEventListener("move_executed", move_executed);
@@ -486,12 +487,16 @@ const AppContainer: React.FC = () => {
       skill_profile = chess_meta.skill_profiles[refElo.current] 
 
 
-      await chess_stats.load_my_model(); 
+      await chess_stats.load_my_model({isProduction: true}); 
+
       
       //console.log(await chess_stats.test_model());
+
       
 
-      if(create_aggregated_data_development_option || true){
+      if(create_aggregated_data_development_option){
+        
+        window.export_current_model = chess_stats.export_my_model;
 
         // once needed every time the feature vector or model definition are changed.
         //await chess_stats.build_my_model();
@@ -543,7 +548,7 @@ const AppContainer: React.FC = () => {
       <div style={{textAlign:'right', marginRight: '10px', marginTop: '-26px'}}>
       <IonBadge>{refSecToWait.current}</IonBadge>
       </div>
-
+ 
       <Chessboard
         squareStyles={chess_board_utils.highlightSquares(refStockfishInfoOutHistory.current,chess, highlightAnalysis, highlightEngine, refHalfMoves.current)}
         boardStyle={chess_board_utils.highlightBoard(refMovePerformance.current, avgPerf, medianPerf)}
@@ -561,7 +566,7 @@ const AppContainer: React.FC = () => {
         draggable={refIsDraggable.current}
         onPieceClick={show_piece_stats}
         onSquareClick={show_piece_stats_square}
-      />
+      /> 
       <IonActionSheet
         isOpen={showActionSheet}
         onDidDismiss={() => setShowActionSheet(false)}
