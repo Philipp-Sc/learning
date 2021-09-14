@@ -101,8 +101,30 @@ Pieces (you can click/tap the pieces on the board to get extra information)
 
 * `cd learning`
 
-# Run on localhost (development)
 
+# a) Local Setup (current published build)
+
+* `cd learning_host_production`
+
+* `npm install`
+
+* `node server-localhost.js`  (local testing)
+
+* `node server.js` (production, also see bellow *hosting*) 
+
+
+# b) Docker Setup (current published build)
+
+* `cd learning_host_production`
+
+* `docker build -t philipp-sc/learning ` or `docker load < philipp-sc_learning_latest.xz`
+
+* `docker run --name=learning-xtreme -d -p 8080:8080 philipp-sc/learning npm test` (local testing)
+
+* `docker run --name=learning-xtreme -d -p 443:8080 philipp-sc/learning npm start` (production, also see bellow *hosting*) 
+
+
+# Development (only for developers)
 
 **Update npm**
 
@@ -115,40 +137,38 @@ Pieces (you can click/tap the pieces on the board to get extra information)
 
 * `npm install @wmik/use-media-recorder --force`
 
-**Build the Capacitor PWA**
+**Build webpack-eval-package**
 
-* `cd src/webpack; npx webpack; cp dist/main.js ../../public/chess-to-vector-worker/main.js;cd ../..;`
+* Description: The code needed to evaluate a given position i.e feature extraction. The main script is implemented as webworker to increase performance.
+
+* `cd src/webpack-eval-package; npx webpack; cp dist/main.js ../../public/chess-to-vector-worker/main.js;cd ../..;`
 (you may need to install webpack, anyway this command is only needed for development. The main.js for the package is already provided with this repo.)
 
+**Build the Capacitor PWA (get the latest build)**
 
 * `npm run build`
+ 
+* `cp -a build learning_host_production/` (optional, to continue with a) or b) otherwise bellow)
 
 **Host with express.js** *(required)*
 
 *express.js is required because stockfish.js (https://github.com/niklasf/stockfish.wasm) uses sharedarraybuffer (https://developer.chrome.com/blog/enabling-shared-array-buffer/))*
 
-* `node server-localhost.js`
+* `node server-localhost.js` (testing)
 
 *without stockfish.js the express.js server is not needed, use:*
 
 * `ionic serve --livereload;`
 
+* NOTE: There is also a Dockerfile for the complete build pipeline.
 
 
-# Hosting
+# Hosting (production)
 
 **Https** *(required)*
 
 * Put the ssh certificates (cert.pem, privkey.pem) for your domain here. 
 * You may use https://hub.docker.com/r/certbot/certbot/ to generate the certificates with Let's Encrypt. 
-
-**Build the Docker image**
-
-* `docker build -t philipp-sc/learning `
-
-**Start the container and run the express.js server**
-
-* `docker run --name=learning-xtreme -d -p 443:8080 philipp-sc/learning npm start`
 
 *Make sure the port 443 is open to accept incoming requests*
 
