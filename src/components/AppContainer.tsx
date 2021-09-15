@@ -98,7 +98,7 @@ const AppContainer: React.FC = () => {
   const [elo, setElo] = useState(min_elo);
   const refElo = useRef(elo);
 
-  const [useBook, setUseBook] = useState(false);
+  const [useBook, setUseBook] = useState(true);
   const refBook = useRef(useBook);  
 
   const [debug, setDebug] = useState(false); 

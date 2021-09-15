@@ -361,6 +361,13 @@ export async function getSkillProfile(elo,depth) {
 export async function getNotification(chess, playerColor, halfMoves){
 
 	 if(halfMoves>=0){ 
+
+	 				var last_move = chess.history({verbose:true}).reverse()[0]
+	 				if(!last_move){
+	 					return [];
+	 				}
+	 	   		var my_stats_now = evaluation.getStatisticsForPositionDict(chess,last_move); 
+       
 	 				// get global importance for (any) position
 	 				//
 
@@ -388,7 +395,6 @@ export async function getNotification(chess, playerColor, halfMoves){
 	 				// dropdown:
 	 				// - to show what features are normaly more important, but in this position are not.
 
-          var my_stats_now = evaluation.getStatisticsForPositionDict(chess,chess.history({verbose:true}).reverse()[0]); 
           // filter my_stats_now by feature importance
 
           var stats_hero = chess_meta[playerColor=="w" ? "white" : "black"][halfMoves]; 

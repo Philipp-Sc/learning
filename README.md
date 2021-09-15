@@ -70,23 +70,35 @@ It is written using Ionic, Capacitorjs and Expressjs.
 
 *Below the board:*
 
-* **@analysis** if active the analysis is shown live on the board as the engine opponent evaluates the position.
-
-* **@avg. perf.** if active the board is highlighted either in green or in red based on your past performance at the current move number.
-* **@median. perf.** if active the board is highlighted either in green or in red based on your past performance at the current move number.
- (If **@avg. perf.** and **@median. perf.** are active the average of both is taken to determine the color.)
-
-*Actions (activate by tapping the labels or the pieces on the board!)*
-
-Labels
 * **Resign!** Give up the current game to start a new game.
 * **Force Move!** The engine mirrors you time usage, that way the game feels much more natural. If you do not want to wait use this button, to force the engine to move immidiatly.
 * **Switch Sides!** Play a different color or overtake the engines side.
+* **Take Back Move!** I added this feature to account for mouse slips. Undo your last move. 
 
-Pieces (you can click/tap the pieces on the board to get extra information)
-* Learn about Chess by exploring the information provided to you. Including valuable statistics related to your position.
 
- 
+
+* **@analysis**  (+) the analysis is shown live on the board as the engine opponent evaluates the position.
+* **@max depth** the maximum depth for the analysis, should be higher than the depth used by the opponement.
+
+* **@engine move** (+) show the move/square that the engine is currently evaluating on the board.
+
+
+* **@avg. perf.** (+) the board is highlighted based on your past performance at the current move number.
+* **@median. perf.** (+) the board is highlighted based on your past performance at the current move number.
+ (If **@avg. perf.** and **@median. perf.** the average of both is taken to determine the color. If the games played were very consisten then take avg. perf or both, else use median perf.)
+
+* **Export Last Game To Lichess** Import the game to Lichess and open Lichess in a new Tab/Lichess App.
+
+* **NN evaluation** After every move a Tensorflow Neural Network evaluates the *previous* position. 
+* For example `NN evaluation of dxe4: 0.50 (2/27)` means that the move dxe4 has been given an evaluation of 0.50, and it was one of the best moves 2 out of 27.
+* `Input Neurons:` This shows the most important features of the position. (The previous position at which dxe4 not yet has been played) This allows you to understand what features were important for the move you just played. Direct feedback is important to improve the quality of your moves.
+
+* The features provide three numbers `a (b, c)`
+* `a` your value of this feature.
+* `b` the average value of this feature in human games where your side drew or won.
+* `c` the average value of this feature in engine games where your side drew or won. 
+
+* The feature also provides an indication `+ or -`, this shows that the feature is more/less important that usual.
 
 # Language Learning
 
