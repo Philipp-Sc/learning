@@ -156,10 +156,7 @@ const AppContainer: React.FC = () => {
   const [showActionSheet, setShowActionSheet] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalIndex, setModalIndex] = useState<number>(0);
-
-// put into objects. to reduce size of passing!
-
-// app chess logic
+ 
 
   const takeBackMove = async() => {
       if(refHalfMoves.current<=0){
@@ -332,16 +329,13 @@ const AppContainer: React.FC = () => {
     };    
 
   const transition_engine_to_next_position = (new_game) => {
-    if(refEngineOn.current){
-      if(new_game){
-      if(refDebug.current) console.log("engine stop!");
-      // @ts-ignore
-      window.stockfish.postMessage("stop");
-      return;
-      }
+    if(refEngineOn.current){ 
       if(refDebug.current) console.log("engine transitioning to next position!");
-      refManualEngineStop.current=true;
-      setManualEngineStop(true);
+      if(!new_game){
+        refManualEngineStop.current=true;
+        setManualEngineStop(true);
+      }
+      if(refDebug.current) console.log("engine stop!");
       // @ts-ignore
       window.stockfish.postMessage("stop");
     }else{
@@ -389,25 +383,17 @@ const AppContainer: React.FC = () => {
     function messageListener(line) {
       if(line.split(" ")[0]=="info"){
         if(line.split(" ")[1]=="depth" && line.split(" ")[3]!="currmove"){
-          var info = {
-                "depth": parseInt(line.split(" ")[2]),
-                "multipv": parseInt(line.split(" multipv ")[1].split(" ")[0]),
-                "cp": line.includes("mate") ? 999 * parseInt(line.split(" mate ")[1].split(" ")[0]) : parseInt(line.split(" cp ")[1].split(" ")[0]),
-                "pv": line.split(" pv ")[1].split(" ")[0],
-                "info": line,
-                "timestamp": new Date().getTime(),
-                "move":  refEngineOnPrevMove.current
-              }  
+          var info = chess_engine.parseInfo(line);
+          info.move = refEngineOnPrevMove.current;
+
           if(refDepth.current==info.depth){ // only for the engine player @depth
              position_info_list_at_depth[info.multipv-1] = info;
           }  
-          if(info.multipv-1==0){
-            // get the best move
+          if(info.multipv-1==0){// get the best move
             refStockfishInfoOutHistory.current[info.move-1]=info; // -1 because the evaluation revers to the prev position
             // tell react to trigger a re-render on all components that use this useState. 
             setStockfishInfoOutHistory([...refStockfishInfoOutHistory.current]); 
           }
-
           if(refMoveReady.current==false && position_info_list_at_depth.filter(e => e.move==refHalfMoves.current).length==refMultipv.current){
             if(refDebug.current) console.log("move_ready event")
             refMoveReady.current=true; 

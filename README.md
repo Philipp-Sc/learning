@@ -15,7 +15,7 @@ It is written using Ionic, Capacitorjs and Expressjs.
 
 
 # Roadmap
-# Chess
+# Chess 
 * **@self_play** Have the opponement play the same opening and eventually mirror your playing style based on your past games. Bobby Fisher has been known to play himself. Alpha Zero was trained using self play.
 
 * **@custom_book** Extend functionality: 1) Filter by Elo independent from current elo. 2) Allow the use of the engine pgn database as source. 3) Optional weighting of common opening moves. Still random but prefer common openings. 4) Allow user to provide pgn database.
@@ -154,6 +154,7 @@ It is written using Ionic, Capacitorjs and Expressjs.
 * Description: The code needed to evaluate a given position i.e feature extraction. The main script is implemented as webworker to increase performance.
 
 * `cd src/webpack-eval-package; npx webpack; cp dist/main.js ../../public/chess-to-vector-worker/main.js;cd ../..;`
+* `cd src/webpack-tensorflow-worker/; npx webpack; cp dist/main.js ../../public/tensorflow-worker/main.js;cd ../..;`
 (you may need to install webpack, anyway this command is only needed for development. The main.js for the package is already provided with this repo.)
 
 **Build the Capacitor PWA (get the latest build)**

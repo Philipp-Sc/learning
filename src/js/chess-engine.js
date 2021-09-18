@@ -33,3 +33,15 @@ export const startEngine = (messageListener) => {
     setTimeout(() => {startEngine(messageListener);},500);
    }
 }
+
+export const parseInfo = (line) => {
+  var info = {
+    "depth": parseInt(line.split(" ")[2]),
+    "multipv": parseInt(line.split(" multipv ")[1].split(" ")[0]),
+    "cp": line.includes("mate") ? 999 * parseInt(line.split(" mate ")[1].split(" ")[0]) : parseInt(line.split(" cp ")[1].split(" ")[0]),
+    "pv": line.split(" pv ")[1].split(" ")[0],
+    "info": line,
+    "timestamp": new Date().getTime()
+  }  
+  return info;
+}

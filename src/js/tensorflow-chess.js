@@ -14,7 +14,7 @@ var myWorker;
 
 	if (window.Worker) {
 
-  	myWorker = new Worker("tensorflow-worker.js");
+  	myWorker = new Worker("tensorflow-worker/main.js");
 
 	}
 

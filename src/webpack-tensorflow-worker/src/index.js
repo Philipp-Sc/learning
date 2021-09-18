@@ -1,7 +1,9 @@
 
+import * as tf from '@tensorflow/tfjs'
+
 //importScripts("https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.9.0/dist/tf.min.js"); 
 //importScripts("https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-wasm/dist/tf-backend-wasm.js")
-importScripts("./tensorflow/tf.min.js"); 
+//importScripts("./tensorflow/tf.min.js"); 
 //importScripts("./tensorflow/tf-backend-wasm.js")
 //tf.setBackend('cpu')
 //tf.setBackend('wasm')
@@ -19,7 +21,7 @@ onmessage = function(message) {
       if(debug) console.log(">> Method: "+data.method)
       if(debug) console.log(">> Params: "+data.params.length)
     }
-  	var res = self[data.method](data.method,...data.params);
+  	var res = eval(data.method)(data.method,...data.params);
     res.then(result => postMessage(result));
   } else { 
     if(debug) console.log('Tensorflow Worker: Invalid message'); 

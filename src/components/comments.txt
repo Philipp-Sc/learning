@@ -189,7 +189,7 @@ function getEuclidianDistance(arr1, arr2) {
 - rename features to be more intuitive in UI
 - add visualisation
 */
-
+ 
 
 // update website PWA to current, console.log @debug 
 
