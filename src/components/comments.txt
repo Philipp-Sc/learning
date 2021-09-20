@@ -181,6 +181,10 @@ function getEuclidianDistance(arr1, arr2) {
 
 /* TO DO
 
+
+// improve importance code to run faster -> web worker that posts every intermediat result.
+
+
 1) Generate pawn structure list from game database, by creating pawn fen for every move, then count and create list top 100
 
 3) 
@@ -198,8 +202,6 @@ function getEuclidianDistance(arr1, arr2) {
 
 
 // add new NN features
-
-// improve importance code to run faster
 
 
 // create script to run stockfish on my server to evaluate human games in my free time.

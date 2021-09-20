@@ -1,12 +1,6 @@
 
 import * as tf from '@tensorflow/tfjs'
-
-//importScripts("https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.9.0/dist/tf.min.js"); 
-//importScripts("https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-wasm/dist/tf-backend-wasm.js")
-//importScripts("./tensorflow/tf.min.js"); 
-//importScripts("./tensorflow/tf-backend-wasm.js")
-//tf.setBackend('cpu')
-//tf.setBackend('wasm')
+import * as score from '../../js/importance/score.js'
 
 var loaded_model;
 var loaded_model_name;
@@ -134,4 +128,12 @@ async function modelPredict(method,model_name,test) {
     // possible error, no model for model_name exists. 
   }
 }
- 
+
+function modelScore(method,model_name,test,label,kind) {
+  return modelPredict(method,model_name,test).then(res => scoreModel(res,label,kind));
+
+}
+
+function scoreModel(res, label,kind) {
+  return {"type":"result","method":res.method,"value":score.scoreTypes[kind](label,res.value)};
+}

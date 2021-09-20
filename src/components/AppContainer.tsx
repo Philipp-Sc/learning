@@ -11,21 +11,16 @@ import { ChessInstance, ShortMove } from "chess.js";
 import * as chess_meta from "../js/chess-meta.js"
 import * as chess_stats from "../js/chess-stats.js"
 import * as chess_engine from "../js/chess-engine.js" 
+import * as chess_model from "../js/chess-model.js" 
 import * as chess_trainer from "../js/chess-trainer.js" 
 import * as lichess_api from "../js/lichess-api.js" 
 import * as chess_board_utils from "../js/chess-board-utils.js" 
 import {AdjustingInterval} from "../js/utilities.js"
 
-
-
 const Chess = require("chess.js");
 const EloRating = require('elo-rating');
  
-const AppContainer: React.FC = () => {
-
-  const create_aggregated_data_development_option = false; 
-
-  var skill_profile : { avg: number, median: number, dist: number[] }[]  = []; 
+const AppContainer: React.FC = () => { 
 
   const max_depth = 20;
   const max_elo = 2500;
@@ -177,10 +172,7 @@ const AppContainer: React.FC = () => {
         setHalfMoves(refHalfMoves.current)
 
         setTimeout(() => {
-        chess_stats.getNotification(chess,playerColor,refHalfMoves.current).then(result => {
-            refNotificationOut.current = result;
-            setNotificationOut(refNotificationOut.current)
-          }) 
+        chess_stats.getNotification(chess,playerColor,refHalfMoves.current,refNotificationOut.current,updateNotification) 
         },0)
 
         refMovePerformance.current = chess_meta.historicPerformanceAtMoveNumber(refHalfMoves.current,{pgn_db: player_pgn_db_ref.current,pgn_analysis: player_pgn_analysis_ref.current});
@@ -208,15 +200,20 @@ const AppContainer: React.FC = () => {
     } 
   }
 
+  const updateNotification = (new_notification) => {
+      refNotificationOut.current = new_notification;
+      setNotificationOut(refNotificationOut.current)
+  }
+
   const handleMove = async(move: ShortMove) => {
     if (chess.move(move)) {
         refFen.current=chess.fen();
         setFen(refFen.current);   
 
-        chess_stats.getNotification(chess,playerColor,refHalfMoves.current).then(result => {
-            refNotificationOut.current = result;
-            setNotificationOut(refNotificationOut.current)
-          })  
+        // add update function and value to function
+       
+
+        chess_stats.getNotification(chess,playerColor,refHalfMoves.current, refNotificationOut.current,updateNotification)
 
         document.dispatchEvent(new Event('move_executed'))   
         engine_turn();
@@ -267,7 +264,6 @@ const AppContainer: React.FC = () => {
       const engineMove = await chess_trainer.selectEngineMove(opening_move_duration,refHalfMoves.current,chess,refElo.current,playerColor,depth_for_database, refBook.current,
                           position_info_list_at_depth,refStockfishInfoOutHistory.current,
                           refEngineBlunderTolerance.current,
-                          skill_profile,
                           refDebug.current);
       if(refDebug.current) console.log(engineMove)
       if(engineMove){
@@ -373,7 +369,7 @@ const AppContainer: React.FC = () => {
   }
  
  useEffect(() => { 
-    window.addEventListener('resize',() => {setTimeout(() => {refBoardWidth.current=Math.min(700,window.innerWidth);setBoardWidth(refBoardWidth.current); },500)});
+    window.addEventListener('resize',() => {refBoardWidth.current=Math.min(700,window.innerWidth);setBoardWidth(refBoardWidth.current); });
     
     document.addEventListener("transition_engine_to_next_position", transition_engine_to_next_position.bind(null,false));
     document.addEventListener("move_ready", move_ready);
@@ -409,6 +405,38 @@ const AppContainer: React.FC = () => {
       }
     }
     chess_engine.startEngine(messageListener);
+
+    async function doTask() {
+
+      await chess_model.load_my_model({isProduction: true}); 
+      //console.log(await chess_stats.test_model());
+
+      var development = false;
+      if(development){  
+    
+        window.export_current_model = chess_model.export_my_model;
+        // once needed every time the feature vector or model definition are changed.
+        //await chess_stats.build_my_model();
+ 
+        // retrain the model & new importance
+        // await chess_stats.train_my_model(); 
+
+        var rebuild_prod_prerequisites = false;
+        if(rebuild_prod_prerequisites){
+
+          // once needed every time the feature vector or model definition are changed.
+          // also new importance
+          //await chess_stats.build_my_model();
+  
+          chess_stats.calculate_average_position_vector_list("engine")
+          chess_stats.calculate_average_position_vector_list("human") 
+
+          var skill_profile = await chess_stats.getSkillProfile(refElo.current,depth_for_database)
+          console.log(JSON.stringify(skill_profile))  
+        }
+      }
+    }
+    doTask();
     }, []);  
 
   useEffect(() => {   
@@ -468,52 +496,6 @@ const AppContainer: React.FC = () => {
     }
     }, [engineOn]);  
  
-   useEffect(() => { 
-
-      async function doTask() {
-
-      // using pre computed skill profile
-      skill_profile = chess_meta.skill_profiles[refElo.current] 
-
-
-      await chess_stats.load_my_model({isProduction: true}); 
-
-      
-      //console.log(await chess_stats.test_model());
-
-      
-
-      if(create_aggregated_data_development_option){
-        
-        window.export_current_model = chess_stats.export_my_model;
-
-        // once needed every time the feature vector or model definition are changed.
-        //await chess_stats.build_my_model();
- 
-
-        // retrain the model & new importance
-        // await chess_stats.train_my_model(); 
-
-
-
-        var rebuild_prod_prerequisites = false;
-        if(rebuild_prod_prerequisites){
-
-          // once needed every time the feature vector or model definition are changed.
-          // also new importance
-          //await chess_stats.build_my_model();
-  
-          chess_stats.calculate_average_position_vector_list("engine")
-          chess_stats.calculate_average_position_vector_list("human") 
-
-          skill_profile = await chess_stats.getSkillProfile(refElo.current,depth_for_database)
-          console.log(JSON.stringify(skill_profile))  
-        }
-      }
-    }
-    doTask();
-      }, [elo]);  
-
    const toggle_engine_tolerance = () => {
     if(refEngineBlunderTolerance.current==10){
       refEngineBlunderTolerance.current=0;
@@ -583,7 +565,6 @@ const AppContainer: React.FC = () => {
           modalIndex={modalIndex}
           showModal={showModal}
           setShowModal={setShowModal}/>
-
 
       <IonBadge>Games: {gameCount}</IonBadge>
       <IonBadge>Halfmoves: {refHalfMoves.current}</IonBadge>

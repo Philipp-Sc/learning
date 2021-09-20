@@ -140,6 +140,20 @@ export function modelPredict(model_name,test) {
 
 }
 
+export function modelScore(model_name,test,label,kind) {
+		var promise = new Promise((res, rej) => {
+  
+		  myWorker.postMessage({method:"modelScore",params: [model_name,test,label,kind]});
+
+		  myWorker.onmessage = (message) => {   
+		  			if(message.data.method=="modelScore") res(message.data.value)     
+		  }
+		})
+   return promise
+
+}
+
+
 export function load_model(model_name) {
 
 		var promise = new Promise((res, rej) => {
@@ -153,7 +167,7 @@ export function load_model(model_name) {
    return promise
   .then(model_name => tf.loadLayersModel('indexeddb://'+model_name))
   .then(model =>  {
-  	tfvis.show.modelSummary({name: 'Model Summary'},model);
+  	if(debug) tfvis.show.modelSummary({name: 'Model Summary'},model);
   	return model;
   	})
 

@@ -1,7 +1,7 @@
 
 import * as fen_utils from "./fen-utils.js"
 
-import {average,reduce_sum} from "./utilities.js"
+import {average,reduce_sum} from "../../js/utilities.js"
 
 const Chess = require("chess.js"); 
 

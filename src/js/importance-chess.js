@@ -13,25 +13,25 @@ const Chess = require("chess.js");
 
 var debug = false;
 
-
-export async function getImportance(model_name, vectors, norm,n_) { 
+// has a callback function to get intermediate results
+export function getImportance(model_name, vectors, norm,n_,callback) { 
 	  var n_vectors = tf_chess.convertToTensor(vectors,norm);
 
-	  var myModel = {predict: (test) => tf_chess.modelPredict(model_name,[test, [test.length, test[0].length]])}
+	  var myModel = {modelScore: (test,label,kind) => tf_chess.modelScore(model_name,[test, [test.length, test[0].length]],label,kind)}
 	  
-	  const imp = await importance(myModel, n_vectors.inputs[0], n_vectors.labels[0], {
+	  return importance(myModel, n_vectors.inputs[0], n_vectors.labels[0], {
 		  kind: 'mse',
 		  n: n_,
 		  means: true,
 		  verbose: debug
 		})
-	  var importance_list = (imp.map((e,i) => {return {key:evaluation.allKeys[1+i],value:e}}))
-	  importance_list = sortJsObject(importance_list); 
-	  return importance_list 
+	  .then(imp => Promise.all(imp.map((e,i) => e.then(res => {callback(res,i);return res}))).then(importance_list => {
+	  	return sortJsObject(importance_list.map((e,i) => {return {key:evaluation.allKeys[1+i],value:e}}))
+	  }))
 }
 
 
-export const get_feature_importance_with_pgn = async(model_name, pgn) => {
+export const get_feature_importance_with_pgn = async(model_name, pgn, callback) => {
 
 	var norm = JSON.parse(window.localStorage.getItem(model_name));
 
@@ -102,7 +102,7 @@ export const get_feature_importance_with_pgn = async(model_name, pgn) => {
    *    - How relevant they are for positive/negative evaluations
 	 */
  
-	return getImportance(model_name, vectors, norm, Math.max(1,Math.floor(alternatives.length/2)));
+	return getImportance(model_name, vectors, norm, Math.max(1,Math.floor(alternatives.length/2)), callback);
 
 } 
 
@@ -113,12 +113,12 @@ export async function main(model_name,vectors,test_vectors) {
 
 			if(vectors){
 				if(debug) console.log("Importance on training data:")
-	 			if(debug) console.log(await getImportance(model_name,vectors, norm,1))
+	 			if(debug) console.log(await getImportance(model_name,vectors, norm,1,() => {}))
  			}
 
  			if(test_vectors){
 				if(debug) console.log("Importance on test data:")
-				var global_feature_importance = await getImportance(model_name,test_vectors, norm,1);
+				var global_feature_importance = await getImportance(model_name,test_vectors, norm,1,() => {});
 				if(debug) console.log(global_feature_importance)		
 				window.localStorage.setItem(model_name+"://importance",JSON.stringify(global_feature_importance))
 				if(debug) console.log('Saved '+model_name+"://importance")

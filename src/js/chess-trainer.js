@@ -25,12 +25,13 @@ async function selectOpeningMove(opening_move_duration,halfMoves,chess,elo,playe
 export async function selectEngineMove(opening_move_duration,halfMoves,chess,elo,playerColor,depth_for_database,book,
                           position_info_list_at_depth,stockfishInfoOutHistory,
                           engineBlunderTolerance,
-                          skill_profile,debug){
+                          debug){
 
       var openingMove = await selectOpeningMove(opening_move_duration,halfMoves,chess,elo,playerColor,depth_for_database,book,debug);
       if(openingMove){
         return openingMove;
       }
+
 
       /*
       The opponement only plays good as long as you play decent.
@@ -41,6 +42,9 @@ export async function selectEngineMove(opening_move_duration,halfMoves,chess,elo
 
       if(debug) console.log("INFO: The following "+clean_position_info_list_at_depth.length+" moves are available: ");   
       if(debug) console.log(clean_position_info_list_at_depth);   
+
+      
+      var skill_profile = chess_meta.skill_profiles[elo] 
 
       if(skill_profile[halfMoves]==undefined){ // unlikely case
         if(debug) console.log("WARNING: skill_profile[halfMoves]==undefined") 

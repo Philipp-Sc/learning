@@ -26,11 +26,8 @@ It is written using Ionic, Capacitorjs and Expressjs.
 * Improve NN by providing better training data. (Annotate Lichess Chess Database with Stockfish)
 * Consider live training the NN on the current (or simialar) game position. Stockfish evaluations are already partly there anyway.
 * Add more principles/features.
-* Calculate Pawn Structure from Database.
+* Calculate Pawn Structure from Database. Reduce 3 features to 1.
 
-* Improve Importance calculation code to run asynchron and display results immidiatly. 
-
-* 
 
 * **@training** 
 * a) Based on game history let the opponement go for positions where you made mistakes in the past.
@@ -160,8 +157,17 @@ It is written using Ionic, Capacitorjs and Expressjs.
 **Build the Capacitor PWA (get the latest build)**
 
 * `npm run build`
+
+* ` find ./build -type f -name '*.js.map' -exec du -ch {} +` (find out how much space is used by javascript source maps)
+* ` find ./build -type f -not -name '*.js.map' -exec du -ch {} + ` (space used by everything else)
+
+* ` find ./build -type f -name '*.js.map' -delete` (delete source maps for production version)
  
-* `cp -a build learning_host_production/` (optional, to continue with a) or b) otherwise bellow)
+* `rm -rf learning_host_production/build/; cp -a build learning_host_production/` (optional, to continue with a) or b) otherwise bellow)
+
+* Shortcut to build Dockerimage:
+
+* `sudo systemctl start docker;cd learning_host_production/;docker build -t philipp-sc/learning .;docker save philipp-sc/learning:latest | xz > philipp-sc_learning_latest.xz;cd ..;` (also see Dockerfile comments)
 
 **Host with express.js** *(required)*
 

@@ -91,7 +91,7 @@ export async function getMoveFromHumans(chess,elo,playerColor,depth_for_database
     // console.log(games)
     if(games.length>0){ 
         var randomGame = games[Math.floor(Math.random()*games.length)];
-        console.log(randomGame.moves[history.length].notation.notation);
+        //console.log(randomGame.moves[history.length].notation.notation);
 
         var commentAfter = (randomGame.moves[history.length].commentAfter || "[%depth20 0] [%depth1 0]" ).replace(/[\[\]\%]/g,"").split("depth").filter(e => e.length >0).map(e => { return {"depth": e.split(" ")[0], "eval": e.split(" ")[1]} });
         var engine_meter = {evaluation: (playerColor=='w' ? (-1) : 1)*parseFloat(commentAfter.filter( e => e.depth==depth_for_database)[0].eval), depth: parseInt(commentAfter.filter( e => e.depth==depth_for_database)[0].depth)};

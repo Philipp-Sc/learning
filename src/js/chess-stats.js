@@ -1,7 +1,10 @@
+// put model code into new js file.
+// chess-model.js
+// the code makes sure it is loaded on its own
+
  
 import * as chess_meta from "../js/chess-meta.js" 
 import {sum_array, average, median, shuffleArray, sortArrayKeyValue} from "./utilities.js"
-import * as tf_chess from './tensorflow-chess.js'
 
 import * as importance_chess from './importance-chess.js'
 
@@ -10,11 +13,12 @@ import * as data_prep from "../js/eval/data-prep.js"
 
 
 import {skeleton_to_ascii} from "../webpack-eval-package/src/pawn-structure.js"
-   
+
+
+import * as chess_model from "../js/chess-model.js" 
 
 const Chess = require("chess.js"); 
-
-const default_model = require('./json/default_model.json')
+ 
  
 var debug = false;
 
@@ -42,30 +46,6 @@ function sendGameDataToChessWorker(worker,game_data){
 		});
 	return promise;
 }
-
-function getMovesAsFENs(game_index,game, process){ 
-	return sampleMovesAsFENs(game_index,game,process,0,0,512,-10,10,0);
-}
- 
-async function sampleMovesAsFENs(game_index,game, process,skipProbability, start, end, minCP, maxCP,cpZeroProbability){  
-	if(debug) console.log("...")     
-	var res = [];
-	for (var i = 0; i < game.moves.length; i++) {
-		if(game.moves[i] && game.moves[i].notation && game.moves[i].notation.notation){
-			if(i>=start && i<=end && evaluation.getCP(game.moves[i])>=minCP && evaluation.getCP(game.moves[i])<=maxCP && Math.random()>skipProbability){
-				if(evaluation.getCP(game.moves[i])==0){
-					if(Math.random()>cpZeroProbability){ 
-						res.push(await process(game_index,i))
-					}
-				}else{
-						res.push(await process(game_index,i))
-				}
-			}
-		}
-	}   
-	return Promise.resolve(res);
-}
-
 
 export function getDistanceVectorForStatistics(stats){
 	var stats1 = stats.playerStats;
@@ -195,88 +175,18 @@ export async function load_data() {
   return vectors;
 }
 
-export async function build_my_model(output) {
-
-	var vectors = await load_data();
-
-   
-	await tf_chess.main({
-		 	create: {model_name: 'my-model'}, 
-		 	train: {initial: true},    
-		 },vectors, undefined)	 
-
-	if(output){
-		window.default_model = JSON.stringify(Object.entries(localStorage).filter(e => e[0].includes("tensorflow") || e[0].includes("normalizeVector")))
-		if(debug) console.log("saved to window.default_model");
-	} 
-
-	if(debug) console.log(await test_model())
-
-}
-
-export async function test_model(){
-
-	var games = ["1.g3 e5 2.bg3 d5",
-							 "1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. a3 {giuoco piano} *"]
-
-	var results = [];
-	for(var i=0;i<games.length;i++){
-		var result = await tf_chess.test_model_with_pgn('my-model',games[i]);
-		results.push(result);
-	}
-
-	return results
-}
-
-
-export async function load_my_model(args) {
-
-	 if(args.isProduction){
-	  	await tf_chess.import_model('my-model',default_model)
-	 }
-  
-	 await tf_chess.main({ 
-	 	load: {model_name: 'my-model'},    
-	 },undefined) 
- 
-}
-
-export function export_my_model() {
-	return tf_chess.export_model('my-model');
-}
-
-export async function train_my_model() {
- 
-	var vectors= await load_data();
-
-	var test_vectors = vectors.filter((e,i) => i<vectors.length/2)
-	vectors = vectors.filter((e,i) => i>=vectors.length/2)
-
- 
-	 await tf_chess.main({ 
-	 	load: {model_name: 'my-model'}, 
-	 	train: {initial: false},    
-	 },vectors) 
-
-	
-	if(debug) console.log(await test_model())
-
-	importance_chess.main('my-model',vectors,test_vectors)
-  
-}
-
 export async function calculate_average_position_vector_list(pgn_database_name) {
 
-	var games = await chess_meta.chessGames(pgn_database_name).then(humanGames => humanGames.get)
+	var games = await load_data();
 	       
-  games = games//.filter((e,i) => i<3)    
+  games = games  
         .map((game,i) => {return {
         	forBlack: (game.tags.Result=="0-1" || game.tags.Result=="1/2-1/2"),
         	forWhite: (game.tags.Result=="1-0" || game.tags.Result=="1/2-1/2"),
-        	vector: getMovesAsFENs(i,game, evaluation.getStatisticsForPositionVector)}})
+        	vector: game}})
 
-  var games_FEN_forWhite = games.filter(e => e.forWhite).map(e => e.vector);
-  var games_FEN_forBlack = games.filter(e => e.forBlack).map(e => e.vector);
+  var games_FEN_forWhite = gamesToVector(games.filter(e => e.forWhite).map(e => e.vector));
+  var games_FEN_forBlack = gamesToVector(games.filter(e => e.forBlack).map(e => e.vector));
 
 
   const getResult = (games_FEN) => {
@@ -358,106 +268,101 @@ export async function getSkillProfile(elo,depth) {
      })
 }
 
-export async function getNotification(chess, playerColor, halfMoves){
+function getValueByKey(key_value_array,key) { 
+	return key_value_array.filter(e => e[0]==key)[0][1];
+}
 
-	 if(halfMoves>=0){ 
+// add update function and value here
+export async function getNotification(chess, playerColor, halfMoves, notificationList, setNotificationList){
 
-	 				var last_move = chess.history({verbose:true}).reverse()[0]
-	 				if(!last_move){
-	 					return [];
-	 				}
-	 	   		var my_stats_now = evaluation.getStatisticsForPositionDict(chess,last_move); 
-       
-	 				// get global importance for (any) position
-	 				//
+	if(halfMoves>=0){ 
 
-	 				// get importance in this position
-	 				var global_feature_importance = JSON.parse(window.localStorage.getItem('my-model'+"://importance"));   
+		var last_move = chess.history({verbose:true}).reverse()[0]
+		if(!last_move){
+			return [];
+		}
 
-					var feature_importance = await importance_chess.get_feature_importance_with_pgn('my-model',chess.pgn())      
+		var pgn = chess.pgn();
 
+		notificationList = await neuralNetworkPredictNotification(pgn,last_move.san,notificationList,setNotificationList);
 
-	 				function getValueByKey(key_value_array,key) {
-	 					return key_value_array.filter(e => e[0]==key)[0][1];
-	 				}
+		var allKeys = evaluation.allKeys.filter(e => e!="cp"); // e!="last move by"
+		var my_stats_now = evaluation.getStatisticsForPositionDict(chess,last_move); 
 
-	 				var allKeys = evaluation.allKeys.filter(e => e!="last move by" && e!="cp");
+		var global_feature_importance = JSON.parse(window.localStorage.getItem('my-model'+"://importance"));   
 
+        var stats_hero = chess_meta[playerColor=="w" ? "white" : "black"][halfMoves]; 
+        var stats_human = chess_meta[playerColor=="w" ? "white_human" : "black_human"][halfMoves]; 
 
-	 				var combined_importance = allKeys
-	 					.map(e => [e,allKeys.length*((getValueByKey(global_feature_importance,e)+getValueByKey(feature_importance,e))/2),allKeys.length*getValueByKey(global_feature_importance,e)])
-	 				//	.filter(e => e[1]>=0.0001)
+		const callback = (feature_importance_value,index) => {
 
-          combined_importance = sortArrayKeyValue(combined_importance); 
+			var key = allKeys[index]; 
 
+			var global_feature_importance_value = getValueByKey(global_feature_importance,key);
 
-	 				// then add rank difference
-	 				// dropdown:
-	 				// - to show what features are normaly more important, but in this position are not.
+			var combined_importance_value = [ 
+				allKeys.length*((global_feature_importance_value+feature_importance_value)/2),
+				allKeys.length*global_feature_importance_value,
+				allKeys.length*feature_importance_value
+				];
 
-          // filter my_stats_now by feature importance
+			var difference = ((combined_importance_value[0]-combined_importance_value[1]).toFixed(2))
+				var positive = difference > 0 ? "+" : (difference < 0 ? "-" : "")
 
-          var stats_hero = chess_meta[playerColor=="w" ? "white" : "black"][halfMoves]; 
-          var stats_human = chess_meta[playerColor=="w" ? "white_human" : "black_human"][halfMoves]; 
+			var msg;
+				var value;
+	      	if(key.includes("Pawn Structure") && !key.includes("Count")){
+	      		value = skeleton_to_ascii(my_stats_now[key])+"\n";
+	      		msg = key+" \n"+value+" \|\|           "+positive+"\n"+"    ("+(stats_human[key].toFixed(2))+", "+(stats_hero[key].toFixed(2))+")";
+	      
+	      	}else{
+	      		value = my_stats_now[key].toFixed(2);
+	      		msg = key+" \|\|           "+positive+"\n"+value+"    ("+(stats_human[key].toFixed(2))+", "+(stats_hero[key].toFixed(2))+")";
+	      
+	      	}
 
- 
-          var notification = [];
-          for(var i=0;i<combined_importance.length;i++){ 
-          	var difference = ((combined_importance[i][1]-combined_importance[i][2]).toFixed(2))
-          	var positive = difference > 0 ? "+" : (difference < 0 ? "-" : "")
-          	//+(combined_importance[i][1].toFixed(2))+" ("+positive+difference+") \n"
+	      	notificationList.push([msg,combined_importance_value[2]])
+	      	setNotificationList([...sortArrayKeyValue(notificationList)])
 
-          	var msg;
-          	var value;
-          	if(combined_importance[i][0].includes("Pawn Structure") && !combined_importance[i][0].includes("Count")){
-          		value = skeleton_to_ascii(my_stats_now[combined_importance[i][0]])+"\n";
-          		msg = combined_importance[i][0]+" \n"+value+" \|\|           "+positive+"\n"+"    ("+(stats_human[combined_importance[i][0]].toFixed(2))+", "+(stats_hero[combined_importance[i][0]].toFixed(2))+")";
-          
-          	}else{
-          		value = my_stats_now[combined_importance[i][0]].toFixed(2);
-          		msg = combined_importance[i][0]+" \|\|           "+positive+"\n"+value+"    ("+(stats_human[combined_importance[i][0]].toFixed(2))+", "+(stats_hero[combined_importance[i][0]].toFixed(2))+")";
-          
-          	}
+		}
 
-          		notification.push(msg)
-          }
- 
-          // order and color by importance later
+	importance_chess.get_feature_importance_with_pgn('my-model',pgn,callback) 
+    } 
+}
 
- 
-
-          var prediction = await tf_chess.test_model_with_pgn('my-model',chess.pgn())
-          // predict each possible move, order them, get index of played move.
-          var prediction_cp = (parseFloat(prediction.prediction_value).toFixed(2)); 
-          var my_test_game = new Chess();
-					my_test_game.load_pgn(chess.pgn());
+async function neuralNetworkPredictNotification(pgn,last_move_san,notificationList,setNotificationList) {
+	 
+		var prediction = await chess_model.test_model_with_pgn(pgn)
+		// predict each possible move, order them, get index of played move.
+		var prediction_cp = (parseFloat(prediction.prediction_value).toFixed(2)); 
+		var my_test_game = new Chess();
+		my_test_game.load_pgn(pgn);
 
 
-					var predictions = [];
+		var predictions = [];
 
-					my_test_game.undo();
-					var alternatives = my_test_game.moves({verbose:true}); 
+		my_test_game.undo();
+		var alternatives = my_test_game.moves({verbose:true}); 
 
-					for(var i=0;i<alternatives.length;i++){
-						my_test_game.load_pgn(chess.pgn());
-						my_test_game.undo();
-						my_test_game.move(alternatives[i]);  
-						predictions.push(await tf_chess.test_model_with_pgn('my-model',my_test_game.pgn()));
-					} 
-					predictions = await Promise.all(predictions); 
+		for(var i=0;i<alternatives.length;i++){
+			my_test_game.load_pgn(pgn);
+			my_test_game.undo();
+			my_test_game.move(alternatives[i]);  
+			predictions.push(await chess_model.test_model_with_pgn(my_test_game.pgn()));
+		} 
+		predictions = await Promise.all(predictions); 
 
-					predictions = predictions
-						.map((e,i) => [alternatives[i].san,e.prediction[0]]) 
+		predictions = predictions
+			.map((e,i) => [alternatives[i].san,e.prediction[0]]) 
 
-					predictions = sortArrayKeyValue(predictions).map((e,i) => [e[0],i]);
- 
-
-					var index_of_played_move = 1+getValueByKey(predictions,chess.history({verbose:true}).reverse()[0].san)
+		predictions = sortArrayKeyValue(predictions).map((e,i) => [e[0],i]);
 
 
-          return ["NN evaluation of "+chess.history().reverse()[0]+": "+prediction_cp+" ("+index_of_played_move+"/"+alternatives.length+") \nInput Neurons:",...Array.from(new Set(notification))]; 
- 
-        }else{
-          return [];
-        }
+		var index_of_played_move = 1+getValueByKey(predictions,last_move_san)
+
+		notificationList = [["NN evaluation of "+last_move_san+": "+prediction_cp+" ("+index_of_played_move+"/"+alternatives.length+") \nInput Neurons:",Infinity]]
+
+		setNotificationList(notificationList);
+		return notificationList;
+
 }

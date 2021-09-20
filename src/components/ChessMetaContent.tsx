@@ -68,7 +68,7 @@ const ChessMetaContent: React.FC<ContainerProps> = ({halfMoves,playerColor,moveP
 
          
         <IonList style={{"maxWidth": "700px", "margin": "0 auto"}}>
-        {notificationOut
+        {notificationOut.map(e => e[0])
             .filter((e,i) => i==0).map(e => {return <IonItemSliding>
             <IonItem>
               <IonLabel>{e.toString().split("||")[0]}</IonLabel>
@@ -95,7 +95,7 @@ const ChessMetaContent: React.FC<ContainerProps> = ({halfMoves,playerColor,moveP
             </IonItemOptions>
           </IonItemSliding>})}
 
-          {notificationOut
+          {notificationOut.map(e => e[0])
             .filter((e,i) => i!=0)
             .filter(e => showCapture ? true : !e.includes("{capture}"))
             .filter(e => showMaterialCount ? true : !e.includes("count {"))

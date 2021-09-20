@@ -29,6 +29,7 @@ CMD [ "npm", "start" ]
 
 # Check list
 
+# systemctl start docker
 # docker build -t philipp-sc/learning .
 
 	# in case there already is a running container

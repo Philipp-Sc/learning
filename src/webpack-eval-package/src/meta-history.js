@@ -1,6 +1,6 @@
 
 import * as move_meta from "./move-meta.js"
-import {sum_array} from "./utilities.js"
+import {sum_array} from "../../js/utilities.js"
 
 export const historyKeys = move_meta.move_meta_keys.map(e => "{history} "+e);
 
