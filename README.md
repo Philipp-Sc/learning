@@ -12,7 +12,7 @@ I work on <a href="https://github.com/Philipp-Sc/learning">Philipp-Sc/learning</
 
 
 It is written using Ionic, Capacitorjs and Expressjs. 
-
+ 
 
 # Roadmap
 # Chess 
@@ -192,6 +192,33 @@ It is written using Ionic, Capacitorjs and Expressjs.
 
 * Put the ssh certificates (cert.pem, privkey.pem) for your domain here. 
 * You may use https://hub.docker.com/r/certbot/certbot/ to generate the certificates with Let's Encrypt. 
+
+
+* Ensure that the listed domains point to this machine and that it can accept inbound connections from the internet.
+
+* `iptables -A INPUT  -p tcp -m tcp --dport 80 -j ACCEPT` (open port 80 for a moment)
+
+* `docker run -it --rm --name certbot \
+            -v "/etc/letsencrypt:/etc/letsencrypt" \
+            -v "/var/lib/letsencrypt:/var/lib/letsencrypt" \
+            -p 80:80 \
+            certbot/certbot certonly`
+
+* `1: Spin up a temporary webserver (standalone)`
+
+* `Please enter the domain name(s) you would like on your certificate (comma and/or
+space separated): librelearning.eu librelearning.de`
+
+* `iptables -A INPUT  -p tcp -m tcp --dport 80 -j REJECT` (close port 80)
+
+* Copy certificates over
+* `cp /etc/letsencrypt/live/librelearning.eu/cert.pem .`
+* `cp /etc/letsencrypt/live/librelearning.eu/privkey.pem .`
+
+* `chown user:user *.pem ` (make sure the certificates are accessible)
+
+* Now build the docker image or start the expressjs server.
+
 
 *Make sure the port 443 is open to accept incoming requests*
 
