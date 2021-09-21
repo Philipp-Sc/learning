@@ -27,6 +27,10 @@ It is written using Ionic, Capacitorjs and Expressjs.
 * Consider live training the NN on the current (or simialar) game position. Stockfish evaluations are already partly there anyway.
 * Add more principles/features.
 * Calculate Pawn Structure from Database. Reduce 3 features to 1.
+* Fix Pawn Structure Visualization on Mobile
+* Ensure the Importance Calculation is stopped before the next one is calculated.
+* Reduce the amount of features for importance calculation somehow. Calculate the top 10 and add show more button. Top 10 based on heuristic.
+* Add button to enable/disable feature importance
 
 
 * **@training** 
@@ -102,7 +106,7 @@ It is written using Ionic, Capacitorjs and Expressjs.
 **Language Learning with instant feedback, space repetition, voice recognition and your own frictionless content creation.**
 ...
 
-# Manual
+# Manual - Just Read The Instructions
 
 **Clone the repository**
 
@@ -111,7 +115,7 @@ It is written using Ionic, Capacitorjs and Expressjs.
 * `cd learning`
 
 
-# a) Local Setup (current published build)
+# a) Local Setup (current build)
 
 * `cd learning_host_production`
 
@@ -122,18 +126,18 @@ It is written using Ionic, Capacitorjs and Expressjs.
 * `node server.js` (production, also see bellow *hosting*) 
 
 
-# b) Docker Setup (current published build)
+# b) Docker Setup (current build)
 
 * `cd learning_host_production`
 
-* `docker build -t philipp-sc/learning ` or `docker load < philipp-sc_learning_latest.xz`
+* `docker build -t philipp-sc/learning .` or `docker load < philipp-sc_learning_latest.xz`
 
 * `docker run --name=learning-xtreme -d -p 8080:8080 philipp-sc/learning npm test` (local testing)
 
 * `docker run --name=learning-xtreme -d -p 443:8080 philipp-sc/learning npm start` (production, also see bellow *hosting*) 
 
 
-# Development (only for developers)
+# Development - More Than Just Reading The Instructions
 
 **Update npm**
 
