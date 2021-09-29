@@ -13,6 +13,7 @@ export async function build_my_model(output) {
 
 	var vectors = await chess_stats.load_data();
 
+	console.log("load_data finished")
    
 	await tf_chess.main({
 		 	create: {model_name: 'my-model'}, 

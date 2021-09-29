@@ -24,7 +24,28 @@
   </head>
 
   <body>
-    <script crossorigin src="load-stockfish.js"></script>
+    <script src="load-stockfish.js"></script>
+    <script src='./rust/eval-wasm/pkg/eval_wasm.js'></script>
+    <script type="text/javascript">
+      
+      window.rust_wasm = wasm_bindgen.get_wasm_blob('./rust/eval-wasm/pkg/eval_wasm_bg.wasm');
+
+      window.rust = window.rust_wasm
+        .then(blob => blob.arrayBuffer())
+        .then(buffer => wasm_bindgen(buffer))
+        .then(wasm => wasm_bindgen); 
+/*
+      import('./rust/eval-wasm/pkg/eval_wasm.js')
+        .then((module) => {  
+          console.log(module) // module.default() is init();
+          module.get_wasm_blob().then(blob => {window.rust_wasm = blob}).then(() => {
+            module.default().then(() => {
+                  window.rust = module;
+                }); 
+          });
+        }); */
+
+    </script>
     <div id="root"></div>
   </body>
 

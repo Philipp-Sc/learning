@@ -7,8 +7,7 @@ import * as chess_meta from "../js/chess-meta.js"
 import {sum_array, average, median, shuffleArray, sortArrayKeyValue} from "./utilities.js"
 
 import * as importance_chess from './importance-chess.js'
-
-import * as evaluation from "../webpack-eval-package/src/evaluation.js"
+ 
 import * as data_prep from "../js/eval/data-prep.js"
 
 
@@ -22,16 +21,46 @@ const Chess = require("chess.js");
  
 var debug = false;
 
+export function get_all_keys_for_features() {
+	return window.rust.then(my_wasm_bindgen => {return ("cp\n"+my_wasm_bindgen.get_keys()).split("\n");});
+}
+
+
+async function get_features_with_keys_as_dict(history) {
+	var keys = await get_all_keys_for_features();
+	var feature_vector =window.rust.get_features(JSON.stringify(history));
+	var dict = {};
+	for(var i=0;i<keys.length;i++){
+		dict[keys[i]] = feature_vector[i];
+	}
+	return dict;
+}
+
 
 /* Returns a promise, which we need to resolve with await before we send another request.*/
 function sendToChessToVectorWorker(worker,game_index){
 	var promise = new Promise((res, rej) => {
   
-		  worker.postMessage({method:"getStatisticsForPositionVector",params: [game_index]}); 
+		  worker.postMessage({method:"get_features",params: [game_index]}); 
 		  worker.onmessage = (message) => {   
 		        res(message.data.value)     
 		  }
 		});
+	return promise;
+}
+ 
+function sendWasmToChessWorker(worker){
+	var promise = window.rust_wasm.then(blob => blob.arrayBuffer()).then(buffer => {
+
+		return new Promise((res, rej) => {
+  
+		  worker.postMessage({method:"receive_wasm",param: buffer},[buffer]);
+
+		  worker.onmessage = (message) => {  
+		        res(message.data.value)     
+		  }
+		});
+	});
 	return promise;
 }
 
@@ -80,11 +109,11 @@ export function getDistanceVectorForStatistics(stats){
 
 async function gamesToVector(games_FEN) {
 
-	var batchSize = 32;
+  var batchSize = 8;
 
   var myWorkers = new Array(batchSize);
-  for(var i=0;i<myWorkers.length;i++){
-  	myWorkers[i] = new Worker("chess-to-vector-worker/main.js");
+  for(var i=0;i<myWorkers.length;i++){ 
+  	myWorkers[i] = new Worker("chess_to_feature_vector/main.js");
   } 
 
 	var toLength = games_FEN.length - (games_FEN.length % batchSize)
@@ -92,7 +121,8 @@ async function gamesToVector(games_FEN) {
   
  	for(var i=0;i<myWorkers.length;i++){
  		var batchData = games_FEN.filter((e,ii) => ii>=i*frame && ii<(i+1)*frame);
-		await sendGameDataToChessWorker(myWorkers[i],batchData);
+ 		await sendWasmToChessWorker(myWorkers[i]);
+		await sendGameDataToChessWorker(myWorkers[i],batchData); 
  	}
 
 	const getResults = (game_index,i) => {
@@ -120,7 +150,7 @@ async function gamesToVector(games_FEN) {
 		for(var i = 0; i<tasks.length;i++){
 			var res = await tasks[i]();
 			result.push(res);
-			if(debug) console.log("...")
+			console.log("...")
 		}
 		return result;
 	}
@@ -131,17 +161,19 @@ async function gamesToVector(games_FEN) {
 
 	myWorkers.forEach(e => e.terminate());
 
+
+	window.allKeys = await get_all_keys_for_features();
+	if(debug) console.log("window.allKeys")
+
 	var vectors = [].concat.apply([],[].concat.apply([], myPromises))
 		.map(e => {
-			var target = e[evaluation.allKeys.indexOf("cp")];  
-			e.splice(evaluation.allKeys.indexOf("cp"), 1);
+			var target = e[window.allKeys.indexOf("cp")];  
+			e.splice(window.allKeys.indexOf("cp"), 1);
 			return {"data": e, "label":target}
 	})
 
 
 	//if(debug) console.log(vectors)
-	window.allKeys =evaluation.allKeys;
-	if(debug) console.log("window.allKeys")
 
 	//if(debug) console.log(vectors)
 
@@ -208,7 +240,7 @@ export async function calculate_average_position_vector_list(pgn_database_name) 
 	  	vectors_for_move[i] = [i,length,...amalgamation];
 	  }
 
-	  var keys = ["index","game count",...evaluation.allKeys];
+	  var keys = ["index","game count",...window.allKeys];
 
 	  return {data: vectors_for_move, keys: keys};
 
@@ -286,8 +318,8 @@ export async function getNotification(chess, playerColor, halfMoves, notificatio
 
 		notificationList = await neuralNetworkPredictNotification(pgn,last_move.san,notificationList,setNotificationList);
 
-		var allKeys = evaluation.allKeys.filter(e => e!="cp"); // e!="last move by"
-		var my_stats_now = evaluation.getStatisticsForPositionDict(chess,last_move); 
+		var allKeys = (await get_all_keys_for_features()).filter(e => e!="cp"); // e!="last move by"
+		var my_stats_now = get_features_with_keys_as_dict(chess.history({verbose: true})); 
 
 		var global_feature_importance = JSON.parse(window.localStorage.getItem('my-model'+"://importance"));   
 

@@ -4,9 +4,7 @@ import * as tfvis from '@tensorflow/tfjs-vis'
   
 import {normalize, undoNormalize} from "./utilities.js"
 
-
-import * as evaluation from "../webpack-eval-package/src/evaluation.js"
-  
+import * as chess_stats from "./chess-stats.js"
 
 const Chess = require("chess.js"); 
 
@@ -195,11 +193,13 @@ export const test_model_with_pgn = async(model_name, pgn) => {
  	var my_test_game = new Chess();
 	my_test_game.load_pgn(pgn);
  
-	var vectors = evaluation.getStatisticsForPositionVector(my_test_game,my_test_game.history({verbose:true}).reverse()[0])
+	var vectors = (await window.rust).get_features(JSON.stringify(my_test_game.history({verbose:true})));
+
+	var all_keys = (await chess_stats.get_all_keys_for_features());
 
 	vectors = [vectors].map(e => {
-		var target = e[evaluation.allKeys.indexOf("cp")]; 
-		e.splice(evaluation.allKeys.indexOf("cp"), 1);
+		var target = e[all_keys.indexOf("cp")]; 
+		e.splice(all_keys.indexOf("cp"), 1);
 		return {"data": e, "label":target}
 	}) 
 

@@ -17,6 +17,8 @@ import * as lichess_api from "../js/lichess-api.js"
 import * as chess_board_utils from "../js/chess-board-utils.js" 
 import {AdjustingInterval} from "../js/utilities.js"
 
+
+
 const Chess = require("chess.js");
 const EloRating = require('elo-rating');
  
@@ -408,18 +410,20 @@ const AppContainer: React.FC = () => {
 
     async function doTask() {
 
-      await chess_model.load_my_model({isProduction: true}); 
+      // await chess_model.load_my_model({isProduction: true}); 
       //console.log(await chess_stats.test_model());
 
-      var development = false;
+      var development = true;
       if(development){  
     
-        window.export_current_model = chess_model.export_my_model;
         // once needed every time the feature vector or model definition are changed.
-        //await chess_stats.build_my_model();
+        await chess_model.build_my_model();
  
         // retrain the model & new importance
         // await chess_stats.train_my_model(); 
+
+
+        window.export_current_model = chess_model.export_my_model;
 
         var rebuild_prod_prerequisites = false;
         if(rebuild_prod_prerequisites){

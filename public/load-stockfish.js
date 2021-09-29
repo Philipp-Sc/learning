@@ -1,5 +1,4 @@
 
-
 function isSupported() {
   if (typeof WebAssembly !== "object") return false;
   const source = Uint8Array.from([

@@ -195,8 +195,8 @@ function getEuclidianDistance(arr1, arr2) {
 */
  
 
-// update website PWA to current, console.log @debug 
-
+//console.log @debug 
+ 
 
 // calculate pawn structure &
 

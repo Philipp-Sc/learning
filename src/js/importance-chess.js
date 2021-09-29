@@ -2,12 +2,10 @@
 import {sortJsObject} from "./utilities.js"
 
 import * as tf_chess from './tensorflow-chess.js'
-
-import * as evaluation from "../webpack-eval-package/src/evaluation.js"
-
-
+ 
 import {importance} from './importance/index.js'
 
+import * as chess_stats from "./chess-stats.js"
    
 const Chess = require("chess.js"); 
 
@@ -26,7 +24,7 @@ export function getImportance(model_name, vectors, norm,n_,callback) {
 		  verbose: debug
 		})
 	  .then(imp => Promise.all(imp.map((e,i) => e.then(res => {callback(res,i);return res}))).then(importance_list => {
-	  	return sortJsObject(importance_list.map((e,i) => {return {key:evaluation.allKeys[1+i],value:e}}))
+	  	return sortJsObject(importance_list.map((e,i) => {return {key:window.allKeys[1+i],value:e}}))
 	  }))
 }
 
@@ -69,11 +67,11 @@ export const get_feature_importance_with_pgn = async(model_name, pgn, callback) 
 			my_test_game.load_pgn(pgn);
 			my_test_game.undo();
 			my_test_game.move(alternatives[i]);   
-			var vector = evaluation.getStatisticsForPositionVector(my_test_game, my_test_game.history({verbose:true}).reverse()[0]);
+			var vector = (await window.rust).get_features(JSON.stringify(my_test_game.history({verbose:true})));
 			var label = await tf_chess.test_model_with_pgn(model_name,my_test_game.pgn()); 
 			
 			if(label.prediction[0]>=0.5-reduce){ // we want to know about features that are important for good moves
-				vector[evaluation.allKeys.indexOf("cp")] = label.prediction_value[0]
+				vector[window.allKeys.indexOf("cp")] = label.prediction_value[0]
 				vectors.push(vector)
 			}
 		} 
@@ -81,8 +79,8 @@ export const get_feature_importance_with_pgn = async(model_name, pgn, callback) 
 	}
 
 	vectors = vectors.map(e => {
-		var target = e[evaluation.allKeys.indexOf("cp")]; 
-		e.splice(evaluation.allKeys.indexOf("cp"), 1);
+		var target = e[window.allKeys.indexOf("cp")]; 
+		e.splice(window.allKeys.indexOf("cp"), 1);
 		return {"data": e, "label":target}
 	}) 
 
