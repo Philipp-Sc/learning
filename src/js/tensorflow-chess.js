@@ -6,17 +6,14 @@ import {normalize, undoNormalize} from "./utilities.js"
 
 import * as chess_stats from "./chess-stats.js"
 
+import {sendToChessToVectorWorkerDirectly, get_chess_to_feature_vector_worker_if_exists_else_create} from "../js/chess-to-feature-vector-controller.js" 
+
+
 const Chess = require("chess.js"); 
 
-var myWorker;
+var myWorker = new Worker("tensorflow-worker/main.js");
 
-	if (window.Worker) {
-
-  	myWorker = new Worker("tensorflow-worker/main.js");
-
-	}
-
-var debug = false;
+var debug = true;
 
 //Object.entries(localStorage).filter(e => e[0].includes("tensorflow") || e[0].includes("normalizeVector"))
 //JSON.stringify()
@@ -92,7 +89,7 @@ export function convertToTensor(data,norm) {
     //const res = normalizeVector(data,inputMinMax_,labelMinMax_);
 
        // Step 2. Convert data to Tensor
-    const inputs = data.map(d => d.data).map(entry => entry.map((e,i) => normalize(norm.inputMinMax[i].min,norm.inputMinMax[i].max)(e)))
+    const inputs = data.map(d => Array.from(d.data)).map(entry => entry.map((e,i) => normalize(norm.inputMinMax[i].min,norm.inputMinMax[i].max)(e)))
     const labels = data.map(d => d.label).map(entry => normalize(norm.labelMinMax.min,norm.labelMinMax.max)(entry))
   
  
@@ -193,22 +190,16 @@ export async function import_model(model_name,default_model) {
 export const test_model_with_pgn = async(model_name, pgn) => {
  	var my_test_game = new Chess();
 	my_test_game.load_pgn(pgn);
+
+	if(my_test_game.game_over()){
+		my_test_game.undo();
+	}
  
- 	var game_history = my_test_game.history({verbose:true});
- 	var game_history_string = JSON.stringify(game_history);
-
- 	// ask a webworker here.
-	var vectors = (await window.rust).get_features(game_history_string)
-
-
-	var all_keys = (await chess_stats.get_all_keys_for_features());
-
-	vectors = [vectors].map(e => {
-		var target = e[all_keys.indexOf("cp")]; 
-		console.log(e);
-		e.splice(all_keys.indexOf("cp"), 1);
-		return {"data": e, "label":target}
-	}) 
+ 	var game_history = my_test_game.history({verbose:true}); 
+ 
+ 	var chess_to_feature_vector_worker = await get_chess_to_feature_vector_worker_if_exists_else_create();
+ 	var vectors = await sendToChessToVectorWorkerDirectly(chess_to_feature_vector_worker,[game_history])
+ 	vectors = vectors.map(e => {return{"data":e,"label":0}});
 
 	return await test_model_vectors(model_name, vectors,pgn);
 

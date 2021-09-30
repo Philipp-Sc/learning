@@ -420,7 +420,7 @@ const AppContainer: React.FC = () => {
         //await chess_model.build_my_model();
  
         // retrain the model & new importance
-        // await chess_stats.train_my_model(); 
+        //await chess_model.train_my_model(); 
 
 
         window.export_current_model = chess_model.export_my_model;

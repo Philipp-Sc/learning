@@ -7,7 +7,7 @@ import * as importance_chess from './importance-chess.js'
 
 const default_model = require('./json/default_model.json')
  
-var debug = false;
+var debug = true;
 
 export async function build_my_model(output) {
 

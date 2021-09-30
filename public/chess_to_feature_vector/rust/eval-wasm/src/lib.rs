@@ -15,6 +15,10 @@ mod expansion_factor;
 mod package_density;
 mod pawn_structure;
   
+/*
+ * Known Bugs: if game_over is not checked -> RuntimeError: unreachable.
+ * 
+ */
 
 #[wasm_bindgen]
 pub fn get_features(game_history: &str) -> Vec<u8> {

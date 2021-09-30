@@ -13,65 +13,13 @@ import * as data_prep from "../js/eval/data-prep.js"
 
 import * as chess_model from "../js/chess-model.js" 
 
+import {get_all_keys_for_features,get_features_with_keys_as_dict,sendToChessToVectorWorker,sendWasmToChessWorker,sendGameDataToChessWorker} from "../js/chess-to-feature-vector-controller.js" 
+
 const Chess = require("chess.js"); 
  
  
-var debug = false;
+var debug = true;
 
-export function get_all_keys_for_features() {
-	return window.rust.then(my_wasm_bindgen => {return ("cp\n"+my_wasm_bindgen.get_keys()).split("\n");});
-}
-
-
-async function get_features_with_keys_as_dict(history) {
-	var keys = await get_all_keys_for_features();
-	var feature_vector =window.rust.get_features(JSON.stringify(history));
-	var dict = {};
-	for(var i=0;i<keys.length;i++){
-		dict[keys[i]] = feature_vector[i];
-	}
-	return dict;
-}
-
-
-/* Returns a promise, which we need to resolve with await before we send another request.*/
-function sendToChessToVectorWorker(worker,game_index){
-	var promise = new Promise((res, rej) => {
-  
-		  worker.postMessage({method:"get_features",params: [game_index]}); 
-		  worker.onmessage = (message) => {   
-		        res(message.data.value)     
-		  }
-		});
-	return promise;
-}
- 
-function sendWasmToChessWorker(worker){
-	var promise = window.rust_wasm.then(blob => blob.arrayBuffer()).then(buffer => {
-
-		return new Promise((res, rej) => {
-  
-		  worker.postMessage({method:"receive_wasm",param: buffer},[buffer]);
-
-		  worker.onmessage = (message) => {  
-		        res(message.data.value)     
-		  }
-		});
-	});
-	return promise;
-}
-
-function sendGameDataToChessWorker(worker,game_data){
-	var promise = new Promise((res, rej) => {
-  
-		  worker.postMessage({method:"receive_game_data",params: [game_data]});
-
-		  worker.onmessage = (message) => {  
-		        res(message.data.value)     
-		  }
-		});
-	return promise;
-}
 
 export function getDistanceVectorForStatistics(stats){
 	var stats1 = stats.playerStats;
@@ -158,16 +106,7 @@ async function gamesToVector(games_FEN) {
 
 	myWorkers.forEach(e => e.terminate());
 
-
-	window.allKeys = await get_all_keys_for_features();
-	if(debug) console.log("window.allKeys")
-
-	var vectors = [].concat.apply([],[].concat.apply([], myPromises))
-		.map(e => {
-			var target = e[window.allKeys.indexOf("cp")];  
-			e.splice(window.allKeys.indexOf("cp"), 1);
-			return {"data": e, "label":target}
-	})
+	var vectors = [].concat.apply([],[].concat.apply([], myPromises)) 
 
 
 	//if(debug) console.log(vectors)
@@ -197,7 +136,7 @@ export async function load_data() {
 
   if(debug) console.log("Number of games: "+games_FEN.length)  
 
-	var vectors = await gamesToVector(games_FEN.filter((e,i) => i<=(32*200)-1))
+	var vectors = await gamesToVector(games_FEN.filter((e,i) => i<=(16*4*200)-1))
 
   if(debug) console.log("Number of positions: "+vectors.length)  
 
@@ -218,6 +157,8 @@ export async function calculate_average_position_vector_list(pgn_database_name) 
   var games_FEN_forBlack = gamesToVector(games.filter(e => e.forBlack).map(e => e.vector));
 
 
+  var allKeys = await get_all_keys_for_features(); 
+
   const getResult = (games_FEN) => {
 
 	  var vectors_for_move = [];
@@ -237,7 +178,7 @@ export async function calculate_average_position_vector_list(pgn_database_name) 
 	  	vectors_for_move[i] = [i,length,...amalgamation];
 	  }
 
-	  var keys = ["index","game count",...window.allKeys];
+	  var keys = ["index","game count",...allKeys];
 
 	  return {data: vectors_for_move, keys: keys};
 
@@ -297,7 +238,7 @@ export async function getSkillProfile(elo,depth) {
      })
 }
 
-function getValueByKey(key_value_array,key) { 
+function getValueByKey(key_value_array,key) {  
 	return key_value_array.filter(e => e[0]==key)[0][1];
 }
 
@@ -315,8 +256,8 @@ export async function getNotification(chess, playerColor, halfMoves, notificatio
 
 		notificationList = await neuralNetworkPredictNotification(pgn,last_move.san,notificationList,setNotificationList);
 
-		var allKeys = (await get_all_keys_for_features()).filter(e => e!="cp"); // e!="last move by"
-		var my_stats_now = get_features_with_keys_as_dict(chess.history({verbose: true})); 
+		var allKeys = await get_all_keys_for_features();
+		var my_stats_now = await get_features_with_keys_as_dict([chess.history({verbose: true})]); 
 
 		var global_feature_importance = JSON.parse(window.localStorage.getItem('my-model'+"://importance"));   
 
@@ -342,11 +283,11 @@ export async function getNotification(chess, playerColor, halfMoves, notificatio
 				var value;
 	      	if(key.includes("Pawn Structure") && !key.includes("Count")){
 	      		value = my_stats_now[key]+"\n";
-	      		msg = key+" \n"+value+" \|\|           "+positive+"\n"+"    ("+(stats_human[key].toFixed(2))+", "+(stats_hero[key].toFixed(2))+")";
+	      		msg = key+" \n"+value+" \|\|           "+positive+"\n";//+"    ("+(stats_human[key].toFixed(2))+", "+(stats_hero[key].toFixed(2))+")";
 	      
 	      	}else{
 	      		value = my_stats_now[key].toFixed(2);
-	      		msg = key+" \|\|           "+positive+"\n"+value+"    ("+(stats_human[key].toFixed(2))+", "+(stats_hero[key].toFixed(2))+")";
+	      		msg = key+" \|\|           "+positive+"\n"+value;//+"    ("+(stats_human[key].toFixed(2))+", "+(stats_hero[key].toFixed(2))+")";
 	      
 	      	}
 

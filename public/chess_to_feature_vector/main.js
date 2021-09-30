@@ -34,10 +34,20 @@ onmessage = function(message) {
 				  	if(data.method=="getStatisticsForPositionVector"){ 
 				  		res = evaluation[data.method](...getPGN_and_LastMove(...data.params));
 				  	}*/
+				  	if(data.method=="get_all_keys"){ 
+				  		res = wasm_bindgen.get_keys().split("\n");
+				  		postMessage({"value":res});
+				  	}
 				  	if(data.method=="get_features"){ 
-				  		res = getPGN(...data.params).map(e => {
-				  			//console.log(JSON.stringify(e.history));
-				  			return [].concat.apply([e.label],wasm_bindgen.get_features(JSON.stringify(e.history)))});
+				  		res = getPGN(...data.params).map(e => { 
+				  			return  {"data": wasm_bindgen.get_features(JSON.stringify(e.history)), "label":e.label};
+				  		});
+				  		postMessage({"value":res});
+				  	}
+				  	if(data.method=="get_features_directly"){ 
+				  		res = data.params.map(e => {  
+				  			return wasm_bindgen.get_features(JSON.stringify(e));
+				  		});
 				  		postMessage({"value":res});
 				  	}
 
@@ -61,10 +71,10 @@ function getPGN(game_index){
 			new_game.move(game_data[game_index].moves[i].notation.notation);
 			if(i>=start && i<=end && getCP(game_data[game_index].moves[i])>=minCP && getCP(game_data[game_index].moves[i])<=maxCP && Math.random()>skipProbability){
 				if(getCP(game_data[game_index].moves[i])==0){
-					if(Math.random()>cpZeroProbability){ 
+					if(Math.random()>cpZeroProbability && !new_game.game_over()){ 
 						res.push({"history":new_game.history({verbose: true}), "label": getCP(game_data[game_index].moves[i])})
 					}
-				}else{
+				}else if (!new_game.game_over()){
 						res.push({"history":new_game.history({verbose: true}), "label": getCP(game_data[game_index].moves[i])})
 				}
 				}

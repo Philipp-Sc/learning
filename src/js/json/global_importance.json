@@ -1,374 +1,942 @@
 {
 	"global_train_importance": [
-		["last move by", 0.005111323990372276],
-		["Pawn On A3 {white}", 0.0029465854274450683],
-		["Pawn On A6 {black}", 0.002649402690176435],
-		["Open D File", 0.0024831197334270866],
-		["Open C File", 0.0024636459902411573],
-		["Pawn On H6 {black}", 0.0023344028353356307],
-		["{history} {castle} 0-0 {white}", 0.002330387728878012],
-		["Half-Open D File {black}", 0.0022029247348259915],
-		["b == n", 0.0021996380557987166],
-		["Pawn On H3 {white}", 0.002175100311095109],
-		["P == p", 0.0021496768401374827],
-		["Open E File", 0.0020926073038740954],
-		["B == N", 0.002054784294770342],
-		["{history} {castle} 0-0 {black}", 0.0020082395097112617],
-		["Half-Open D File {white}", 0.0019729237609375254],
-		["Half-Open C File {black}", 0.001960873547885935],
-		["Half-Open E File {white}", 0.0019370331387695235],
-		["Half-Open E File {black}", 0.0019356490413930858],
-		["b > N", 0.001880035912302062],
-		["Half-Open C File {white}", 0.001786773312021203],
-		["Half-Open B File {black}", 0.0017345488855650677],
-		["Open B File", 0.0016753609687865305],
-		["Pawn On H4 {white}", 0.0016750786394565862],
-		["Fianchetto King Side {black}", 0.0016146663051151014],
-		["King Side Pawn Majority {white}", 0.001572113721427783],
-		["Queen Side Pawn Majority {black}", 0.0015690665943180575],
-		["King Side Pawn Majority {black}", 0.001559045922094562],
-		["Half-Open B File {white}", 0.0015268392700335393],
-		["Fianchetto King Side {white}", 0.0014993802963789945],
-		["Half-Open F File {black}", 0.0014711901365276705],
-		["Pawn Structure 1st Closest Match", 0.0014590071702329306],
-		["Pawn Structure 2nd Closest Match", 0.0014488655346158751],
-		["B > n", 0.0013869243335929734],
-		["move to rank 4", 0.0013389185027601214],
-		["move to file D", 0.0013360095135071717],
-		["Pawn On A5 {black}", 0.001279048516751854],
-		["move to rank 5", 0.0012746847108332294],
-		["Pawn Structure 3rd Closest Match", 0.0012350388538315315],
-		["Queen Side Pawn Majority {white}", 0.0012203515952484032],
-		["Fianchetto Queen Side {white}", 0.001218065790835129],
-		["Half-Open A File {white}", 0.0011792696018475906],
-		["Pawn On A4 {white}", 0.001178976586405088],
-		["move to file C", 0.0011776570885301848],
-		["{fig} Pawn {black}", 0.0011626425378235077],
-		["move to file E", 0.0011557828277482733],
-		["n > B", 0.0011458167841199578],
-		["Pawn On H5 {black}", 0.0011219662624248625],
-		["Half-Open A File {black}", 0.0011203983161251667],
-		["Half-Open F File {white}", 0.001119623556749202],
-		["Half-Open G File {black}", 0.0010276751937030228],
-		["move to file G", 0.0010078511711761216],
-		["move to file B", 0.0009950972980213206],
-		["move to rank 3", 0.0009935753723921865],
-		["move to rank 6", 0.0009702220858434568],
-		["Half-Open H File {black}", 0.0009622865177448596],
-		["{fig} Pawn {white}", 0.0009554689363383198],
-		["N > b", 0.0009486310951870668],
-		["Over-protected-squares (excl. pieces as defenders, protected pawns) {white}", 0.0009437671476178424],
-		["Open A File", 0.0009335235315998197],
-		["Half-Open G File {white}", 0.0008743903253445696],
-		["move to rank 2", 0.0008536064470452731],
-		["{history} {castle} 0-0-0 {white}", 0.0008520948042673898],
-		["move to rank 7", 0.0008343589024095967],
-		["{fig} Knight {white}", 0.0008236401788793869],
-		["move to file F", 0.0007815221276631753],
-		["Over-protected squares (excl. pieces as defenders, protected pawns) {black}", 0.0007761247398723805],
-		["Fianchetto Queen Side {black}", 0.0007716629325258975],
-		["Opponement Space Area (Unprotected)", 0.0007595368648262915],
-		["Q count {white}", 0.000750385063446451],
-		["{fig} Knight {black}", 0.0007320607967161039],
-		["q count {black}", 0.0007090634913400378],
-		["{fig} Bishop {black}", 0.0006745853828059803],
-		["move to rank 8", 0.0006490108718429326],
-		["{fig} Rook {black}", 0.0006421995661850638],
-		["move to file A", 0.0006373024955470366],
-		["Open H File", 0.0006264513549842111],
-		["{fig} Bishop {white}", 0.0006189997165604284],
-		["n count {black}", 0.000614285050414529],
-		["N count {white}", 0.0006086134770829035],
-		["{fig} Queen {white}", 0.0006062503994342516],
-		["{fig} Rook {white}", 0.0006048190585474317],
-		["Open F File", 0.0005361457852885932],
-		["{fig} Queen {black}", 0.0005319946993615573],
-		["Half-Open H File {white}", 0.00050852835781055],
-		["Opponement Mobility (Queen)", 0.0004915466302064241],
-		["Double Pawns {black}", 0.00048480657875443506],
-		["B count {white}", 0.0004770489679482339],
-		["{fig} King {black}", 0.00046315386890141057],
-		["b count {black}", 0.0004610499492494583],
-		["r count {black}", 0.00043525442555520635],
-		["Isolated Pawns {black}", 0.0004145167299653081],
-		["move to file H", 0.00039641292733657554],
-		["{capture} Qx {white}", 0.00037352560313314226],
-		["R count {white}", 0.0003706935497092011],
-		["{history} {castle} 0-0-0 {black}", 0.00036071583405292986],
-		["{history} {capture} px {black}", 0.0003477041504189078],
-		["{capture} Px {white}", 0.0003401675803314133],
-		["{fig} King {white}", 0.0003306228396309282],
-		["Isolated Pawns {white}", 0.0003251455702218246],
-		["Count Pawns On Black Squares {black}", 0.0002956357261959543],
-		["Opponement Mobility (Pawns)", 0.00028736726324370165],
-		["{history} {capture} Px {white}", 0.0002733304882256538],
-		["{capture} px {black}", 0.0002666074621211705],
-		["{capture} nx {black}", 0.00025164383751383353],
-		["Open G File", 0.0002515164511027832],
-		["{history} {capture} qx {black}", 0.00024201248873257958],
-		["Count Pawns On White Squares {white}", 0.00023633946094425587],
-		["Double Pawns {white}", 0.00022734118886206048],
-		["{history} {capture} Bx {white}", 0.0002150933172529126],
-		["{history} {capture} Qx {white}", 0.00020906123973499235],
-		["{capture} bx {black}", 0.0002063880994201846],
-		["{history} {fig} Pawn {black}", 0.00020629875669334172],
-		["Opponement Mobility (King)", 0.00020147485004622752],
-		["Count Pawns On White Squares {black}", 0.00019594203754018445],
-		["Pawn Structure 1st Closest Match Count", 0.00018400383143895053],
-		["{capture} rx {black}", 0.00017860417540260624],
-		["{history} move to rank 3", 0.00017216745230811358],
-		["{history} {fig} Pawn {white}", 0.00017143441795352198],
-		["Opponement Mobility (Pieces)", 0.00016786139055432244],
-		["Pawn Structure 2nd Closest Match Count", 0.00016647649163305288],
-		["{history} {capture} Nx {white}", 0.0001664043297090489],
-		["{history} {capture} nx {black}", 0.000157304904091305],
-		["Count Pawns On Black Squares {white}", 0.00015711862098518074],
-		["{history} move to rank 2", 0.00015297079819637162],
-		["{capture} Nx {white}", 0.0001528058529882781],
-		["Furthest advanced pawn {black}", 0.0001498652632256058],
-		["{castle} 0-0 {white}", 0.0001465571851949109],
-		["{capture} Bx {white}", 0.00013717705828105516],
-		["{history} move to file B", 0.0001281526449656309],
-		["{history} {capture} bx {black}", 0.0001214957624743714],
-		["{history} {capture} kx {black}", 0.00011574322494519167],
-		["halfmove", 0.00011027970087571133],
-		["Opponement Mobility (All)", 0.00010967090422587047],
-		["{history} move to rank 5", 0.00010444771069233389],
-		["{castle} 0-0 {black}", 0.00010322942354744477],
-		["{history} {fig} Knight {black}", 0.00010047051382053665],
-		["Protected-squares (excl. pieces as defenders, protected pawns, overprotection) {black}", 0.0001001368233091649],
-		["{capture} Rx {white}", 0.0000976740549624794],
-		["{history} move to file D", 0.00009644340647626626],
-		["{history} {capture} rx {black}", 0.00009412959624550998],
-		["{capture} qx {black}", 0.0000936292862831527],
-		["{history} {fig} Bishop {white}", 0.00009274062465453731],
-		["{history} move to file C", 0.00009083408692989582],
-		["{history} move to rank 8", 0.00008875912123325455],
-		["{history} move to file H", 0.00008473838462748102],
-		["{history} move to file F", 0.00008213765758307429],
-		["{history} move to file G", 0.00008118158267830778],
-		["{history} {fig} Knight {white}", 0.00007869587081500262],
-		["{history} move to rank 4", 0.00006819718844105604],
-		["{history} move to file E", 0.0000663676199147762],
-		["{history} move to rank 6", 0.0000655933341913034],
-		["p count {black}", 0.00006504170043865147],
-		["Protected-squares (excl. pieces as defenders, protected pawns, overprotection) {white}", 0.00006358593450494674],
-		["Expansion Factor King Side {black}", 0.00006201752991206707],
-		["{history} {fig} Queen {black}", 0.00006123274611664106],
-		["{history} {capture} Rx {white}", 0.000060168769702661075],
-		["{history} {fig} King {white}", 0.000059974913214910666],
-		["{history} move to rank 7", 0.000053056683720451676],
-		["Expansion Factor King Side {white}", 0.000047605335413321184],
-		["{history} {fig} Queen {white}", 0.000043264411339919155],
-		["{history} {fig} Rook {black}", 0.00004297287495235477],
-		["Furthest advanced pawn {white}", 0.000040742907400929],
-		["{history} {fig} Rook {white}", 0.00003870156998564964],
-		["P count {white}", 0.000037788951594149045],
-		["{history} move to file A", 0.00003570142507899811],
-		["{history} {fig} Bishop {black}", 0.000028377324487633597],
-		["Protected-squares per pawn (excl. pieces as defenders, protected pawns, overprotection) {white}", 0.000027111622026789145],
-		["Expansion Factor {white}", 0.000022872076548920367],
-		["{history} {fig} King {black}", 0.000020621581356458922],
-		["Least advanced pawn {white}", 0.000019081726989291143],
-		["{history} {capture} Kx {white}", 0.000019014621748031564],
-		["Protected-squares per pawn (excl. pieces as defenders, protected pawns, overprotection) {black}", 0.000012556656869881452],
-		["{capture} kx {black}", 0.00001253271787416679],
-		["{castle} 0-0-0 {white}", 0.000011397418584252993],
-		["Expansion Factor Queen Side {black}", 0.000010907160178526146],
-		["Least advanced pawn {black}", 0.000008876337052641549],
-		["{capture} Kx {white}", 0.000008303456675142233],
-		["Avg advanced pawn {white}", 0.0000061183574377211836],
-		["Expansion Factor Queen Side {white}", 0.000005084390618984133],
-		["Avg advanced pawn {black}", 0.0000032924408124869985],
-		["Expansion Factor {black}", 0.000001558470242133997],
-		["{castle} 0-0-0 {black}", 7.156443512936579e-7],
-		["move to rank 1", 0],
-		["{history} move to rank 1", 0]
-	],
-	"global_test_importance": [
-		["last move by", 0.004063883683554249],
-		["Pawn On A3 {white}", 0.0020750162135865467],
-		["Open D File", 0.0018205999931179481],
-		["Open C File", 0.001753863747147616],
-		["Half-Open D File {black}", 0.0016637907686287597],
-		["Pawn On A6 {black}", 0.0016252991965151585],
-		["b == n", 0.0014368190284818408],
-		["{history} {castle} 0-0 {white}", 0.0014250057368365085],
-		["P == p", 0.0014069059111937628],
-		["Pawn On H3 {white}", 0.0013853318763392478],
-		["Half-Open E File {white}", 0.0013567852748407605],
-		["Half-Open D File {white}", 0.0013505246855910098],
-		["Half-Open B File {black}", 0.0013222787199724632],
-		["b > N", 0.0012894283547403226],
-		["Pawn On H6 {black}", 0.0012692816909651156],
-		["Half-Open C File {black}", 0.001213078871788998],
-		["Open E File", 0.001209700370998594],
-		["{history} {castle} 0-0 {black}", 0.0011976397355990646],
-		["B == N", 0.0011798158995207815],
-		["Fianchetto King Side {black}", 0.001166979698447361],
-		["Open B File", 0.0011591043475335655],
-		["Half-Open C File {white}", 0.0011385487441512888],
-		["Half-Open E File {black}", 0.0011302453636619463],
-		["Pawn On H4 {white}", 0.0011081982923094105],
-		["Queen Side Pawn Majority {black}", 0.0010826818312207817],
-		["Half-Open B File {white}", 0.0010219510069305847],
-		["Fianchetto King Side {white}", 0.000984930930603662],
-		["King Side Pawn Majority {white}", 0.00097297248637538],
-		["Fianchetto Queen Side {white}", 0.0008953167828229004],
-		["Pawn Structure 2nd Closest Match", 0.0008942364276260037],
-		["Half-Open A File {white}", 0.000831503873142049],
-		["Half-Open A File {black}", 0.0008197010298303387],
-		["Half-Open F File {white}", 0.0008181200645667221],
-		["Pawn On A5 {black}", 0.0008080829983512956],
-		["Half-Open F File {black}", 0.0008026357388904483],
-		["King Side Pawn Majority {black}", 0.0007879744384824104],
-		["n > B", 0.0007773372033446566],
-		["Pawn Structure 1st Closest Match", 0.0007731974230348569],
-		["Pawn Structure 3rd Closest Match", 0.0007573953190780844],
-		["Queen Side Pawn Majority {white}", 0.0007491465753591588],
-		["Pawn On A4 {white}", 0.0007422865232909609],
-		["B > n", 0.0007396409688722703],
-		["move to rank 4", 0.0007280942768519635],
-		["Pawn On H5 {black}", 0.0007091479935638252],
-		["move to rank 5", 0.0007002896015588164],
-		["move to file E", 0.0006952738985794883],
-		["Half-Open H File {black}", 0.0006884889457218109],
-		["move to file C", 0.0006778150372394043],
-		["{fig} Pawn {black}", 0.0006548382849624959],
-		["Over-protected-squares (excl. pieces as defenders, protected pawns) {white}", 0.0006469704115729911],
-		["Q count {white}", 0.0006410460029966959],
-		["Half-Open G File {white}", 0.0006092675837880458],
-		["Half-Open G File {black}", 0.0006037326274640244],
-		["Opponement Space Area (Unprotected)", 0.0005845833923010489],
-		["move to file B", 0.0005758223426650909],
-		["Open A File", 0.0005673200266983237],
-		["{fig} Rook {white}", 0.0005458843298017449],
-		["move to file D", 0.0005446840159126221],
-		["N > b", 0.0005287572779648815],
-		["{history} {castle} 0-0-0 {white}", 0.000522181301099673],
-		["q count {black}", 0.000516132302673028],
-		["{fig} Pawn {white}", 0.000501772107740054],
-		["Open H File", 0.0004930729726474355],
-		["n count {black}", 0.00047850337493871714],
-		["N count {white}", 0.00046795917318958116],
-		["{fig} Rook {black}", 0.00044888328259731075],
-		["move to file G", 0.000439580262017715],
-		["move to rank 3", 0.00043821210591527687],
-		["{fig} Queen {white}", 0.00042571892329614294],
-		["{fig} Queen {black}", 0.00039883681003298824],
-		["{fig} Bishop {white}", 0.0003779729488322392],
-		["{fig} Knight {white}", 0.0003757084578399003],
-		["Open F File", 0.00036890648649149163],
-		["{fig} Knight {black}", 0.00036751974088448935],
-		["Isolated Pawns {white}", 0.00035770019983254187],
-		["move to rank 7", 0.00035353182191127583],
-		["{fig} Bishop {black}", 0.0003311976624228302],
-		["move to file A", 0.000322186834363105],
-		["move to rank 2", 0.0003189456828625488],
-		["move to rank 6", 0.00031711773402325755],
-		["{history} {capture} qx {black}", 0.0003154211141492627],
-		["R count {white}", 0.0003153702661744147],
-		["Double Pawns {black}", 0.0003052210271637795],
-		["Half-Open H File {white}", 0.00030406807600571323],
-		["r count {black}", 0.00029385299008425833],
-		["Fianchetto Queen Side {black}", 0.00029182913461813995],
-		["Isolated Pawns {black}", 0.0002809936579517454],
-		["Open G File", 0.00027260617434649373],
-		["move to rank 8", 0.000267422513138698],
-		["{fig} King {black}", 0.0002662879199041186],
-		["Over-protected squares (excl. pieces as defenders, protected pawns) {black}", 0.00026582041423684963],
-		["move to file F", 0.00024387259679269427],
-		["{capture} Qx {white}", 0.00024156237060235508],
-		["move to file H", 0.0002395959553113669],
-		["{capture} Px {white}", 0.000238838587406736],
-		["Count Pawns On Black Squares {black}", 0.0002269732833732295],
-		["{fig} King {white}", 0.00022626968057739769],
-		["B count {white}", 0.00022585210598920213],
-		["Opponement Mobility (Queen)", 0.00021805062255462332],
-		["{history} {castle} 0-0-0 {black}", 0.00019967960912182364],
-		["{history} {capture} Px {white}", 0.00019437208383820542],
-		["{history} {capture} bx {black}", 0.00017295580073453318],
-		["b count {black}", 0.00016341938883463955],
-		["{history} {capture} px {black}", 0.00016279687606336052],
-		["Double Pawns {white}", 0.00014160206231593475],
-		["{history} {fig} Pawn {black}", 0.00013933879676652355],
-		["{capture} px {black}", 0.00013803874199431326],
-		["{history} {fig} Pawn {white}", 0.00013615063790923046],
-		["{history} {capture} Qx {white}", 0.00013338114762954587],
-		["{castle} 0-0 {white}", 0.0001307276135056358],
-		["Opponement Mobility (King)", 0.0001304210934594853],
-		["Furthest advanced pawn {black}", 0.0001233915950832748],
-		["{history} move to rank 2", 0.00012008224447557572],
-		["{history} {capture} nx {black}", 0.00011371273161207493],
-		["{capture} Bx {white}", 0.0001086661000755905],
-		["{history} move to file C", 0.0001060550308243681],
-		["{history} {fig} Bishop {white}", 0.00009931769305789734],
-		["{history} move to rank 3", 0.00009924497903989263],
-		["Opponement Mobility (Pieces)", 0.00009729001162714357],
-		["Count Pawns On White Squares {black}", 0.00009669514465581591],
-		["{history} {capture} rx {black}", 0.0000948112567925978],
-		["{capture} nx {black}", 0.0000920616266638502],
-		["{history} move to rank 4", 0.00009116330028378569],
-		["{history} {capture} Bx {white}", 0.00008662930123737311],
-		["{capture} bx {black}", 0.0000858886875653754],
-		["{history} move to file D", 0.0000816493215722025],
-		["{capture} rx {black}", 0.00007892443909810268],
-		["{history} move to file F", 0.00007802767756085252],
-		["{history} move to rank 6", 0.0000728263523221695],
-		["Protected-squares (excl. pieces as defenders, protected pawns, overprotection) {black}", 0.00007091041865230768],
-		["{history} move to file B", 0.00006963116170801212],
-		["Count Pawns On Black Squares {white}", 0.00006872628468712616],
-		["{history} {fig} Knight {black}", 0.00006725823521890051],
-		["{history} move to rank 8", 0.00006715100911298261],
-		["Opponement Mobility (Pawns)", 0.00006664017514111664],
-		["P count {white}", 0.00006559723888500263],
-		["{history} move to file E", 0.00006508758421863367],
-		["{history} {fig} Queen {black}", 0.00006473819746994139],
-		["Expansion Factor King Side {black}", 0.00006288068011657891],
-		["{capture} qx {black}", 0.00006111129427734466],
-		["{history} {fig} Knight {white}", 0.00006087847837498578],
-		["Count Pawns On White Squares {white}", 0.000059358647962141214],
-		["halfmove", 0.00005891003864366695],
-		["{capture} Rx {white}", 0.000050670545295120745],
-		["{history} {capture} kx {black}", 0.000048553642483021436],
-		["{history} {fig} Rook {white}", 0.0000448108841018674],
-		["Pawn Structure 2nd Closest Match Count", 0.000041343376624779216],
-		["Furthest advanced pawn {white}", 0.000041026957075637055],
-		["{history} {fig} King {white}", 0.000039448667651872243],
-		["{history} {capture} Nx {white}", 0.00003580170800218663],
-		["Expansion Factor King Side {white}", 0.000030524087409271317],
-		["{history} move to file A", 0.000029074816241567852],
-		["{history} move to rank 5", 0.000028927461400752447],
-		["{history} {capture} Kx {white}", 0.00002870581154340579],
-		["Protected-squares per pawn (excl. pieces as defenders, protected pawns, overprotection) {white}", 0.000027824831640731185],
-		["Least advanced pawn {white}", 0.000026128452054435813],
-		["Expansion Factor {white}", 0.000025828516051956685],
-		["Avg advanced pawn {white}", 0.00002222860850480124],
-		["{capture} kx {black}", 0.000017942627804277272],
-		["{history} {fig} King {black}", 0.000016425096807271],
-		["{history} {fig} Bishop {black}", 0.00001614208284489091],
-		["{history} move to file H", 0.00001604546737755605],
-		["{history} {fig} Queen {white}", 0.000015300251344260718],
-		["p count {black}", 0.000012846754462066123],
-		["{history} move to rank 7", 0.000008909971306082093],
-		["Expansion Factor Queen Side {white}", 0.000008601578151568728],
-		["Least advanced pawn {black}", 0.000006206102007001724],
-		["Expansion Factor {black}", 0.000005081238743310373],
-		["Opponement Mobility (All)", 0.000005048285762958987],
-		["Avg advanced pawn {black}", 0.0000045294735420732535],
-		["{capture} Nx {white}", 0.000003949258055691018],
-		["{history} {capture} Rx {white}", 0.000002635658300498278],
-		["{castle} 0-0-0 {black}", 3.1320511354251956e-7],
-		["{history} move to file G", 2.5954065714997587e-7],
-		["move to rank 1", 0],
-		["{history} move to rank 1", 0],
-		["{capture} Kx {white}", -0.000002582050525102436],
-		["{castle} 0-0-0 {white}", -0.000004420575272088417],
-		["Protected-squares per pawn (excl. pieces as defenders, protected pawns, overprotection) {black}", -0.00000721825002820628],
-		["{history} {fig} Rook {black}", -0.000007745575443227765],
-		["Pawn Structure 1st Closest Match Count", -0.00001137741822290761],
-		["{castle} 0-0 {black}", -0.000012887904381395782],
-		["Protected-squares (excl. pieces as defenders, protected pawns, overprotection) {white}", -0.000014440898637627098],
-		["Expansion Factor Queen Side {black}", -0.00001650968224871721]
-	]
+    [
+        "Color of last move",
+        0.036116450679431034
+    ],
+    [
+        "P == p",
+        0.005673824436533683
+    ],
+    [
+        "Open C File",
+        0.005463843938757925
+    ],
+    [
+        "King Side Pawn Majority {white}",
+        0.005387358179580203
+    ],
+    [
+        "b == n",
+        0.0051845569792641506
+    ],
+    [
+        "b > N",
+        0.005096633084852984
+    ],
+    [
+        "B > n",
+        0.005080897054520228
+    ],
+    [
+        "B == N",
+        0.005053786544723882
+    ],
+    [
+        "Open D File",
+        0.005033067487132174
+    ],
+    [
+        "Open E File",
+        0.00502100395552315
+    ],
+    [
+        "Half-Open F File {black}",
+        0.004967621812771663
+    ],
+    [
+        "Half-Open E File {black}",
+        0.004923880584042015
+    ],
+    [
+        "Pawn On A5",
+        0.004874425277054915
+    ],
+    [
+        "Pawn On A6",
+        0.004802947305531888
+    ],
+    [
+        "Half-Open D File {white}",
+        0.004616258544005915
+    ],
+    [
+        "Pawn On H3",
+        0.004551295442897086
+    ],
+    [
+        "Pawn On A4",
+        0.004401817623115947
+    ],
+    [
+        "King Side Pawn Majority {black}",
+        0.00439013023791484
+    ],
+    [
+        "Pawn On H6",
+        0.004366967980323178
+    ],
+    [
+        "Half-Open B File {black}",
+        0.004285544977870266
+    ],
+    [
+        "q count",
+        0.004245655003134027
+    ],
+    [
+        "Half-Open E File {white}",
+        0.00418574442161543
+    ],
+    [
+        "Open B File",
+        0.00404156354549224
+    ],
+    [
+        "Half-Open F File {white}",
+        0.003882724050784778
+    ],
+    [
+        "Pawn On A3",
+        0.003852614354846755
+    ],
+    [
+        "n > B",
+        0.003808204274676971
+    ],
+    [
+        "Half-Open D File {black}",
+        0.0037763813892232444
+    ],
+    [
+        "Half-Open C File {black}",
+        0.0037711465187392663
+    ],
+    [
+        "Queen Side Pawn Majority {white}",
+        0.003753261902424254
+    ],
+    [
+        "Queen Side Pawn Majority {black}",
+        0.003696341096291165
+    ],
+    [
+        "Pawn On H5",
+        0.0036762010912942643
+    ],
+    [
+        "Half-Open B File {white}",
+        0.0035507218079097787
+    ],
+    [
+        "Half-Open C File {white}",
+        0.003464734186424418
+    ],
+    [
+        "Pawn On H4",
+        0.003447278964885326
+    ],
+    [
+        "R count",
+        0.00344283347973451
+    ],
+    [
+        "Half-Open G File {black}",
+        0.003319604871143399
+    ],
+    [
+        "Pawn Structure Closest Match",
+        0.003259755031633043
+    ],
+    [
+        "Half-Open G File {white}",
+        0.003246690072724552
+    ],
+    [
+        "N > b",
+        0.0032335870536702362
+    ],
+    [
+        "N count",
+        0.003219284494041562
+    ],
+    [
+        "Half-Open A File {black}",
+        0.0030305986624729817
+    ],
+    [
+        "r count",
+        0.003030294040328514
+    ],
+    [
+        "Half-Open H File {black}",
+        0.0030201752529329107
+    ],
+    [
+        "B count",
+        0.002930514428333619
+    ],
+    [
+        "Half-Open A File {white}",
+        0.0027971894687491925
+    ],
+    [
+        "Fianchetto King Side {white}",
+        0.002664205675737611
+    ],
+    [
+        "Open A File",
+        0.002649959674240641
+    ],
+    [
+        "b count",
+        0.002617048254437487
+    ],
+    [
+        "n count",
+        0.0024936554867082943
+    ],
+    [
+        "Open F File",
+        0.0023208605433171162
+    ],
+    [
+        "Half-Open H File {white}",
+        0.0022476776512774296
+    ],
+    [
+        "Pawn, Move",
+        0.0021612879428054635
+    ],
+    [
+        "Open H File",
+        0.0020599315724208513
+    ],
+    [
+        "Rook, Move",
+        0.0020415427198094823
+    ],
+    [
+        "Fianchetto King Side {black}",
+        0.002028462217499565
+    ],
+    [
+        "Q count",
+        0.0019250967431674358
+    ],
+    [
+        "Knight, Move",
+        0.0018735327915340941
+    ],
+    [
+        "Opponement Mobility (Knight or Bishop)",
+        0.001809043793618478
+    ],
+    [
+        "halfmove",
+        0.00158198297547754
+    ],
+    [
+        "Bishop, Move",
+        0.00149993956622261
+    ],
+    [
+        "Queen, Move",
+        0.001488382363284517
+    ],
+    [
+        "Open G File",
+        0.0014294657111265999
+    ],
+    [
+        "Pawn Structure Closest Match Count",
+        0.0013896291248085184
+    ],
+    [
+        "King, Move",
+        0.001338835546348843
+    ],
+    [
+        "Isolated Pawns {white}",
+        0.0013208691638253974
+    ],
+    [
+        "Isolated Pawns {black}",
+        0.0012057476143502409
+    ],
+    [
+        "Opponement Mobility (Queen)",
+        0.00116986945132512
+    ],
+    [
+        "Pawn, Capture",
+        0.0011316771294023753
+    ],
+    [
+        "Opponement Mobility (Rook)",
+        0.0011251861951105556
+    ],
+    [
+        "Double Pawns {black}",
+        0.0010239133861111253
+    ],
+    [
+        "Opponement Mobility (Pawns)",
+        0.0010207961755930228
+    ],
+    [
+        "Opponement Mobility (King)",
+        0.0009539837538411625
+    ],
+    [
+        "Bishop, Capture",
+        0.0008603652387640538
+    ],
+    [
+        "Opponement Targets (Knight or Bishop)",
+        0.0008356158165808659
+    ],
+    [
+        "Furthest advanced pawn {black}",
+        0.0008041962309832873
+    ],
+    [
+        "Expansion Factor Queen Side {white}",
+        0.0007971972778614434
+    ],
+    [
+        "Opponement Targets (Rook)",
+        0.0007770946337743558
+    ],
+    [
+        "Opponement Space Area (Unprotected)",
+        0.0007713986445012783
+    ],
+    [
+        "Expansion Factor Center {white}",
+        0.0007672905238838923
+    ],
+    [
+        "Opponement Target Area (Unprotected)",
+        0.0007528818728074586
+    ],
+    [
+        "Rook, Capture",
+        0.0007198527753107756
+    ],
+    [
+        "Knight, Capture",
+        0.0007186173582482951
+    ],
+    [
+        "Opponement Targets",
+        0.0006219199794501419
+    ],
+    [
+        "Expansion Factor Center {black}",
+        0.0006147975610842028
+    ],
+    [
+        "Double Pawns {white}",
+        0.0005883612728039486
+    ],
+    [
+        "Count Pawns On White Squares {white}",
+        0.0005820453054246541
+    ],
+    [
+        "Queen, Capture",
+        0.0005541900164003251
+    ],
+    [
+        "Count Pawns On Black Squares {black}",
+        0.0005396070676370029
+    ],
+    [
+        "Median advanced pawn {white}",
+        0.000533816501082994
+    ],
+    [
+        "P count",
+        0.0005324529525099686
+    ],
+    [
+        "Furthest advanced pawn {white}",
+        0.000509675538990062
+    ],
+    [
+        "Over-protected squares (excl. pieces as defenders, protected pawns) {black}",
+        0.0005017954360407887
+    ],
+    [
+        "Protected-squares per pawn (excl. pieces as defenders, protected pawns, overprotection) {black}",
+        0.0004971709813104148
+    ],
+    [
+        "Protected-squares (excl. pieces as defenders, protected pawns, overprotection) {white}",
+        0.00048570283057277827
+    ],
+    [
+        "Count Pawns On Black Squares {white}",
+        0.00048207360387828545
+    ],
+    [
+        "Opponement Mobility",
+        0.0004740425511169247
+    ],
+    [
+        "p count",
+        0.0004705854660993075
+    ],
+    [
+        "Expansion Factor Queen Side {black}",
+        0.0004475854035700562
+    ],
+    [
+        "Opponement Targets (Queen)",
+        0.0004474638780589419
+    ],
+    [
+        "Protected-squares (excl. pieces as defenders, protected pawns, overprotection) {black}",
+        0.00042042727541564094
+    ],
+    [
+        "Median advanced pawn {black}",
+        0.0003755689853316797
+    ],
+    [
+        "Opponement Targets (Pawns)",
+        0.00037518279241163886
+    ],
+    [
+        "Fianchetto Queen Side {white}",
+        0.0003368939050434564
+    ],
+    [
+        "Fianchetto Queen Side {black}",
+        0.0003230036776875394
+    ],
+    [
+        "King, 0-0",
+        0.000315330963391933
+    ],
+    [
+        "Expansion Factor King Side {white}",
+        0.00030973726126181083
+    ],
+    [
+        "Count Pawns On White Squares {black}",
+        0.0003059051978964913
+    ],
+    [
+        "Over-protected-squares (excl. pieces as defenders, protected pawns) {white}",
+        0.0002575654454158756
+    ],
+    [
+        "Expansion Factor {white}",
+        0.0002092082532171302
+    ],
+    [
+        "Expansion Factor King Side {black}",
+        0.00015726870958296304
+    ],
+    [
+        "Opponement Targets (King)",
+        0.00013471931131260606
+    ],
+    [
+        "Least advanced pawn {white}",
+        0.00012884283107020798
+    ],
+    [
+        "King, Capture",
+        0.00011843578693481946
+    ],
+    [
+        "Least advanced pawn {black}",
+        0.00011528431528065684
+    ],
+    [
+        "Protected-squares per pawn (excl. pieces as defenders, protected pawns, overprotection) {white}",
+        0.00011140276655261221
+    ],
+    [
+        "Expansion Factor {black}",
+        0.00009742309230225191
+    ],
+    [
+        "King, 0-0-0",
+        0.00003779938537720306
+    ]
+],
+	"global_test_importance":  [
+    [
+        "Color of last move",
+        0.03147241477261674
+    ],
+    [
+        "P == p",
+        0.00409926392655419
+    ],
+    [
+        "Open C File",
+        0.003942432606252488
+    ],
+    [
+        "King Side Pawn Majority {white}",
+        0.003915043921407485
+    ],
+    [
+        "Half-Open E File {black}",
+        0.0038851490466180576
+    ],
+    [
+        "B > n",
+        0.0037582061407019605
+    ],
+    [
+        "Half-Open F File {black}",
+        0.0037355771707601425
+    ],
+    [
+        "b > N",
+        0.0036819842432298314
+    ],
+    [
+        "Open D File",
+        0.0035648798120819954
+    ],
+    [
+        "B == N",
+        0.0035410178319364924
+    ],
+    [
+        "b == n",
+        0.0035279839245570405
+    ],
+    [
+        "Open E File",
+        0.003511988711875233
+    ],
+    [
+        "Half-Open D File {white}",
+        0.003461537759089958
+    ],
+    [
+        "Pawn On A5",
+        0.0033169858780082787
+    ],
+    [
+        "Pawn On A6",
+        0.0032974951349828314
+    ],
+    [
+        "Half-Open B File {black}",
+        0.0032499424883040973
+    ],
+    [
+        "Pawn On A4",
+        0.003160435397164922
+    ],
+    [
+        "q count",
+        0.0031363460842697144
+    ],
+    [
+        "King Side Pawn Majority {black}",
+        0.0031086627974592114
+    ],
+    [
+        "Pawn On H3",
+        0.0030216199012858963
+    ],
+    [
+        "Pawn On H6",
+        0.0029919440633230793
+    ],
+    [
+        "Half-Open F File {white}",
+        0.002955719720716756
+    ],
+    [
+        "Half-Open E File {white}",
+        0.0029364340739361887
+    ],
+    [
+        "R count",
+        0.002932410079806113
+    ],
+    [
+        "Open B File",
+        0.0029322166297718853
+    ],
+    [
+        "n > B",
+        0.0028580439629129657
+    ],
+    [
+        "Half-Open D File {black}",
+        0.002776084688569394
+    ],
+    [
+        "Queen Side Pawn Majority {white}",
+        0.0026602078250234917
+    ],
+    [
+        "Half-Open C File {black}",
+        0.0026581397264471493
+    ],
+    [
+        "Pawn On A3",
+        0.0026306331291479357
+    ],
+    [
+        "Queen Side Pawn Majority {black}",
+        0.002546314918470842
+    ],
+    [
+        "Half-Open G File {black}",
+        0.0025136982084789893
+    ],
+    [
+        "Half-Open C File {white}",
+        0.0025064839048751057
+    ],
+    [
+        "Half-Open B File {white}",
+        0.0024980289924374233
+    ],
+    [
+        "N > b",
+        0.002475723043293899
+    ],
+    [
+        "N count",
+        0.0024553546979298527
+    ],
+    [
+        "r count",
+        0.0024142803757730355
+    ],
+    [
+        "Pawn On H5",
+        0.0023986456704215044
+    ],
+    [
+        "Pawn On H4",
+        0.002361037938175447
+    ],
+    [
+        "Half-Open G File {white}",
+        0.0023260825418136392
+    ],
+    [
+        "Half-Open H File {black}",
+        0.002321440778294912
+    ],
+    [
+        "Pawn Structure Closest Match",
+        0.002199191229545379
+    ],
+    [
+        "B count",
+        0.002170748177086332
+    ],
+    [
+        "Half-Open A File {black}",
+        0.0021394379673374646
+    ],
+    [
+        "Half-Open A File {white}",
+        0.00212866726045699
+    ],
+    [
+        "Open A File",
+        0.001981446618031891
+    ],
+    [
+        "Fianchetto King Side {white}",
+        0.0019534627496397526
+    ],
+    [
+        "b count",
+        0.0018189346658369042
+    ],
+    [
+        "n count",
+        0.0017306391025395905
+    ],
+    [
+        "Half-Open H File {white}",
+        0.0016899793754276138
+    ],
+    [
+        "Open H File",
+        0.001569495777385202
+    ],
+    [
+        "Open F File",
+        0.0015643906008804553
+    ],
+    [
+        "Q count",
+        0.001526044297110233
+    ],
+    [
+        "Opponement Mobility (Knight or Bishop)",
+        0.0014722710968435408
+    ],
+    [
+        "Fianchetto King Side {black}",
+        0.0014188390048612137
+    ],
+    [
+        "halfmove",
+        0.0013729394825965358
+    ],
+    [
+        "Pawn, Move",
+        0.001325321351026483
+    ],
+    [
+        "Rook, Move",
+        0.0011755396427025333
+    ],
+    [
+        "Pawn Structure Closest Match Count",
+        0.0010092352041158395
+    ],
+    [
+        "Open G File",
+        0.0009984233958451987
+    ],
+    [
+        "Knight, Move",
+        0.000995339719779914
+    ],
+    [
+        "Bishop, Move",
+        0.0009055640683692905
+    ],
+    [
+        "Isolated Pawns {white}",
+        0.0008860529027467368
+    ],
+    [
+        "Queen, Move",
+        0.0008559979770366259
+    ],
+    [
+        "King, Move",
+        0.0008256935583793694
+    ],
+    [
+        "Double Pawns {black}",
+        0.0008010803722561868
+    ],
+    [
+        "Isolated Pawns {black}",
+        0.000799813572985697
+    ],
+    [
+        "Opponement Mobility (Pawns)",
+        0.0007977589965133362
+    ],
+    [
+        "Opponement Mobility (Queen)",
+        0.0007899114352743347
+    ],
+    [
+        "Opponement Mobility (Rook)",
+        0.0007807083742282367
+    ],
+    [
+        "Pawn, Capture",
+        0.0006987834737913375
+    ],
+    [
+        "Opponement Targets (Knight or Bishop)",
+        0.0006089583251609951
+    ],
+    [
+        "Opponement Mobility (King)",
+        0.0005950846349495158
+    ],
+    [
+        "Furthest advanced pawn {black}",
+        0.000585804855494608
+    ],
+    [
+        "Expansion Factor Queen Side {white}",
+        0.0005638233260437941
+    ],
+    [
+        "Expansion Factor Center {white}",
+        0.0005314484974030184
+    ],
+    [
+        "Opponement Targets (Rook)",
+        0.00048796967455041335
+    ],
+    [
+        "Count Pawns On White Squares {white}",
+        0.00048526151288450295
+    ],
+    [
+        "Opponement Target Area (Unprotected)",
+        0.0004678456406960116
+    ],
+    [
+        "Knight, Capture",
+        0.00046118533706617296
+    ],
+    [
+        "Opponement Space Area (Unprotected)",
+        0.00045423855107261726
+    ],
+    [
+        "Bishop, Capture",
+        0.0004462768701342344
+    ],
+    [
+        "Expansion Factor Center {black}",
+        0.00043253975563804434
+    ],
+    [
+        "P count",
+        0.0004221338468143633
+    ],
+    [
+        "Rook, Capture",
+        0.0004024194876616413
+    ],
+    [
+        "Double Pawns {white}",
+        0.00039815685444787724
+    ],
+    [
+        "Queen, Capture",
+        0.00039229502332198407
+    ],
+    [
+        "Furthest advanced pawn {white}",
+        0.0003816260505347356
+    ],
+    [
+        "Count Pawns On Black Squares {white}",
+        0.00037027393690531457
+    ],
+    [
+        "Over-protected squares (excl. pieces as defenders, protected pawns) {black}",
+        0.00036792972610841593
+    ],
+    [
+        "Count Pawns On Black Squares {black}",
+        0.0003574160652883712
+    ],
+    [
+        "Median advanced pawn {white}",
+        0.00034507615761286345
+    ],
+    [
+        "Opponement Targets",
+        0.0003416388936447745
+    ],
+    [
+        "Protected-squares per pawn (excl. pieces as defenders, protected pawns, overprotection) {black}",
+        0.0003357359977750399
+    ],
+    [
+        "Protected-squares (excl. pieces as defenders, protected pawns, overprotection) {white}",
+        0.00033538920586910145
+    ],
+    [
+        "p count",
+        0.00032290665984591876
+    ],
+    [
+        "Opponement Mobility",
+        0.0003224393207765727
+    ],
+    [
+        "Protected-squares (excl. pieces as defenders, protected pawns, overprotection) {black}",
+        0.0003140599579135421
+    ],
+    [
+        "Expansion Factor Queen Side {black}",
+        0.0003135759715056641
+    ],
+    [
+        "Opponement Targets (Queen)",
+        0.00029262624843521406
+    ],
+    [
+        "Median advanced pawn {black}",
+        0.0002508766564611291
+    ],
+    [
+        "Fianchetto Queen Side {black}",
+        0.00024769783747930624
+    ],
+    [
+        "Fianchetto Queen Side {white}",
+        0.0002218305305876113
+    ],
+    [
+        "Opponement Targets (Pawns)",
+        0.0002213773337441001
+    ],
+    [
+        "Expansion Factor King Side {white}",
+        0.00020377727400611167
+    ],
+    [
+        "King, 0-0",
+        0.00019041865323606716
+    ],
+    [
+        "Count Pawns On White Squares {black}",
+        0.00017221727659005523
+    ],
+    [
+        "Over-protected-squares (excl. pieces as defenders, protected pawns) {white}",
+        0.00016219248983692994
+    ],
+    [
+        "Expansion Factor {white}",
+        0.00014944843994577073
+    ],
+    [
+        "Expansion Factor King Side {black}",
+        0.00010808061707540118
+    ],
+    [
+        "Opponement Targets (King)",
+        0.00009986868095462897
+    ],
+    [
+        "Least advanced pawn {white}",
+        0.00008915419650844247
+    ],
+    [
+        "Expansion Factor {black}",
+        0.00008249174963919845
+    ],
+    [
+        "King, Capture",
+        0.0000776202713633975
+    ],
+    [
+        "Least advanced pawn {black}",
+        0.00007325142379348976
+    ],
+    [
+        "Protected-squares per pawn (excl. pieces as defenders, protected pawns, overprotection) {white}",
+        0.0000653533915972275
+    ],
+    [
+        "King, 0-0-0",
+        0.00002331307136453631
+    ]
+]
 }

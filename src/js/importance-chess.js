@@ -7,12 +7,16 @@ import {importance} from './importance/index.js'
 
 import * as chess_stats from "./chess-stats.js"
    
+import {sendToChessToVectorWorkerDirectly,get_chess_to_feature_vector_worker_if_exists_else_create,get_all_keys_for_features} from "../js/chess-to-feature-vector-controller.js" 
+
 const Chess = require("chess.js"); 
 
-var debug = false;
+
+var debug = true;
 
 // has a callback function to get intermediate results
-export function getImportance(model_name, vectors, norm,n_,callback) { 
+export async function getImportance(model_name, vectors, norm,n_,callback) { 
+	  var allKeys = await get_all_keys_for_features();
 	  var n_vectors = tf_chess.convertToTensor(vectors,norm);
 
 	  var myModel = {modelScore: (test,label,kind) => tf_chess.modelScore(model_name,[test, [test.length, test[0].length]],label,kind)}
@@ -24,7 +28,7 @@ export function getImportance(model_name, vectors, norm,n_,callback) {
 		  verbose: debug
 		})
 	  .then(imp => Promise.all(imp.map((e,i) => e.then(res => {callback(res,i);return res}))).then(importance_list => {
-	  	return sortJsObject(importance_list.map((e,i) => {return {key:window.allKeys[1+i],value:e}}))
+	  	return sortJsObject(importance_list.map((e,i) => {return {key:allKeys[i],value:e}}))
 	  }))
 }
 
@@ -35,6 +39,10 @@ export const get_feature_importance_with_pgn = async(model_name, pgn, callback) 
 
  	var my_test_game = new Chess();
 	my_test_game.load_pgn(pgn);
+		
+	if(my_test_game.game_over()){
+		my_test_game.undo();
+	}
 
 
 	var vectors = [];
@@ -67,22 +75,18 @@ export const get_feature_importance_with_pgn = async(model_name, pgn, callback) 
 			my_test_game.load_pgn(pgn);
 			my_test_game.undo();
 			my_test_game.move(alternatives[i]);   
-			var vector = (await window.rust).get_features(JSON.stringify(my_test_game.history({verbose:true})));
+
+ 			var chess_to_feature_vector_worker = await get_chess_to_feature_vector_worker_if_exists_else_create();
+			var vector = (await sendToChessToVectorWorkerDirectly(chess_to_feature_vector_worker,[my_test_game.history({verbose:true})]))[0]
+
 			var label = await tf_chess.test_model_with_pgn(model_name,my_test_game.pgn()); 
 			
-			if(label.prediction[0]>=0.5-reduce){ // we want to know about features that are important for good moves
-				vector[window.allKeys.indexOf("cp")] = label.prediction_value[0]
-				vectors.push(vector)
+			if(label.prediction[0]>=0.5-reduce){ // we want to know about features that are important for good moves 
+				vectors.push({"data":vector,"label": label.prediction_value[0]})
 			}
 		} 
 		reduce = reduce + 0.1;
 	}
-
-	vectors = vectors.map(e => {
-		var target = e[window.allKeys.indexOf("cp")]; 
-		e.splice(window.allKeys.indexOf("cp"), 1);
-		return {"data": e, "label":target}
-	}) 
 
 	/*
    * feature vectors for all possible positions that could have arisen a move ago
