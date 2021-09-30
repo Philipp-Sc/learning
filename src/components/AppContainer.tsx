@@ -410,14 +410,14 @@ const AppContainer: React.FC = () => {
 
     async function doTask() {
 
-      // await chess_model.load_my_model({isProduction: true}); 
+      await chess_model.load_my_model({isProduction: false}); 
       //console.log(await chess_stats.test_model());
 
       var development = true;
       if(development){  
     
         // once needed every time the feature vector or model definition are changed.
-        await chess_model.build_my_model();
+        //await chess_model.build_my_model();
  
         // retrain the model & new importance
         // await chess_stats.train_my_model(); 

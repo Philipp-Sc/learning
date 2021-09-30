@@ -25,10 +25,10 @@
 
   <body>
     <script src="load-stockfish.js"></script>
-    <script src='./rust/eval-wasm/pkg/eval_wasm.js'></script>
+    <script src='./chess_to_feature_vector/rust/eval-wasm/pkg/eval_wasm.js'></script>
     <script type="text/javascript">
       
-      window.rust_wasm = wasm_bindgen.get_wasm_blob('./rust/eval-wasm/pkg/eval_wasm_bg.wasm');
+      window.rust_wasm = wasm_bindgen.get_wasm_blob('./chess_to_feature_vector/rust/eval-wasm/pkg/eval_wasm_bg.wasm');
 
       window.rust = window.rust_wasm
         .then(blob => blob.arrayBuffer())

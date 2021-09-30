@@ -155,13 +155,25 @@ It is written using Ionic, Capacitorjs and Expressjs.
 
 * `npm install @wmik/use-media-recorder --force`
 
-**Build webpack-eval-package**
+**Build webpack-tensorflow-package**
 
-* Description: The code needed to evaluate a given position i.e feature extraction. The main script is implemented as webworker to increase performance.
-
-* `cd src/webpack-eval-package; npx webpack; cp dist/main.js ../../public/chess-to-vector-worker/main.js;cd ../..;`
+* Description: The code needed to run the tensorflow model inside a worker to keep the main UI thread responsive
+ 
 * `cd src/webpack-tensorflow-worker/; npx webpack; cp dist/main.js ../../public/tensorflow-worker/main.js;cd ../..;`
 (you may need to install webpack, anyway this command is only needed for development. The main.js for the package is already provided with this repo.)
+
+**Build rust-wasm-package**
+
+* Description: The code needed to extract the features from a given move history. This replaces the previous javascript code.
+
+* wasm_bindgen + a fast chess library in rust (jordanbray/chess)
+
+* `cd public/rust/eval-wasm/;~/.cargo/bin/wasm-pack build --target no-modules; cd ../../../;`
+
+* then fix the eval_wasm.js to work with the code (init, blobs)
+
+* relevant files `chess_to_vector_feature/main.js`, `index.js`, ...
+
 
 **Build the Capacitor PWA (get the latest build)**
 

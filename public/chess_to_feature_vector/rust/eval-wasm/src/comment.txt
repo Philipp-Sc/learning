@@ -1,0 +1,112 @@
+use wasm_bindgen::prelude::*;
+
+use serde_json::{Result}; 
+
+use chess::{Board, ChessMove};
+
+
+mod history;
+use history::history_move::Move;
+
+mod move_info; 
+mod material; 
+mod mobility;
+mod expansion_factor;
+mod package_density;
+mod pawn_structure;
+
+/*
+#[wasm_bindgen]
+extern {
+    pub fn alert(s: &str);
+} */
+
+#[wasm_bindgen]
+pub struct ChessToFeatures {
+    game_history: String,
+    vector: Vec<u8>,
+}
+
+
+#[wasm_bindgen]
+impl ChessToFeatures {
+    /// Create new instance.
+    pub fn new(game_history: String) -> ChessToFeatures {
+        ChessToFeatures { game_history: game_history, vector: Vec::new() }
+    }
+
+    pub fn features(&mut self) {
+        // game_history = JSON.stringify(chess.history({ verbose: true }))
+        // -> [{ color: 'w', from: 'e2', to: 'e4', flags: 'b', piece: 'p', san: 'e4' },
+        //     { color: 'b', from: 'e7', to: 'e5', flags: 'b', piece: 'p', san: 'e5' },
+        //     { color: 'w', from: 'f2', to: 'f4', flags: 'b', piece: 'p', san: 'f4' },
+        //     { color: 'b', from: 'e5', to: 'f4', flags: 'c', piece: 'p', captured: 'p', san: 'exf4' }] 
+
+        //let data = r#"[{"color":"w","from":"e2","to":"e4","flags":"b","piece":"p","san":"e4"},{"color":"b","from":"e7","to":"e5","flags":"b","piece":"p","san":"e5"},{"color":"w","from":"f2","to":"f4","flags":"b","piece":"p","san":"f4"},{"color":"b","from":"e5","to":"f4","flags":"c","piece":"p","captured":"p","san":"exf4"},{"color":"w","from":"h2","to":"h4","flags":"b","piece":"p","san":"h4"}]"#;
+
+        let history: Result<Vec<Move>> = serde_json::from_str(self.game_history.as_str()); 
+        let res: Vec<u8>  = match history {
+            Ok(history) => ChessToFeatures::get_features_from_history(history), //format!("{:?}", get_features_from_history(history)),
+            Err(_history) => Vec::new() //history.to_string()
+        }; 
+        self.vector = res;
+    }
+ 
+    pub fn get_vector(&self) -> Vec<u8> {
+        self.vector.clone()
+    }
+
+    pub fn get_keys() -> String {
+
+        let mut a = move_info::get_keys();
+        let mut b = material::get_keys();
+        let mut c = mobility::get_keys(); 
+        let mut d = expansion_factor::get_keys(); 
+        let mut e = package_density::get_keys(); 
+        let mut f = pawn_structure::get_keys(); 
+
+        let mut res: Vec<String> = Vec::new();
+
+        res.push("halfmove".to_string());
+
+        res.append(&mut a);
+        res.append(&mut b);
+        res.append(&mut c);
+        res.append(&mut d);
+        res.append(&mut e);
+        res.append(&mut f);
+        res.join("\n")
+    }
+ 
+    fn get_features_from_history(history: Vec<Move>) -> Vec<u8> {
+        let history_iter = history.iter(); 
+
+        let mut board = Board::default();
+
+        for val in history_iter {
+            let m = ChessMove::from_san(&board, &val.san).unwrap();
+            board = board.make_move_new(m);
+        } 
+
+        let halfmove = history.len() as u8;
+
+        let mut a = move_info::get_feature_vector(history);
+        let mut b = material::get_feature_vector(board);
+        let mut c = mobility::get_feature_vector(board);
+        let mut d = expansion_factor::get_feature_vector(board);
+        let mut e = package_density::get_feature_vector(board);
+        let mut f = pawn_structure::get_feature_vector(board);
+
+        let mut res: Vec<u8> = Vec::new();
+        res.push(halfmove);
+        res.append(&mut a);
+        res.append(&mut b);
+        res.append(&mut c);
+        res.append(&mut d);
+        res.append(&mut e);
+        res.append(&mut f);
+        res
+    } 
+}
+
+ 

@@ -205,3 +205,8 @@ function getEuclidianDistance(arr1, arr2) {
 
 
 // create script to run stockfish on my server to evaluate human games in my free time.
+
+
+// almost ready to remove evaluation package
+// fix move errors
+// check vectors in normalised state

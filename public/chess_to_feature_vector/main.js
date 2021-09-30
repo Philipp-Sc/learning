@@ -1,6 +1,6 @@
 // cd src/webpack; npx webpack; cp dist/main.js ../../public/chess-to-vector-worker/main.js;
  
-importScripts('../rust/eval-wasm/pkg/eval_wasm.js'); 
+importScripts('./rust/eval-wasm/pkg/eval_wasm.js'); 
 importScripts('./chess.min.js'); 
   
  
@@ -49,7 +49,7 @@ onmessage = function(message) {
 
 function receive_game_data(data) {
 	game_data = data;
-	console.log("...data ("+game_data.length+") loaded on this web worker")
+	console.log("received game data: "+game_data.length+" games loaded")
 	return 1;
 } 
 

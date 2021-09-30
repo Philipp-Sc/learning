@@ -11,9 +11,6 @@ import * as importance_chess from './importance-chess.js'
 import * as data_prep from "../js/eval/data-prep.js"
 
 
-import {skeleton_to_ascii} from "../webpack-eval-package/src/pawn-structure.js"
-
-
 import * as chess_model from "../js/chess-model.js" 
 
 const Chess = require("chess.js"); 
@@ -344,7 +341,7 @@ export async function getNotification(chess, playerColor, halfMoves, notificatio
 			var msg;
 				var value;
 	      	if(key.includes("Pawn Structure") && !key.includes("Count")){
-	      		value = skeleton_to_ascii(my_stats_now[key])+"\n";
+	      		value = my_stats_now[key]+"\n";
 	      		msg = key+" \n"+value+" \|\|           "+positive+"\n"+"    ("+(stats_human[key].toFixed(2))+", "+(stats_hero[key].toFixed(2))+")";
 	      
 	      	}else{

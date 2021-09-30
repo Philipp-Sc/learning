@@ -189,16 +189,23 @@ export async function import_model(model_name,default_model) {
 	console.log("TensorFlow Model "+model_name+" imported")
 }
 
+
 export const test_model_with_pgn = async(model_name, pgn) => {
  	var my_test_game = new Chess();
 	my_test_game.load_pgn(pgn);
  
-	var vectors = (await window.rust).get_features(JSON.stringify(my_test_game.history({verbose:true})));
+ 	var game_history = my_test_game.history({verbose:true});
+ 	var game_history_string = JSON.stringify(game_history);
+
+ 	// ask a webworker here.
+	var vectors = (await window.rust).get_features(game_history_string)
+
 
 	var all_keys = (await chess_stats.get_all_keys_for_features());
 
 	vectors = [vectors].map(e => {
 		var target = e[all_keys.indexOf("cp")]; 
+		console.log(e);
 		e.splice(all_keys.indexOf("cp"), 1);
 		return {"data": e, "label":target}
 	}) 
