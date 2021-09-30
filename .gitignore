@@ -34,3 +34,4 @@ yarn-error.log*
 cert.pem
 privkey.pem
 
+/public/chess_to_feature_vector/rust/eval-wasm/target
